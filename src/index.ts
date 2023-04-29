@@ -33,16 +33,16 @@ app.use(bodyMiddleware)
 
 
 
-app.get('/hometask_01/api/videos', (req: Request, res: Response<VideoViewModel[]>)=>{
+app.get('/videos', (req: Request, res: Response<VideoViewModel[]>)=>{
     res.send(dbVideos.videos)
 })
-app.get('/hometask_01/api/videos/:id', (req:RequestWithParams<URIParamsId>, res:Response<VideoViewModel>)=>{
+app.get('/videos/:id', (req:RequestWithParams<URIParamsId>, res:Response<VideoViewModel>)=>{
     let video = dbVideos.videos.find(el=>el.id===+req.params.id)
     if(video){
         res.send(video)
     } else res.sendStatus(404)
 })
-app.post('/hometask_01/api/videos', (req: RequestWithBody<VideosCreateAndUpdateModel>, res: Response<errorsMessages|VideoViewModel>) => {
+app.post('/videos', (req: RequestWithBody<VideosCreateAndUpdateModel>, res: Response<errorsMessages|VideoViewModel>) => {
     if(validation(req.body).errorsMessages.length) {
         res.status(400).send(validation(req.body))
     }
@@ -64,7 +64,7 @@ app.post('/hometask_01/api/videos', (req: RequestWithBody<VideosCreateAndUpdateM
 
 
 })
-app.put('/hometask_01/api/videos/:id', (req: RequestWithBodyAndParams<URIParamsId, VideosCreateAndUpdateModel>, res: Response<errorsMessages|VideoViewModel>)=>{
+app.put('/videos/:id', (req: RequestWithBodyAndParams<URIParamsId, VideosCreateAndUpdateModel>, res: Response<errorsMessages|VideoViewModel>)=>{
     const desiredVideo = dbVideos.videos.find(el=>el.id===+req.params.id)
     if(desiredVideo){
         if(validation(req.body).errorsMessages.length){
@@ -75,7 +75,7 @@ app.put('/hometask_01/api/videos/:id', (req: RequestWithBodyAndParams<URIParamsI
         }
     } else res.sendStatus(404)
 })
-app.delete('/hometask_01/api/videos/:id', (req:RequestWithParams<URIParamsId>, res:Response)=>{
+app.delete('/videos/:id', (req:RequestWithParams<URIParamsId>, res:Response)=>{
     if(dbVideos.videos.find(el=>el.id===+req.params.id)){
         dbVideos.videos = dbVideos.videos.filter(el=>el.id!==+req.params.id)
         res.sendStatus(204)
@@ -86,7 +86,7 @@ app.delete('/hometask_01/api/videos/:id', (req:RequestWithParams<URIParamsId>, r
 
 
 })
-app.delete('/ht_01/api/testing/all-data', (req: Request, res: Response)=>{
+app.delete('/testing/all-data', (req: Request, res: Response)=>{
     dbVideos.videos = []
     res.sendStatus(204)
 })
