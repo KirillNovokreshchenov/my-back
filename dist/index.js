@@ -15,10 +15,10 @@ const dbVideos = {
 };
 const bodyMiddleware = (0, body_parser_1.default)();
 app.use(bodyMiddleware);
-app.get('/hometask_01/api/videos', (req, res) => {
+app.get('/videos', (req, res) => {
     res.send(dbVideos.videos);
 });
-app.get('/hometask_01/api/videos/:id', (req, res) => {
+app.get('/videos/:id', (req, res) => {
     let video = dbVideos.videos.find(el => el.id === +req.params.id);
     if (video) {
         res.send(video);
@@ -26,7 +26,7 @@ app.get('/hometask_01/api/videos/:id', (req, res) => {
     else
         res.sendStatus(404);
 });
-app.post('/hometask_01/api/videos', (req, res) => {
+app.post('/videos', (req, res) => {
     if ((0, validation_1.validation)(req.body).errorsMessages.length) {
         res.status(400).send((0, validation_1.validation)(req.body));
     }
@@ -43,7 +43,7 @@ app.post('/hometask_01/api/videos', (req, res) => {
     dbVideos.videos.push(newVideo);
     res.status(201).send(newVideo);
 });
-app.put('/hometask_01/api/videos/:id', (req, res) => {
+app.put('/videos/:id', (req, res) => {
     const desiredVideo = dbVideos.videos.find(el => el.id === +req.params.id);
     if (desiredVideo) {
         if ((0, validation_1.validation)(req.body).errorsMessages.length) {
@@ -57,7 +57,7 @@ app.put('/hometask_01/api/videos/:id', (req, res) => {
     else
         res.sendStatus(404);
 });
-app.delete('/hometask_01/api/videos/:id', (req, res) => {
+app.delete('/videos/:id', (req, res) => {
     if (dbVideos.videos.find(el => el.id === +req.params.id)) {
         dbVideos.videos = dbVideos.videos.filter(el => el.id !== +req.params.id);
         res.sendStatus(204);
@@ -66,7 +66,7 @@ app.delete('/hometask_01/api/videos/:id', (req, res) => {
         res.sendStatus(404);
     }
 });
-app.delete('/ht_01/api/testing/all-data', (req, res) => {
+app.delete('/testing/all-data', (req, res) => {
     dbVideos.videos = [];
     res.sendStatus(204);
 });
