@@ -2,7 +2,7 @@ import {Request, Response, Router} from "express";
 import {VideoViewModel} from "../models/VideoViewModel";
 import {RequestWithBody, RequestWithBodyAndParams, RequestWithParams} from "../types";
 import {URIParamsId} from "../models/URIParamsIdModel";
-import {VideosCreateAndUpdateModel} from "../models/VideoCreateModel";
+import {VideoCreateAndUpdateModel} from "../models/VideoCreateModel";
 import {errorsMessages, validation} from "../helpers/validation";
 import {publicationDate} from "../helpers/publicationDate";
 import {videoUpdate} from "../helpers/videoUpdate";
@@ -42,7 +42,7 @@ videoRouter.get('/:id', (req:RequestWithParams<URIParamsId>, res:Response<VideoV
         res.send(video)
     } else res.sendStatus(404)
 })
-videoRouter.post('/', (req: RequestWithBody<VideosCreateAndUpdateModel>, res: Response<errorsMessages|VideoViewModel>) => {
+videoRouter.post('/', (req: RequestWithBody<VideoCreateAndUpdateModel>, res: Response<errorsMessages|VideoViewModel>) => {
     if(validation(req.body).errorsMessages.length) {
         res.status(400).send(validation(req.body))
         return
@@ -64,7 +64,7 @@ videoRouter.post('/', (req: RequestWithBody<VideosCreateAndUpdateModel>, res: Re
 
 
 })
-videoRouter.put('/:id', (req: RequestWithBodyAndParams<URIParamsId, VideosCreateAndUpdateModel>, res: Response<errorsMessages|VideoViewModel>)=>{
+videoRouter.put('/:id', (req: RequestWithBodyAndParams<URIParamsId, VideoCreateAndUpdateModel>, res: Response<errorsMessages|VideoViewModel>)=>{
     const desiredVideo = dbVideos.videos.find(el=>el.id===+req.params.id)
     if(desiredVideo){
         if(validation(req.body).errorsMessages.length){

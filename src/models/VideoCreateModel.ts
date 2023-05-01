@@ -1,6 +1,6 @@
 
 
-export type VideosCreateAndUpdateModel = {
+export type VideoCreateAndUpdateModel = {
     id?: number,
     title:string,
     author: string,

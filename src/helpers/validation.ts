@@ -1,4 +1,4 @@
-import {VideosCreateAndUpdateModel} from "../models/VideoCreateModel";
+import {VideoCreateAndUpdateModel} from "../models/VideoCreateModel";
 import {filterResolutions} from "./filterResolutions";
 import {correctAge} from "./minAgeRestriction";
 
@@ -13,7 +13,7 @@ export type errorsMessages = {
 
 
 
-export function validation(video: VideosCreateAndUpdateModel) {
+export function validation(video: VideoCreateAndUpdateModel) {
     const errors: errorsMessages= {
         "errorsMessages": []
     }
