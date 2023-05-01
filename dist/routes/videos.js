@@ -6,7 +6,16 @@ const validation_1 = require("../helpers/validation");
 const publicationDate_1 = require("../helpers/publicationDate");
 const videoUpdate_1 = require("../helpers/videoUpdate");
 exports.dbVideos = {
-    videos: []
+    videos: [{
+            id: 1,
+            title: 'string',
+            author: 'string',
+            canBeDownloaded: true,
+            minAgeRestriction: 34,
+            createdAt: 'string',
+            publicationDate: 'string',
+            availableResolutions: ['P720']
+        }]
 };
 exports.videoRouter = (0, express_1.Router)();
 exports.videoRouter.get('/', (req, res) => {
@@ -23,6 +32,7 @@ exports.videoRouter.get('/:id', (req, res) => {
 exports.videoRouter.post('/', (req, res) => {
     if ((0, validation_1.validation)(req.body).errorsMessages.length) {
         res.status(400).send((0, validation_1.validation)(req.body));
+        return;
     }
     const newVideo = {
         id: req.body.id || +(new Date()),

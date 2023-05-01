@@ -9,7 +9,16 @@ import {videoUpdate} from "../helpers/videoUpdate";
 
 
 export const dbVideos: { videos: Array<videoType> } = {
-    videos: []
+    videos: [{
+        id: 1,
+        title:'string',
+        author: 'string',
+        canBeDownloaded: true,
+        minAgeRestriction: 34,
+        createdAt: 'string',
+        publicationDate: 'string',
+        availableResolutions: ['P720']
+    }]
 }
 
 type videoType = {
@@ -36,6 +45,7 @@ videoRouter.get('/:id', (req:RequestWithParams<URIParamsId>, res:Response<VideoV
 videoRouter.post('/', (req: RequestWithBody<VideosCreateAndUpdateModel>, res: Response<errorsMessages|VideoViewModel>) => {
     if(validation(req.body).errorsMessages.length) {
         res.status(400).send(validation(req.body))
+        return
     }
     const newVideo: videoType = {
         id:req.body.id || +(new Date()),
@@ -47,7 +57,6 @@ videoRouter.post('/', (req: RequestWithBody<VideosCreateAndUpdateModel>, res: Re
         publicationDate: req.body.publicationDate||publicationDate(),
         availableResolutions: req.body.availableResolutions||[]
     }
-
 
 
     dbVideos.videos.push(newVideo)

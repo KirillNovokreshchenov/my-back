@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import {videoRouter} from "./routes/videos";
 import {testingRouter} from "./routes/testing";
 
-const app = express()
+export const app = express()
 const port = 3000
 
 
