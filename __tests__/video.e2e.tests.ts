@@ -1,8 +1,8 @@
 import request from 'supertest'
-import {app} from "../src";
 import {VideoCreateAndUpdateModel} from "../src/models/VideoCreateModel";
 import {VideoViewModel} from "../src/models/VideoViewModel";
 import {errorsMessages} from "../src/helpers/validation";
+import {app} from "../src/app";
 
 
 describe('/video', ()=>{
@@ -126,11 +126,21 @@ describe('/video', ()=>{
         })
 
 
-
-
         await request(app)
             .get('/videos')
             .expect(200, [createdVideo, createdVideoTwo])
+    })
+
+    it('should return existing video', async ()=>{
+        await request(app)
+            .get('/videos/'+ createdVideo.id)
+            .expect(200, createdVideo)
+
+        await request(app)
+            .get('/videos/'+ createdVideoTwo.id)
+            .expect(200, createdVideoTwo)
+
+
     })
 
     it('should not update video with incorrect input author and title',async()=>{

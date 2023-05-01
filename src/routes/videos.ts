@@ -6,37 +6,16 @@ import {VideoCreateAndUpdateModel} from "../models/VideoCreateModel";
 import {errorsMessages, validation} from "../helpers/validation";
 import {publicationDate} from "../helpers/publicationDate";
 import {videoUpdate} from "../helpers/videoUpdate";
+import {dbVideos, videoType} from "../db/db";
 
 
-export const dbVideos: { videos: Array<videoType> } = {
-    videos: [{
-        id: 1,
-        title:'string',
-        author: 'string',
-        canBeDownloaded: true,
-        minAgeRestriction: 34,
-        createdAt: 'string',
-        publicationDate: 'string',
-        availableResolutions: ['P720']
-    }]
-}
 
-type videoType = {
-    id: number,
-    title:string,
-    author: string,
-    canBeDownloaded: boolean,
-    minAgeRestriction: number|null,
-    createdAt: string,
-    publicationDate: string,
-    availableResolutions: string[]
-}
 
 export const videoRouter = Router()
 videoRouter.get('/', (req: Request, res: Response<VideoViewModel[]>)=>{
     res.send(dbVideos.videos)
 })
-videoRouter.get('/:id', (req:RequestWithParams<URIParamsId>, res:Response<VideoViewModel>)=>{
+videoRouter.get('/:id([0-9]+)', (req:RequestWithParams<URIParamsId>, res:Response<VideoViewModel>)=>{
     let video = dbVideos.videos.find(el=>el.id===+req.params.id)
     if(video){
         res.send(video)
@@ -64,18 +43,18 @@ videoRouter.post('/', (req: RequestWithBody<VideoCreateAndUpdateModel>, res: Res
 
 
 })
-videoRouter.put('/:id', (req: RequestWithBodyAndParams<URIParamsId, VideoCreateAndUpdateModel>, res: Response<errorsMessages|VideoViewModel>)=>{
-    const desiredVideo = dbVideos.videos.find(el=>el.id===+req.params.id)
-    if(desiredVideo){
+videoRouter.put('/:id([0-9]+)', (req: RequestWithBodyAndParams<URIParamsId, VideoCreateAndUpdateModel>, res: Response<errorsMessages|VideoViewModel>)=>{
+    const foundVideo = dbVideos.videos.find(el=>el.id===+req.params.id)
+    if(foundVideo){
         if(validation(req.body).errorsMessages.length){
             res.status(400).send(validation(req.body))
         } else {
-            videoUpdate(desiredVideo, req.body)
+            videoUpdate(foundVideo, req.body)
             res.sendStatus(204)
         }
     } else res.sendStatus(404)
 })
-videoRouter.delete('/:id', (req:RequestWithParams<URIParamsId>, res:Response)=>{
+videoRouter.delete('/:id([0-9]+)', (req:RequestWithParams<URIParamsId>, res:Response)=>{
     if(dbVideos.videos.find(el=>el.id===+req.params.id)){
         dbVideos.videos = dbVideos.videos.filter(el=>el.id!==+req.params.id)
         res.sendStatus(204)
