@@ -1,12 +1,12 @@
 import {Request, Response, Router} from "express";
-import {VideoViewModel} from "../models/VideoViewModel";
+import {VideoViewModel} from "../models/video-model/VideoViewModel";
 import {RequestWithBody, RequestWithBodyAndParams, RequestWithParams} from "../types";
 import {URIParamsId} from "../models/URIParamsIdModel";
-import {VideoCreateAndUpdateModel} from "../models/VideoCreateModel";
-import {errorsMessages, validation} from "../helpers/validation";
-import {publicationDate} from "../helpers/publicationDate";
-import {videoUpdate} from "../helpers/videoUpdate";
-import {dbVideos, videoType} from "../db/db";
+import {VideoCreateAndUpdateModel} from "../models/video-model/VideoCreateModel";
+import {errorsMessages, validation} from "../helpers/videoHelpers/validation";
+import {publicationDate} from "../helpers/videoHelpers/publicationDate";
+import {videoUpdate} from "../helpers/videoHelpers/videoUpdate";
+import {dbVideos, videoType} from "../db/db-videos";
 
 
 
@@ -22,8 +22,9 @@ videoRouter.get('/:id([0-9]+)', (req:RequestWithParams<URIParamsId>, res:Respons
     } else res.sendStatus(404)
 })
 videoRouter.post('/', (req: RequestWithBody<VideoCreateAndUpdateModel>, res: Response<errorsMessages|VideoViewModel>) => {
-    if(validation(req.body).errorsMessages.length) {
-        res.status(400).send(validation(req.body))
+    const errors = validation(req.body)
+    if(errors.errorsMessages.length) {
+        res.status(400).send(errors)
         return
     }
     const newVideo: videoType = {

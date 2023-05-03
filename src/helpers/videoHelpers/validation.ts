@@ -1,4 +1,4 @@
-import {VideoCreateAndUpdateModel} from "../models/VideoCreateModel";
+import {VideoCreateAndUpdateModel} from "../../models/video-model/VideoCreateModel";
 import {filterResolutions} from "./filterResolutions";
 import {correctAge} from "./minAgeRestriction";
 

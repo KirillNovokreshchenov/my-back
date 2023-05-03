@@ -1,3 +1,15 @@
+export type videoType = {
+    id: number,
+    title:string,
+    author: string,
+    canBeDownloaded: boolean,
+    minAgeRestriction: number|null,
+    createdAt: string,
+    publicationDate: string,
+    availableResolutions: string[]
+}
+
+
 export const dbVideos: { videos: Array<videoType> } = {
     videos: [{
         id: 1,
@@ -11,13 +23,6 @@ export const dbVideos: { videos: Array<videoType> } = {
     }]
 }
 
-export type videoType = {
-    id: number,
-    title:string,
-    author: string,
-    canBeDownloaded: boolean,
-    minAgeRestriction: number|null,
-    createdAt: string,
-    publicationDate: string,
-    availableResolutions: string[]
-}
+
+
+
