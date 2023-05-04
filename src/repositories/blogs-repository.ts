@@ -21,7 +21,6 @@ export const blogsRepository = {
     updateBlog(id: string, name: string, description: string, websiteUrl: string){
         let foundBlog = dbBlogs.blogs.find(blog=>blog.id ===id)
         if(foundBlog){
-            foundBlog.id = id
             foundBlog.name =  name
             foundBlog.description =  description
             foundBlog.websiteUrl= websiteUrl

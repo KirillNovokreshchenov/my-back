@@ -1,4 +1,4 @@
-export type blogType = {
+type blogType = {
     id: string
     name: string
     description: string
