@@ -1,8 +1,8 @@
 import request from 'supertest'
 import {VideoCreateAndUpdateModel} from "../src/models/video-model/VideoCreateModel";
 import {VideoViewModel} from "../src/models/video-model/VideoViewModel";
-import {errorsMessages} from "../src/helpers/videoHelpers/validation";
 import {app} from "../src/app";
+import {errorsMessages} from "../src/models/error-model";
 
 
 describe('/video', ()=>{

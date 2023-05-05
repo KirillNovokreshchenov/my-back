@@ -3,10 +3,11 @@ import {VideoViewModel} from "../models/video-model/VideoViewModel";
 import {RequestWithBody, RequestWithBodyAndParams, RequestWithParams} from "../types";
 import {URIParamsId} from "../models/URIParamsIdModel";
 import {VideoCreateAndUpdateModel} from "../models/video-model/VideoCreateModel";
-import {errorsMessages, validation} from "../helpers/videoHelpers/validation";
+import {validation} from "../helpers/videoHelpers/validation";
 import {publicationDate} from "../helpers/videoHelpers/publicationDate";
 import {videoUpdate} from "../helpers/videoHelpers/videoUpdate";
 import {dbVideos, videoType} from "../db/db-videos";
+import {errorsMessages} from "../models/error-model";
 
 
 

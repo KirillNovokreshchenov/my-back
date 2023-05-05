@@ -1,15 +1,10 @@
 import {VideoCreateAndUpdateModel} from "../../models/video-model/VideoCreateModel";
 import {filterResolutions} from "./filterResolutions";
 import {correctAge} from "./minAgeRestriction";
+import {errorsMessages} from "../../models/error-model";
 
 
-export type errorsType = {
-    message: string,
-    field: string
-}
-export type errorsMessages = {
-    errorsMessages: Array<errorsType>
-}
+
 
 
 
