@@ -1,11 +1,11 @@
-type blogType = {
+export type BlogType = {
     id: string
     name: string
     description: string
     websiteUrl: string
 }
 
-export const dbBlogs: {blogs: Array<blogType>} = {
+export const dbBlogs: {blogs: Array<BlogType>} = {
     blogs:[
         {
             id: '1',

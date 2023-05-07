@@ -1,13 +1,13 @@
-import {dbPosts} from "../db/db-posts";
+import {dbPosts, PostType} from "../db/db-posts";
 import {findBlogName} from "../helpers/post-helpers/findBlogName";
 
 
 export const postsRepository = {
-    allPosts(){
+    allPosts(): Array<PostType>{
         return dbPosts.posts
     },
-    createPost(title: string, shortDescription: string, content: string, blogId: string){
-        const createPost = {
+    createPost(title: string, shortDescription: string, content: string, blogId: string): PostType{
+        const createPost: PostType = {
             id: `${+new Date()}`,
             title: title,
             shortDescription: shortDescription,
@@ -22,8 +22,8 @@ export const postsRepository = {
     findPost(id: string){
         return dbPosts.posts.find(post =>post.id===id)
     },
-    updatePost(id: string, title: string, shortDescription: string, content: string){
-        let foundPost = dbPosts.posts.find(post =>post.id===id)
+    updatePost(id: string, title: string, shortDescription: string, content: string): boolean{
+        let foundPost: PostType|undefined = dbPosts.posts.find(post =>post.id===id)
         if(foundPost){
             foundPost.title = title
             foundPost.shortDescription =  shortDescription
@@ -34,7 +34,7 @@ export const postsRepository = {
         }
 
     },
-    deletePost(id: string){
+    deletePost(id: string): boolean{
         for(let i =0;i<dbPosts.posts.length;i++){
             if(dbPosts.posts[i].id === id){
                 dbPosts.posts.splice(i, 1)

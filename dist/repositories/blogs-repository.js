@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blogsRepository = void 0;
 const db_blogs_1 = require("../db/db-blogs");
+const changeBlogNamePosts_1 = require("../helpers/blog-helpers/changeBlogNamePosts");
 exports.blogsRepository = {
     allBlogs() {
         return db_blogs_1.dbBlogs.blogs;
@@ -25,6 +26,7 @@ exports.blogsRepository = {
             foundBlog.name = name;
             foundBlog.description = description;
             foundBlog.websiteUrl = websiteUrl;
+            (0, changeBlogNamePosts_1.changeBlogNamePosts)(id, name);
             return true;
         }
         else {

@@ -41,7 +41,7 @@ postRouter.get('/:id([0-9]+)', (req: RequestWithParams<URIParamsId>, res: Respon
     }
 })
 
-postRouter.put('/:id([0-9]+)',
+postRouter.put('/:id([0-9]+)', 
     authorizationValidation,
     titleValidation,
     shortDescriptionValidation,

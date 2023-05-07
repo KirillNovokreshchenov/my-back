@@ -1,4 +1,4 @@
-type postType = {
+export type PostType = {
     id: string
     title: string
     shortDescription: string
@@ -7,7 +7,7 @@ type postType = {
     blogName: string
 }
 
-export const dbPosts: {posts: Array<postType>} = {
+export const dbPosts: {posts: Array<PostType>} = {
     posts:[
         {
             "id": "1",
