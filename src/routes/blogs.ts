@@ -4,15 +4,13 @@ import {URIParamsId} from "../models/URIParamsIdModel";
 import {blogsRepository} from "../repositories/blogs-repository";
 import {CreateAndUpdateBlogModel} from "../models/blog-models/CreateAndUpdateBlogModel";
 import {BlogViewModel} from "../models/blog-models/BlogViewModel";
-import {
-    descriptionValidation,
-    nameValidation,
-    websiteUrlValidation
-} from "../middlewares/blog-middlewares";
-import {authorizationValidation, errorsValidationMiddleware} from "../middlewares/common-middleware";
+import {blogValidate} from "../middlewares/blog-middlewares";
+import {authorizationValidation} from "../middlewares/auth-middleware";
+
 
 
 export const blogRouter = Router()
+
 
 blogRouter.get('/', (req: Request, res: Response<Array<BlogViewModel>>)=>{
     const allBlogs = blogsRepository.allBlogs()
@@ -20,11 +18,7 @@ blogRouter.get('/', (req: Request, res: Response<Array<BlogViewModel>>)=>{
 })
 
 blogRouter.post('/',
-    authorizationValidation,
-    nameValidation,
-    descriptionValidation,
-    websiteUrlValidation,
-    errorsValidationMiddleware,
+    blogValidate,
     (req: RequestWithBody<CreateAndUpdateBlogModel>, res: Response<BlogViewModel>)=>{
     const newBlog = blogsRepository.createBlog(req.body.name, req.body.description, req.body.websiteUrl)
     res.status(201).send(newBlog)
@@ -40,11 +34,7 @@ blogRouter.get('/:id([0-9]+)', (req: RequestWithParams<URIParamsId>, res: Respon
 })
 
 blogRouter.put('/:id([0-9]+)',
-    authorizationValidation,
-    nameValidation,
-    descriptionValidation,
-    websiteUrlValidation,
-    errorsValidationMiddleware,
+    blogValidate,
     (req: RequestWithBodyAndParams<URIParamsId, CreateAndUpdateBlogModel>, res: Response)=>{
     const isUpdate: boolean = blogsRepository.updateBlog(req.params.id, req.body.name, req.body.description, req.body.websiteUrl)
     if(isUpdate){
