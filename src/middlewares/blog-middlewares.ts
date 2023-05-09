@@ -5,7 +5,7 @@ import {authorizationValidation} from "./auth-middleware";
 
 const nameValidation = body('name')
     .isString()
-    .trim()
+
     .notEmpty()
     .withMessage('incorrect name, max length 15 symbols')
     .isLength({min: 1, max: 15})
