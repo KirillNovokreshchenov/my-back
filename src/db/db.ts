@@ -2,7 +2,10 @@ import {MongoClient} from "mongodb";
 import {BlogType} from "./db-blogs-type";
 import {PostType} from "./db-posts-type";
 
-const uri = process.env.mongoURI || 'mongodb+srv://kirillnovokrest:kirill4022768@cluster0.ngpfdsn.mongodb.net/?retryWrites=true&w=majority';
+import * as dotenv from 'dotenv'
+dotenv.config()
+
+const uri = process.env.MONGO_URI
 
 const client = new MongoClient(uri);
 
