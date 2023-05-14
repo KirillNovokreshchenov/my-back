@@ -38,14 +38,13 @@ const dotenv = __importStar(require("dotenv"));
 dotenv.config();
 const uri = process.env.MONGO_URI;
 const client = new mongodb_1.MongoClient(uri);
-const db = client.db('project');
+const db = client.db('');
 exports.collectionBlogs = db.collection('blogs');
 exports.collectionPosts = db.collection('posts');
 function runDB() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield client.connect();
-            yield client.db("project").command({ ping: 1 });
             console.log("Pinged your deployment. You successfully connected to MongoDB!");
         }
         finally {
