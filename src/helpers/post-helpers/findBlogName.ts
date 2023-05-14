@@ -1,6 +1,7 @@
-import {dbBlogs} from "../../db/db-blogs";
+import {collectionBlogs} from "../../db/db";
 
-export function findBlogName(blogId: string){
-    const foundBlog = dbBlogs.blogs.find(blog =>blog.id===blogId)
+
+export async function findBlogName(blogId: string){
+    const foundBlog = await collectionBlogs.findOne({id: blogId})
     return foundBlog!.name
 }

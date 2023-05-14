@@ -1,7 +1,5 @@
-import {dbPosts} from "../../db/db-posts";
+import {collectionPosts} from "../../db/db";
 
-export function changeBlogNamePosts(id: string, name:string){
-    dbPosts.posts.filter(post =>post.blogId === id).forEach(post=>{
-        post.blogName = name
-    })
+export async function changeBlogNamePosts(id: string, name:string){
+ await collectionPosts.updateMany({blogId: id}, {$set:{blogName: name}})
 }

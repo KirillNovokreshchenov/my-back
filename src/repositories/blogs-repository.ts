@@ -1,46 +1,46 @@
-import {BlogType, dbBlogs} from "../db/db-blogs";
+import {BlogType} from "../db/db-blogs-type";
 import {changeBlogNamePosts} from "../helpers/blog-helpers/changeBlogNamePosts";
+import {collectionBlogs} from "../db/db";
+import {CreateAndUpdateBlogModel} from "../models/blog-models/CreateAndUpdateBlogModel";
 
 
 export const blogsRepository = {
-    allBlogs(): Array<BlogType>{
-        return dbBlogs.blogs
+    async allBlogs():Promise<BlogType[]>{
+        return collectionBlogs.find({}, {projection: { _id: 0}}).toArray()
     },
-    createBlog(name: string, description: string, websiteUrl: string): BlogType{
+
+    async createBlog({name, description, websiteUrl, createdAt}: CreateAndUpdateBlogModel): Promise<BlogType>{
         const createBlog: BlogType = {
             id: `${+new Date()}`,
             name: name,
             description: description,
-            websiteUrl: websiteUrl
+            websiteUrl: websiteUrl,
+            createdAt: createdAt || new Date().toISOString(),
+            isMembership: false
         }
-        dbBlogs.blogs.push(createBlog)
-        return createBlog
+        await collectionBlogs.insertOne(createBlog)
+        const foundNewCreatedBlog = await collectionBlogs.findOne({id: createBlog.id}, {projection: { _id: 0}})
+        return foundNewCreatedBlog!
 
     },
-    findBlog(id: string){
-        return dbBlogs.blogs.find(blog =>blog.id===id)
+    async findBlog(id: string): Promise<BlogType|null>{
+        return collectionBlogs.findOne({id: id}, {projection: { _id: 0}})
     },
-    updateBlog(id: string, name: string, description: string, websiteUrl: string): boolean{
-        let foundBlog: BlogType|undefined = dbBlogs.blogs.find(blog=>blog.id ===id)
-        if(foundBlog){
-            foundBlog.name =  name
-            foundBlog.description =  description
-            foundBlog.websiteUrl= websiteUrl
-            changeBlogNamePosts(id, name)
-            return true
-        }else{
-            return false
-        }
 
+    async  updateBlog(id: string,{name, description, websiteUrl, createdAt}: CreateAndUpdateBlogModel): Promise<boolean>{
+      const result =  createdAt ?
+           await collectionBlogs.updateOne({id}, {$set: {name, description, websiteUrl, createdAt}})
+           :await collectionBlogs.updateOne({id}, {$set: {name, description, websiteUrl}})
+
+
+        await changeBlogNamePosts(id, name)
+
+        return result.matchedCount === 1
     },
-    deleteBlog(id: string) : boolean{
-        for(let i =0;i<dbBlogs.blogs.length;i++){
-            if(dbBlogs.blogs[i].id === id){
-                dbBlogs.blogs.splice(i, 1)
-                return true
-            }
-        }
-        return false
-        }
 
+    async  deleteBlog(id: string) : Promise<boolean> {
+        const result = await collectionBlogs.deleteOne({id: id})
+
+        return result.deletedCount === 1
+    }
 }

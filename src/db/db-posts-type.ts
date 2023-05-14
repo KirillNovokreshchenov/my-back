@@ -1,4 +1,4 @@
-export type PostViewModel = {
+export type PostType = {
     id: string
     title: string
     shortDescription: string
@@ -6,4 +6,6 @@ export type PostViewModel = {
     blogId: string
     blogName: string
     createdAt: string
+    isMembership: boolean
 }
+

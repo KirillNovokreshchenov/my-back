@@ -1,4 +1,4 @@
-export type BlogViewModel= {
+export type BlogType = {
     id: string
     name: string
     description: string
@@ -6,3 +6,4 @@ export type BlogViewModel= {
     createdAt: string
     isMembership: boolean
 }
+

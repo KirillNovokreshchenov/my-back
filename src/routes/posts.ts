@@ -8,25 +8,23 @@ import {postValidate} from "../middlewares/post-middleware";
 import {authorizationValidation} from "../middlewares/auth-middleware";
 
 
-
-
 export const postRouter = Router()
 
-postRouter.get('/', (req: Request, res: Response<Array<PostViewModel>>)=>{
-    const allPosts = postsRepository.allPosts()
-      res.send(allPosts)
+postRouter.get('/', async (req: Request, res: Response<Array<PostViewModel>>) => {
+    const allPosts = await postsRepository.allPosts()
+    res.send(allPosts)
 })
 
 postRouter.post('/',
    postValidate,
-    (req: RequestWithBody<CreateAndUpdatePostModel>, res: Response<PostViewModel>)=>{
-    const newPost = postsRepository.createPost(req.body.title, req.body.shortDescription, req.body.content, req.body.blogId)
-    res.status(201).send(newPost)
-})
+    async (req: RequestWithBody<CreateAndUpdatePostModel>, res: Response<PostViewModel>) => {
+        const newPost = await postsRepository.createPost(req.body)
+        res.status(201).send(newPost)
+    })
 
-postRouter.get('/:id([0-9]+)', (req: RequestWithParams<URIParamsId>, res: Response<PostViewModel>)=>{
-    const foundPost = postsRepository.findPost(req.params.id)
-    if(foundPost){
+postRouter.get('/:id([0-9]+)', async (req: RequestWithParams<URIParamsId>, res: Response<PostViewModel>) => {
+    const foundPost = await postsRepository.findPost(req.params.id)
+    if (foundPost) {
         res.send(foundPost)
     } else {
         res.sendStatus(404)
@@ -35,23 +33,23 @@ postRouter.get('/:id([0-9]+)', (req: RequestWithParams<URIParamsId>, res: Respon
 
 postRouter.put('/:id([0-9]+)', 
     postValidate,
-    (req: RequestWithBodyAndParams<URIParamsId, CreateAndUpdatePostModel>, res: Response)=>{
-    const isUpdate: boolean = postsRepository.updatePost(req.params.id, req.body.title, req.body.shortDescription, req.body.content)
-    if(isUpdate){
-        res.sendStatus(204)
-    } else {
-        res.sendStatus(404)
-    }
-})
+    async (req: RequestWithBodyAndParams<URIParamsId, CreateAndUpdatePostModel>, res: Response) => {
+        const isUpdate = await postsRepository.updatePost(req.params.id, req.body)
+        if (isUpdate) {
+            res.sendStatus(204)
+        } else {
+            res.sendStatus(404)
+        }
+    })
 
 postRouter.delete('/:id([0-9]+)',
     authorizationValidation,
-    (req: RequestWithParams<URIParamsId>, res: Response)=>{
-    const isDeleted: boolean = postsRepository.deletePost(req.params.id)
-    if(isDeleted){
-        res.sendStatus(204)
-    }else{
-        res.sendStatus(404)
-    }
-})
+    async (req: RequestWithParams<URIParamsId>, res: Response) => {
+        const isDeleted: boolean = await postsRepository.deletePost(req.params.id)
+        if (isDeleted) {
+            res.sendStatus(204)
+        } else {
+            res.sendStatus(404)
+        }
+    })
 
