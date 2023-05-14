@@ -11,11 +11,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runDB = exports.collectionPosts = exports.collectionBlogs = void 0;
 const mongodb_1 = require("mongodb");
-const uri = process.env.mongoURI || 'mongodb://127.0.0.1:27017';
+const uri = process.env.mongoURI || 'mongodb+srv://kirillnovokrest:kirill4022768@cluster0.ngpfdsn.mongodb.net/?retryWrites=true&w=majority';
 const client = new mongodb_1.MongoClient(uri);
 const db = client.db('project');
-exports.collectionBlogs = db.collection('blog');
-exports.collectionPosts = db.collection('post');
+exports.collectionBlogs = db.collection('blogs');
+exports.collectionPosts = db.collection('posts');
 function runDB() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
