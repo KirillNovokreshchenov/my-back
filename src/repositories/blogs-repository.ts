@@ -1,7 +1,7 @@
 import {BlogType} from "../db/db-blogs-type";
-import {changeBlogNamePosts} from "../helpers/blog-helpers/changeBlogNamePosts";
-import {collectionBlogs} from "../db/db";
+import {collectionBlogs, collectionPosts} from "../db/db";
 import {CreateAndUpdateBlogModel} from "../models/blog-models/CreateAndUpdateBlogModel";
+import {filterProperties} from "../helpers/blog-helpers/filterProperties";
 
 
 export const blogsRepository = {
@@ -27,13 +27,13 @@ export const blogsRepository = {
         return collectionBlogs.findOne({id: id}, {projection: { _id: 0}})
     },
 
-    async  updateBlog(id: string,{name, description, websiteUrl, createdAt}: CreateAndUpdateBlogModel): Promise<boolean>{
-      const result =  createdAt ?
-           await collectionBlogs.updateOne({id}, {$set: {name, description, websiteUrl, createdAt}})
-           :await collectionBlogs.updateOne({id}, {$set: {name, description, websiteUrl}})
+    async  updateBlog(id: string,{name, description, websiteUrl, ...optionalProperties}: CreateAndUpdateBlogModel): Promise<boolean>{
+      const optionalPropertiesIsValid = filterProperties(optionalProperties)
+        const result =
+           await collectionBlogs.updateOne({id}, {$set: {name, description, websiteUrl, ...optionalPropertiesIsValid}})
 
+        await collectionPosts.updateMany({blogId: id}, {$set:{blogName: name}})
 
-        await changeBlogNamePosts(id, name)
 
         return result.matchedCount === 1
     },

@@ -2,6 +2,7 @@ import {PostType} from "../db/db-posts-type";
 import {findBlogName} from "../helpers/post-helpers/findBlogName";
 import {collectionBlogs, collectionPosts} from "../db/db";
 import {CreateAndUpdatePostModel} from "../models/post-models/CreateAndUpdatePostModel";
+import {filterProperties} from "../helpers/blog-helpers/filterProperties";
 
 
 export const postsRepository = {
@@ -27,11 +28,14 @@ export const postsRepository = {
     async findPost(id: string): Promise<PostType|null>{
         return collectionPosts.findOne({id: id}, {projection: { _id: 0, isMembership: 0}})
     },
-    async updatePost(id: string, {title, shortDescription, content, createdAt}: CreateAndUpdatePostModel): Promise<boolean>{
+    async updatePost(id: string, {title, shortDescription, content, ...optionalProperties}: CreateAndUpdatePostModel): Promise<boolean>{
         let foundPost: PostType|null = await collectionPosts.findOne({id: id})
-        const result =  createdAt ?
-            await collectionPosts.updateOne({id}, {$set: {title, shortDescription, content, createdAt}})
-            :await collectionPosts.updateOne({id}, {$set: {title, shortDescription, content}})
+
+        const optionalPropertiesIsValid = filterProperties(optionalProperties)
+
+        const result =
+            await collectionPosts.updateOne({id}, {$set: {title, shortDescription, content, ...optionalPropertiesIsValid}})
+
 
         return result.matchedCount === 1
 
