@@ -1,7 +1,7 @@
 import {VideoCreateAndUpdateModel} from "../../models/video-model/VideoCreateModel";
 import {filterResolutions} from "./filterResolutions";
 import {correctAge} from "./minAgeRestriction";
-import {errorsMessages} from "../../models/error-model";
+import {errorsMessages} from "../../models/ErrorModel";
 
 
 

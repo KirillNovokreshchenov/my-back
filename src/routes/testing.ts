@@ -7,7 +7,12 @@ export const testingRouter = Router()
 
 testingRouter.delete('/all-data', async (req: Request, res: Response)=>{
     dbVideos.videos = []
-    await collectionBlogs.deleteMany({})
-    await collectionPosts.deleteMany({})
+    const promiseBlogs = collectionBlogs.deleteMany({});
+    const promisePosts = collectionPosts.deleteMany({});
+
+    Promise.all([promiseBlogs, promisePosts])
+        .catch((err) => {
+            console.error(err);
+        });
     res.sendStatus(204)
 })

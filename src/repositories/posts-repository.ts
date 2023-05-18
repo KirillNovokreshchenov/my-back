@@ -1,47 +1,25 @@
 import {PostType} from "../db/db-posts-type";
-import {findBlogName} from "../helpers/post-helpers/findBlogName";
-import {collectionBlogs, collectionPosts} from "../db/db";
-import {CreateAndUpdatePostModel} from "../models/post-models/CreateAndUpdatePostModel";
-import {filterProperties} from "../helpers/blog-helpers/filterProperties";
+import {collectionPosts} from "../db/db";
+import {BSON, ObjectId} from "mongodb";
 
 
 export const postsRepository = {
-    async allPosts(): Promise<Array<PostType>>{
-        return collectionPosts.find({}, {projection: { _id: 0, isMembership: 0}}).toArray()
-    },
-    async createPost({title, shortDescription, content, blogId, createdAt}: CreateAndUpdatePostModel): Promise<PostType>{
-        const createPost: PostType = {
-            id: `${+new Date()}`,
-            title: title,
-            shortDescription: shortDescription,
-            content: content,
-            blogId: blogId,
-            blogName: await findBlogName(blogId),
-            createdAt: createdAt || new Date().toISOString(),
-            isMembership: false
-        }
+
+    async createPost(createPost: any): Promise<ObjectId>{
         await collectionPosts.insertOne(createPost)
-        const foundNewCreatedPost = await collectionPosts.findOne({id: createPost.id}, {projection: { _id: 0, isMembership: 0}})
-        return foundNewCreatedPost!
+        return createPost._id
 
     },
-    async findPost(id: string): Promise<PostType|null>{
-        return collectionPosts.findOne({id: id}, {projection: { _id: 0, isMembership: 0}})
-    },
-    async updatePost(id: string, {title, shortDescription, content, ...optionalProperties}: CreateAndUpdatePostModel): Promise<boolean>{
-        let foundPost: PostType|null = await collectionPosts.findOne({id: id})
 
-        const optionalPropertiesIsValid = filterProperties(optionalProperties)
-
-        const result =
-            await collectionPosts.updateOne({id}, {$set: {title, shortDescription, content, ...optionalPropertiesIsValid}})
-
-
+    async updatePost(id: string, title: string, shortDescription: string, content: string, optionalPropertiesIsValid:object): Promise<boolean>{
+        const objId = new BSON.ObjectId(id)
+        const result = await collectionPosts.updateOne({_id: objId}, {$set: {title, shortDescription, content, ...optionalPropertiesIsValid}})
         return result.matchedCount === 1
 
     },
     async deletePost(id: string): Promise<boolean> {
-        const result = await collectionPosts.deleteOne({id: id})
+        const objId = new BSON.ObjectId(id)
+        const result = await collectionPosts.deleteOne({_id: objId})
         return result.deletedCount === 1
     }
 

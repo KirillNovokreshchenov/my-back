@@ -1,4 +1,4 @@
-export type videoType = {
+export type VideoType = {
     id: number,
     title:string,
     author: string,
@@ -8,9 +8,9 @@ export type videoType = {
     publicationDate: string,
     availableResolutions: string[]
 }
+//Videotype[]
 
-
-export const dbVideos: { videos: Array<videoType> } = {
+export const dbVideos: { videos: VideoType[] } = {
     videos: [{
         id: 1,
         title:'string',

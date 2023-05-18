@@ -1,7 +1,9 @@
-import {body} from "express-validator";
+import {body, param} from "express-validator";
 import {authorizationValidation} from "./auth-middleware";
 import {errorsValidationMiddleware} from "./err-middleware";
 import {collectionBlogs} from "../db/db";
+import {BSON} from "mongodb";
+import {NextFunction, Request, Response} from "express";
 
 
 const titleValidation = body('title')
@@ -35,11 +37,17 @@ const createdAtValidation = body('createdAt')
     .withMessage('incorrect ISO date')
 const blogIdValidation = body('blogId')
     .custom(async value =>{
-        const foundBlog = await collectionBlogs.findOne({id: value});
+        const objId =new BSON.ObjectId(value)
+        const foundBlog = await collectionBlogs.findOne({_id: objId});
         if(!foundBlog){
             throw new Error('incorrect blogId')
         }
     })
 
 
+
+
+
 export const postValidate = [authorizationValidation, titleValidation, shortDescriptionValidation, contentValidation, createdAtValidation, blogIdValidation, errorsValidationMiddleware]
+
+export const postValidateForBlog = [authorizationValidation, titleValidation, shortDescriptionValidation, contentValidation, createdAtValidation, errorsValidationMiddleware]

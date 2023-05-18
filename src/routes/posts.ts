@@ -1,29 +1,34 @@
 import {Request, Router, Response} from "express";
 import {PostViewModel} from "../models/post-models/PostViewModel";
-import {postsRepository} from "../repositories/posts-repository";
 import {CreateAndUpdatePostModel} from "../models/post-models/CreateAndUpdatePostModel";
 import {RequestWithBody, RequestWithBodyAndParams, RequestWithParams} from "../types";
 import {URIParamsId} from "../models/URIParamsIdModel";
 import {postValidate} from "../middlewares/post-middleware";
 import {authorizationValidation} from "../middlewares/auth-middleware";
+import {postsService} from "../domain/posts-service";
+import {postsQueryRepository} from "../repositories/query-posts-repository";
+import {mongoIdMiddleware} from "../middlewares/objId-middleware";
 
 
 export const postRouter = Router()
 
 postRouter.get('/', async (req: Request, res: Response<Array<PostViewModel>>) => {
-    const allPosts = await postsRepository.allPosts()
+    const allPosts = await postsQueryRepository.allPosts()
     res.send(allPosts)
 })
 
 postRouter.post('/',
    postValidate,
     async (req: RequestWithBody<CreateAndUpdatePostModel>, res: Response<PostViewModel>) => {
-        const newPost = await postsRepository.createPost(req.body)
-        res.status(201).send(newPost)
+        const objId = await postsService.createPost(req.body)
+        const foundNewCreatePost = await postsQueryRepository.findPost(objId)
+        res.status(201).send(foundNewCreatePost!)
     })
 
-postRouter.get('/:id([0-9]+)', async (req: RequestWithParams<URIParamsId>, res: Response<PostViewModel>) => {
-    const foundPost = await postsRepository.findPost(req.params.id)
+postRouter.get('/:id',
+    mongoIdMiddleware,
+    async (req: RequestWithParams<URIParamsId>, res: Response<PostViewModel>) => {
+    const foundPost = await postsQueryRepository.findPost(req.params.id)
     if (foundPost) {
         res.send(foundPost)
     } else {
@@ -31,10 +36,11 @@ postRouter.get('/:id([0-9]+)', async (req: RequestWithParams<URIParamsId>, res: 
     }
 })
 
-postRouter.put('/:id([0-9]+)', 
+postRouter.put('/:id',
     postValidate,
+    mongoIdMiddleware,
     async (req: RequestWithBodyAndParams<URIParamsId, CreateAndUpdatePostModel>, res: Response) => {
-        const isUpdate = await postsRepository.updatePost(req.params.id, req.body)
+        const isUpdate = await postsService.updatePost(req.params.id, req.body)
         if (isUpdate) {
             res.sendStatus(204)
         } else {
@@ -42,10 +48,11 @@ postRouter.put('/:id([0-9]+)',
         }
     })
 
-postRouter.delete('/:id([0-9]+)',
+postRouter.delete('/:id',
     authorizationValidation,
+    mongoIdMiddleware,
     async (req: RequestWithParams<URIParamsId>, res: Response) => {
-        const isDeleted: boolean = await postsRepository.deletePost(req.params.id)
+        const isDeleted: boolean = await postsService.deletePost(req.params.id)
         if (isDeleted) {
             res.sendStatus(204)
         } else {

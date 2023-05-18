@@ -20,7 +20,8 @@ export async function runDB() {
     try {
         await client.connect();
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    } finally {
-        //await client.close();
+    } catch {
+        console.log('No connect')
+        await client.close();
     }
 }
