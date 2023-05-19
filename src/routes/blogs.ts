@@ -1,5 +1,11 @@
 import {Router, Request, Response} from "express";
-import {RequestWithBody, RequestWithBodyAndParams, RequestWithParams, RequestWithQuery} from "../types";
+import {
+    RequestWithBody,
+    RequestWithBodyAndParams,
+    RequestWithParams,
+    RequestWithQuery,
+    RequestWithQueryAndParams
+} from "../types";
 import {URIParamsId} from "../models/URIParamsIdModel";
 import {blogsService} from "../domain/blogs-service";
 import {CreateAndUpdateBlogInputModel} from "../models/blog-models/CreateAndUpdateBlogInputModel";
@@ -13,26 +19,27 @@ import {postsQueryRepository} from "../repositories/query-posts-repository";
 import {mongoIdMiddleware} from "../middlewares/objId-middleware";
 import {postValidateForBlog} from "../middlewares/post-middleware";
 import {QueryModel} from "../models/QueryModel";
+import {BlogQueryViewModel} from "../models/blog-models/BlogQueryViewModel";
+import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
 
 
 export const blogRouter = Router()
 
 
-blogRouter.get('/', async (req: RequestWithQuery<QueryModel>, res: Response<BlogViewModel[]>) => {
+blogRouter.get('/', async (req: RequestWithQuery<QueryModel>, res: Response<BlogQueryViewModel[]>) => {
     const allBlogs = await blogsQueryRepository.allBlogs(req.query)
     res.send(allBlogs)
 })
 
 blogRouter.get('/:id/posts',
     mongoIdMiddleware,
-    async (req: Request<URIParamsId>, res: Response<PostViewModel[]>) => {
-    const allPostsForBlog = await blogsQueryRepository.allPostsForBlog(req.params.id)
+    async (req: RequestWithQueryAndParams<URIParamsId, any>, res: Response<PostQueryViewModel[]>)=>{
+    const allPostsForBlog= await blogsQueryRepository.allPostsForBlog(req.params.id, req.query)
     if (!allPostsForBlog) {
         res.sendStatus(404)
     } else {
         res.send(allPostsForBlog)
     }
-
 })
 
 blogRouter.post('/',
