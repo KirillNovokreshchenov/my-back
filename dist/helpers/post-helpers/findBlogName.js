@@ -11,9 +11,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findBlogName = void 0;
 const db_1 = require("../../db/db");
+const mongodb_1 = require("mongodb");
 function findBlogName(blogId) {
     return __awaiter(this, void 0, void 0, function* () {
-        const foundBlog = yield db_1.collectionBlogs.findOne({ id: blogId });
+        const objId = new mongodb_1.BSON.ObjectId(blogId);
+        const foundBlog = yield db_1.collectionBlogs.findOne({ _id: objId });
         return foundBlog.name;
     });
 }

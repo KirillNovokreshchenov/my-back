@@ -10,46 +10,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blogsRepository = void 0;
-const changeBlogNamePosts_1 = require("../helpers/blog-helpers/changeBlogNamePosts");
 const db_1 = require("../db/db");
+const mongodb_1 = require("mongodb");
 exports.blogsRepository = {
-    allBlogs() {
+    createBlog(newBlog) {
         return __awaiter(this, void 0, void 0, function* () {
-            return db_1.collectionBlogs.find({}, { projection: { _id: 0 } }).toArray();
+            yield db_1.collectionBlogs.insertOne(newBlog);
+            return newBlog._id;
         });
     },
-    createBlog({ name, description, websiteUrl, createdAt }) {
+    createPostForBlog(newPost) {
         return __awaiter(this, void 0, void 0, function* () {
-            const createBlog = {
-                id: `${+new Date()}`,
-                name: name,
-                description: description,
-                websiteUrl: websiteUrl,
-                createdAt: createdAt || new Date().toISOString(),
-                isMembership: false
-            };
-            yield db_1.collectionBlogs.insertOne(createBlog);
-            const foundNewCreatedBlog = yield db_1.collectionBlogs.findOne({ id: createBlog.id }, { projection: { _id: 0 } });
-            return foundNewCreatedBlog;
+            yield db_1.collectionPosts.insertOne(newPost);
+            return newPost._id;
         });
     },
-    findBlog(id) {
+    updateBlog(id, name, description, websiteUrl, optionalPropertiesIsValid) {
         return __awaiter(this, void 0, void 0, function* () {
-            return db_1.collectionBlogs.findOne({ id: id }, { projection: { _id: 0 } });
-        });
-    },
-    updateBlog(id, { name, description, websiteUrl, createdAt }) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const result = createdAt ?
-                yield db_1.collectionBlogs.updateOne({ id }, { $set: { name, description, websiteUrl, createdAt } })
-                : yield db_1.collectionBlogs.updateOne({ id }, { $set: { name, description, websiteUrl } });
-            yield (0, changeBlogNamePosts_1.changeBlogNamePosts)(id, name);
+            const objId = new mongodb_1.BSON.ObjectId(id);
+            const result = yield db_1.collectionBlogs.updateOne({ _id: objId }, { $set: Object.assign({ name, description, websiteUrl }, optionalPropertiesIsValid) });
+            yield db_1.collectionPosts.updateMany({ blogId: id }, { $set: { blogName: name } });
             return result.matchedCount === 1;
         });
     },
     deleteBlog(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield db_1.collectionBlogs.deleteOne({ id: id });
+            const objId = new mongodb_1.BSON.ObjectId(id);
+            const result = yield db_1.collectionBlogs.deleteOne({ _id: objId });
             return result.deletedCount === 1;
         });
     }

@@ -11,20 +11,39 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blogRouter = void 0;
 const express_1 = require("express");
-const blogs_repository_1 = require("../repositories/blogs-repository");
+const blogs_service_1 = require("../domain/blogs-service");
 const blog_middlewares_1 = require("../middlewares/blog-middlewares");
 const auth_middleware_1 = require("../middlewares/auth-middleware");
+const query_blogs_repository_1 = require("../repositories/query-blogs-repository");
+const query_posts_repository_1 = require("../repositories/query-posts-repository");
+const objId_middleware_1 = require("../middlewares/objId-middleware");
+const post_middleware_1 = require("../middlewares/post-middleware");
 exports.blogRouter = (0, express_1.Router)();
 exports.blogRouter.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const allBlogs = yield blogs_repository_1.blogsRepository.allBlogs();
+    const allBlogs = yield query_blogs_repository_1.blogsQueryRepository.allBlogs(req.query);
     res.send(allBlogs);
 }));
+exports.blogRouter.get('/:id/posts', objId_middleware_1.mongoIdMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const allPostsForBlog = yield query_blogs_repository_1.blogsQueryRepository.allPostsForBlog(req.params.id, req.query);
+    if (!allPostsForBlog) {
+        res.sendStatus(404);
+    }
+    else {
+        res.send(allPostsForBlog);
+    }
+}));
 exports.blogRouter.post('/', blog_middlewares_1.blogValidate, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const newBlog = yield blogs_repository_1.blogsRepository.createBlog(req.body);
+    const idBlog = yield blogs_service_1.blogsService.createBlog(req.body);
+    const newBlog = yield query_blogs_repository_1.blogsQueryRepository.findBlog(idBlog);
     res.status(201).send(newBlog);
 }));
-exports.blogRouter.get('/:id([0-9]+)', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const foundBlog = yield blogs_repository_1.blogsRepository.findBlog(req.params.id);
+exports.blogRouter.post('/:id/posts', post_middleware_1.postValidateForBlog, objId_middleware_1.mongoIdMiddleware, blog_middlewares_1.foundBlogForCreatePost, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const idPost = yield blogs_service_1.blogsService.createPostForBlog(req.params.id, req.body);
+    const foundNewPost = yield query_posts_repository_1.postsQueryRepository.findPost(idPost);
+    res.status(201).send(foundNewPost);
+}));
+exports.blogRouter.get('/:id', objId_middleware_1.mongoIdMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const foundBlog = yield query_blogs_repository_1.blogsQueryRepository.findBlog(req.params.id);
     if (foundBlog) {
         res.send(foundBlog);
     }
@@ -32,8 +51,8 @@ exports.blogRouter.get('/:id([0-9]+)', (req, res) => __awaiter(void 0, void 0, v
         res.sendStatus(404);
     }
 }));
-exports.blogRouter.put('/:id([0-9]+)', blog_middlewares_1.blogValidate, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const isUpdate = yield blogs_repository_1.blogsRepository.updateBlog(req.params.id, req.body);
+exports.blogRouter.put('/:id', blog_middlewares_1.blogValidate, objId_middleware_1.mongoIdMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const isUpdate = yield blogs_service_1.blogsService.updateBlog(req.params.id, req.body);
     if (isUpdate) {
         res.sendStatus(204);
     }
@@ -41,8 +60,8 @@ exports.blogRouter.put('/:id([0-9]+)', blog_middlewares_1.blogValidate, (req, re
         res.sendStatus(404);
     }
 }));
-exports.blogRouter.delete('/:id([0-9]+)', auth_middleware_1.authorizationValidation, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const isDeleted = yield blogs_repository_1.blogsRepository.deleteBlog(req.params.id);
+exports.blogRouter.delete('/:id', auth_middleware_1.authorizationValidation, objId_middleware_1.mongoIdMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const isDeleted = yield blogs_service_1.blogsService.deleteBlog(req.params.id);
     if (isDeleted) {
         res.sendStatus(204);
     }

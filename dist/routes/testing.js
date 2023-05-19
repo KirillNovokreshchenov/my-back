@@ -12,9 +12,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.testingRouter = void 0;
 const express_1 = require("express");
 const db_1 = require("../db/db");
+const db_videos_1 = require("../db/db-videos");
 exports.testingRouter = (0, express_1.Router)();
 exports.testingRouter.delete('/all-data', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    yield db_1.collectionBlogs.deleteMany({});
-    yield db_1.collectionPosts.deleteMany({});
+    db_videos_1.dbVideos.videos = [];
+    const promiseBlogs = db_1.collectionBlogs.deleteMany({});
+    const promisePosts = db_1.collectionPosts.deleteMany({});
+    Promise.all([promiseBlogs, promisePosts])
+        .catch((err) => {
+        console.error(err);
+    });
     res.sendStatus(204);
 }));

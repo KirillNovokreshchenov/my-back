@@ -10,48 +10,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.postsRepository = void 0;
-const findBlogName_1 = require("../helpers/post-helpers/findBlogName");
 const db_1 = require("../db/db");
+const mongodb_1 = require("mongodb");
 exports.postsRepository = {
-    allPosts() {
+    createPost(createPost) {
         return __awaiter(this, void 0, void 0, function* () {
-            return db_1.collectionPosts.find({}, { projection: { _id: 0, isMembership: 0 } }).toArray();
-        });
-    },
-    createPost({ title, shortDescription, content, blogId, createdAt }) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const createPost = {
-                id: `${+new Date()}`,
-                title: title,
-                shortDescription: shortDescription,
-                content: content,
-                blogId: blogId,
-                blogName: yield (0, findBlogName_1.findBlogName)(blogId),
-                createdAt: createdAt || new Date().toISOString(),
-                isMembership: false
-            };
             yield db_1.collectionPosts.insertOne(createPost);
-            const foundNewCreatedPost = yield db_1.collectionPosts.findOne({ id: createPost.id }, { projection: { _id: 0, isMembership: 0 } });
-            return foundNewCreatedPost;
+            return createPost._id;
         });
     },
-    findPost(id) {
+    updatePost(id, title, shortDescription, content, optionalPropertiesIsValid) {
         return __awaiter(this, void 0, void 0, function* () {
-            return db_1.collectionPosts.findOne({ id: id }, { projection: { _id: 0, isMembership: 0 } });
-        });
-    },
-    updatePost(id, { title, shortDescription, content, createdAt }) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let foundPost = yield db_1.collectionPosts.findOne({ id: id });
-            const result = createdAt ?
-                yield db_1.collectionPosts.updateOne({ id }, { $set: { title, shortDescription, content, createdAt } })
-                : yield db_1.collectionPosts.updateOne({ id }, { $set: { title, shortDescription, content } });
+            const objId = new mongodb_1.BSON.ObjectId(id);
+            const result = yield db_1.collectionPosts.updateOne({ _id: objId }, { $set: Object.assign({ title, shortDescription, content }, optionalPropertiesIsValid) });
             return result.matchedCount === 1;
         });
     },
     deletePost(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield db_1.collectionPosts.deleteOne({ id: id });
+            const objId = new mongodb_1.BSON.ObjectId(id);
+            const result = yield db_1.collectionPosts.deleteOne({ _id: objId });
             return result.deletedCount === 1;
         });
     }

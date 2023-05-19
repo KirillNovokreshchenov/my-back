@@ -37,6 +37,9 @@ const mongodb_1 = require("mongodb");
 const dotenv = __importStar(require("dotenv"));
 dotenv.config();
 const uri = process.env.MONGO_URI;
+if (!uri) {
+    throw new Error('incorrect mongo URL');
+}
 const client = new mongodb_1.MongoClient(uri);
 const db = client.db('');
 exports.collectionBlogs = db.collection('blogs');
@@ -47,8 +50,9 @@ function runDB() {
             yield client.connect();
             console.log("Pinged your deployment. You successfully connected to MongoDB!");
         }
-        finally {
-            //await client.close();
+        catch (_a) {
+            console.log('No connect');
+            yield client.close();
         }
     });
 }
