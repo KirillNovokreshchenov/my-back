@@ -26,8 +26,8 @@ import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
 export const blogRouter = Router()
 
 
-blogRouter.get('/', async (req: RequestWithQuery<QueryModel>, res: Response<BlogQueryViewModel[]>) => {
-    const allBlogs = await blogsQueryRepository.allBlogs(req.query)
+blogRouter.get('/', async (req: RequestWithQuery<QueryModel>, res: Response) => {
+    const allBlogs =  await blogsQueryRepository.allBlogs(req.query)
     res.send(allBlogs)
 })
 

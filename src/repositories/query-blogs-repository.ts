@@ -1,6 +1,6 @@
 import {BlogViewModel} from "../models/blog-models/BlogViewModel";
 import {collectionBlogs, collectionPosts} from "../db/db";
-import {BSON, ObjectId} from "mongodb";
+import {BSON, FindCursor, ObjectId} from "mongodb";
 import {BlogType} from "../db/db-blogs-type";
 import {PostType} from "../db/db-posts-type";
 import {PostViewModel} from "../models/post-models/PostViewModel";
@@ -11,36 +11,37 @@ import {pageCount} from "../helpers/pageCount";
 import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
 
 export const blogsQueryRepository = {
-    async allBlogs({searchNameTerm = null, sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<BlogQueryViewModel[]> {
+    async allBlogs({searchNameTerm = null, sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<any> {
+        const totalCount = await collectionBlogs.countDocuments()
 
-        const foundBlogs: BlogType[] = await collectionBlogs.find({name: {$regex: `${searchNameTerm ? searchNameTerm : ''}`, $options: 'i'}})
+        const foundBlogs =  await collectionBlogs.find({name: {$regex: `${searchNameTerm ? searchNameTerm : ''}`, $options: 'i'}})
             .sort({[sortBy]: sortDirection === 'asc'? 1: -1})
             .skip(limitPages(+pageNumber, +pageSize))
             .limit(+pageSize)
-            .toArray()
+            .map(blog => {
+                const objId = new BSON.ObjectId(blog._id)
+                return {
+                    pagesCount: pageCount(totalCount, +pageSize),
+                    page: +pageNumber,
+                    pageSize: +pageSize,
+                    totalCount: totalCount,
+                    items: [
+                        {
+                            id: objId.toString(),
+                            name: blog.name,
+                            description: blog.description,
+                            websiteUrl: blog.websiteUrl,
+                            createdAt: blog.createdAt,
+                            isMembership: blog.isMembership,
+                        }
+                    ]
+                }
+            }).toArray()
 
-        const totalCount = await collectionBlogs.countDocuments()
+        return foundBlogs
 
-        return foundBlogs.map(blog => {
-            const objId = new BSON.ObjectId(blog._id)
 
-            return {
-                pagesCount: pageCount(totalCount, +pageSize),
-                page: +pageNumber,
-                pageSize: +pageSize,
-                totalCount: totalCount,
-                items: [
-                    {
-                id: objId.toString(),
-                name: blog.name,
-                description: blog.description,
-                websiteUrl: blog.websiteUrl,
-                createdAt: blog.createdAt,
-                isMembership: blog.isMembership,
-                    }
-                ]
-            }
-        })
+
     },
 
     async findBlog(id: string | ObjectId): Promise<BlogViewModel | null> {
