@@ -21,7 +21,7 @@ const post_middleware_1 = require("../middlewares/post-middleware");
 exports.blogRouter = (0, express_1.Router)();
 exports.blogRouter.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const allBlogs = yield query_blogs_repository_1.blogsQueryRepository.allBlogs(req.query);
-    res.send(allBlogs);
+    res.json(allBlogs);
 }));
 exports.blogRouter.get('/:id/posts', objId_middleware_1.mongoIdMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const allPostsForBlog = yield query_blogs_repository_1.blogsQueryRepository.allPostsForBlog(req.params.id, req.query);

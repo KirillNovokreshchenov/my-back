@@ -9,22 +9,21 @@ import {QueryModel} from "../models/QueryModel";
 
 
 export const postsQueryRepository = {
-    async allPosts({sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<PostQueryViewModel[]> {
-        const foundPosts: PostType[] = await collectionPosts.find({})
-            .sort({[sortBy]: sortDirection === 'asc'? 1: -1})
-            .skip(limitPages(+pageNumber, +pageSize))
-            .limit(+pageSize)
-            .toArray();
+    async allPosts({sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<PostQueryViewModel> {
         const totalCount = await collectionPosts.countDocuments()
-        return foundPosts.map(post => {
-            const objId = new BSON.ObjectId(post._id)
-            return {
-                pagesCount: pageCount(totalCount, +pageSize),
-                page: +pageNumber,
-                pageSize:+pageSize,
-                totalCount: totalCount,
-                items: [
-                    {
+
+        return {
+            pagesCount: pageCount(totalCount, +pageSize),
+            page: +pageNumber,
+            pageSize:+pageSize,
+            totalCount: totalCount,
+            items: await collectionPosts.find({})
+                .sort({[sortBy]: sortDirection === 'asc'? 1: -1})
+                .skip(limitPages(+pageNumber, +pageSize))
+                .limit(+pageSize)
+                .map(post=>{
+                    const objId = new BSON.ObjectId(post._id)
+                    return {
                         id: objId.toString(),
                         title: post.title,
                         shortDescription: post.shortDescription,
@@ -33,10 +32,9 @@ export const postsQueryRepository = {
                         blogName: post.blogName,
                         createdAt: post.createdAt
                     }
-                ]
+                }).toArray()
+        }
 
-            }
-        })
     },
     async findPost(id: string | ObjectId): Promise<PostViewModel | null> {
         const objId = new BSON.ObjectId(id)

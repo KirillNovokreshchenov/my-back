@@ -11,34 +11,31 @@ import {pageCount} from "../helpers/pageCount";
 import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
 
 export const blogsQueryRepository = {
-    async allBlogs({searchNameTerm = null, sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<any> {
+    async allBlogs({searchNameTerm = null, sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<BlogQueryViewModel> {
         const totalCount = await collectionBlogs.countDocuments()
 
-        const foundBlogs =  await collectionBlogs.find({name: {$regex: `${searchNameTerm ? searchNameTerm : ''}`, $options: 'i'}})
-            .sort({[sortBy]: sortDirection === 'asc'? 1: -1})
-            .skip(limitPages(+pageNumber, +pageSize))
-            .limit(+pageSize)
-            .map(blog => {
-                const objId = new BSON.ObjectId(blog._id)
-                return {
-                    pagesCount: pageCount(totalCount, +pageSize),
-                    page: +pageNumber,
-                    pageSize: +pageSize,
-                    totalCount: totalCount,
-                    items: [
-                        {
-                            id: objId.toString(),
-                            name: blog.name,
-                            description: blog.description,
-                            websiteUrl: blog.websiteUrl,
-                            createdAt: blog.createdAt,
-                            isMembership: blog.isMembership,
-                        }
-                    ]
-                }
-            }).toArray()
 
-        return foundBlogs
+        return {
+            pagesCount: pageCount(totalCount, +pageSize),
+            page: +pageNumber,
+            pageSize: +pageSize,
+            totalCount: totalCount,
+            items: await collectionBlogs.find({name: {$regex: `${searchNameTerm ? searchNameTerm : ''}`, $options: 'i'}})
+                .sort({[sortBy]: sortDirection === 'asc'? 1: -1})
+                .skip(limitPages(+pageNumber, +pageSize))
+                .limit(+pageSize)
+                .map(blog=>{
+                    const objId = new BSON.ObjectId(blog._id)
+                    return {
+                        id: objId.toString(),
+                        name: blog.name,
+                        description: blog.description,
+                        websiteUrl: blog.websiteUrl,
+                        createdAt: blog.createdAt,
+                        isMembership: blog.isMembership,
+                    }
+                }).toArray()
+        }
 
 
 
@@ -62,40 +59,36 @@ export const blogsQueryRepository = {
 
     },
 
-    async allPostsForBlog(id: string, {sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<PostQueryViewModel[]|null>{
+    async allPostsForBlog(id: string, {sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<PostQueryViewModel|null>{
 
-        const foundPosts: PostType[] = await collectionPosts.find({blogId: id})
+        const foundPosts: PostViewModel[] = await collectionPosts.find({blogId: id})
             .sort({[sortBy]: sortDirection === 'asc'? 1: -1})
             .skip(limitPages(+pageNumber, +pageSize))
             .limit(+pageSize)
-            .toArray()
+            .map(post=>{
+                const objId = new BSON.ObjectId(post._id)
+                return {
+                    id: objId.toString(),
+                    title: post.title,
+                    shortDescription: post.shortDescription,
+                    content: post.content,
+                    blogId: post.blogId,
+                    blogName: post.blogName,
+                    createdAt: post.createdAt
+                }
+            }).toArray()
 
         if(foundPosts.length===0) return null
 
         const totalCount = await collectionPosts.countDocuments({blogId: id})
-
-        return foundPosts.map(post => {
-            const objId = new BSON.ObjectId(post._id)
-            return {
+        return {
                 pagesCount: pageCount(totalCount, +pageSize),
                 page: +pageNumber,
                 pageSize:+pageSize,
                 totalCount: totalCount,
-                items: [
-                    {
-                        id: objId.toString(),
-                        title: post.title,
-                        shortDescription: post.shortDescription,
-                        content: post.content,
-                        blogId: post.blogId,
-                        blogName: post.blogName,
-                        createdAt: post.createdAt
-                    }
-                ]
+                items: foundPosts
+        }
 
-            }
+        }
 
-        })
-
-    }
 }

@@ -14,7 +14,7 @@ import {QueryModel} from "../models/QueryModel";
 
 export const postRouter = Router()
 
-postRouter.get('/', async (req: RequestWithQuery<QueryModel>, res: Response<PostQueryViewModel[]>) => {
+postRouter.get('/', async (req: RequestWithQuery<QueryModel>, res: Response<PostQueryViewModel>) => {
     const allPosts = await postsQueryRepository.allPosts(req.query)
     res.send(allPosts)
 })

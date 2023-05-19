@@ -26,14 +26,14 @@ import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
 export const blogRouter = Router()
 
 
-blogRouter.get('/', async (req: RequestWithQuery<QueryModel>, res: Response) => {
+blogRouter.get('/', async (req: RequestWithQuery<QueryModel>, res: Response<BlogQueryViewModel>) => {
     const allBlogs =  await blogsQueryRepository.allBlogs(req.query)
-    res.send(allBlogs)
+    res.json(allBlogs)
 })
 
 blogRouter.get('/:id/posts',
     mongoIdMiddleware,
-    async (req: RequestWithQueryAndParams<URIParamsId, any>, res: Response<PostQueryViewModel[]>)=>{
+    async (req: RequestWithQueryAndParams<URIParamsId, any>, res: Response<PostQueryViewModel>)=>{
     const allPostsForBlog= await blogsQueryRepository.allPostsForBlog(req.params.id, req.query)
     if (!allPostsForBlog) {
         res.sendStatus(404)
