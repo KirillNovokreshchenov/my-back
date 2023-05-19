@@ -12,8 +12,7 @@ import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
 
 export const blogsQueryRepository = {
     async allBlogs({searchNameTerm = null, sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<BlogQueryViewModel> {
-        const totalCount = await collectionBlogs.countDocuments()
-
+        const totalCount = await collectionBlogs.countDocuments({name: {$regex: `${searchNameTerm ? searchNameTerm : ''}`, $options: 'i'}})
 
         return {
             pagesCount: pageCount(totalCount, +pageSize),
