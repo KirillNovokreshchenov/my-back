@@ -1,9 +1,9 @@
 import {collectionBlogs} from "../../db/db";
 import {BSON} from "mongodb";
+import {formatIdInObjectId} from "../format-id-ObjectId";
 
 
 export async function findBlogName(blogId: string){
-    const objId = new BSON.ObjectId(blogId)
-    const foundBlog = await collectionBlogs.findOne({_id: objId})
+    const foundBlog = await collectionBlogs.findOne({_id: formatIdInObjectId(blogId)})
     return foundBlog!.name
 }

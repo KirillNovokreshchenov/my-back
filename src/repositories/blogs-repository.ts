@@ -1,5 +1,6 @@
 import {collectionBlogs, collectionPosts} from "../db/db";
 import {BSON, ObjectId} from "mongodb";
+import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 
 
 export const blogsRepository = {
@@ -14,9 +15,8 @@ export const blogsRepository = {
         return newPost._id
     },
 
-    async  updateBlog(id: string, name: string, description: string, websiteUrl: string, optionalPropertiesIsValid: object): Promise<boolean>{
-        const objId = new BSON.ObjectId(id)
-        const result = await collectionBlogs.updateOne({_id:objId}, {$set: {name, description, websiteUrl, ...optionalPropertiesIsValid}})
+    async  updateBlog(id: string, name: string, description: string, websiteUrl: string, createdAt: string|undefined): Promise<boolean>{
+        const result = await collectionBlogs.updateOne({_id:formatIdInObjectId(id)}, createdAt? {$set: {name, description, websiteUrl, createdAt}}: {$set: {name, description, websiteUrl}})
 
         await collectionPosts.updateMany({blogId: id}, {$set:{blogName: name}})
 
@@ -26,9 +26,7 @@ export const blogsRepository = {
 
 
     async  deleteBlog(id: string) : Promise<boolean> {
-        const objId = new BSON.ObjectId(id)
-        const result = await collectionBlogs.deleteOne({_id: objId})
-
+        const result = await collectionBlogs.deleteOne({_id: formatIdInObjectId(id)})
         return result.deletedCount === 1
     }
 }

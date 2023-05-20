@@ -9,9 +9,12 @@ import {limitPages} from "../helpers/limitPages";
 import {BlogQueryViewModel} from "../models/blog-models/BlogQueryViewModel";
 import {pageCount} from "../helpers/pageCount";
 import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
+import {mapPost} from "./query-posts-repository";
 
 export const blogsQueryRepository = {
+
     async allBlogs({searchNameTerm = null, sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<BlogQueryViewModel> {
+
         const totalCount = await collectionBlogs.countDocuments({name: {$regex: `${searchNameTerm ? searchNameTerm : ''}`, $options: 'i'}})
 
         return {
@@ -24,37 +27,19 @@ export const blogsQueryRepository = {
                 .skip(limitPages(+pageNumber, +pageSize))
                 .limit(+pageSize)
                 .map(blog=>{
-                    const objId = new BSON.ObjectId(blog._id)
-                    return {
-                        id: objId.toString(),
-                        name: blog.name,
-                        description: blog.description,
-                        websiteUrl: blog.websiteUrl,
-                        createdAt: blog.createdAt,
-                        isMembership: blog.isMembership,
-                    }
+                    return mapBlog(blog)
                 }).toArray()
         }
-
-
-
     },
 
-    async findBlog(id: string | ObjectId): Promise<BlogViewModel | null> {
-        const objId = new BSON.ObjectId(id)
-        const foundBlog: BlogType|null = await collectionBlogs.findOne(objId)
+    async findBlog(id: ObjectId): Promise<BlogViewModel | null> {
+
+        const foundBlog: BlogType|null = await collectionBlogs.findOne(id)
         if (!foundBlog) {
             return null
         }
 
-        return {
-            id: objId.toString(),
-            name: foundBlog.name,
-            description: foundBlog.description,
-            websiteUrl: foundBlog.websiteUrl,
-            createdAt: foundBlog.createdAt,
-            isMembership: foundBlog.isMembership,
-        }
+        return mapBlog(foundBlog)
 
     },
 
@@ -65,16 +50,7 @@ export const blogsQueryRepository = {
             .skip(limitPages(+pageNumber, +pageSize))
             .limit(+pageSize)
             .map(post=>{
-                const objId = new BSON.ObjectId(post._id)
-                return {
-                    id: objId.toString(),
-                    title: post.title,
-                    shortDescription: post.shortDescription,
-                    content: post.content,
-                    blogId: post.blogId,
-                    blogName: post.blogName,
-                    createdAt: post.createdAt
-                }
+                return mapPost(post)
             }).toArray()
 
         if(foundPosts.length===0) return null
@@ -88,6 +64,18 @@ export const blogsQueryRepository = {
                 items: foundPosts
         }
 
-        }
+    }
 
+}
+
+function mapBlog(blog: BlogType){
+    return {
+        id: blog._id.toString(),
+        name: blog.name,
+        description: blog.description,
+        websiteUrl: blog.websiteUrl,
+        createdAt: blog.createdAt,
+        isMembership: blog.isMembership,
+
+    }
 }

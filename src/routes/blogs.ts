@@ -16,11 +16,12 @@ import {blogsQueryRepository} from "../repositories/query-blogs-repository";
 import {PostViewModel} from "../models/post-models/PostViewModel";
 import {CreateModelPostForBlog} from "../models/blog-models/CreateModelPostForBlog";
 import {postsQueryRepository} from "../repositories/query-posts-repository";
-import {mongoIdMiddleware} from "../middlewares/objId-middleware";
+import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
 import {postValidateForBlog} from "../middlewares/post-middleware";
 import {QueryModel} from "../models/QueryModel";
 import {BlogQueryViewModel} from "../models/blog-models/BlogQueryViewModel";
 import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
+import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 
 
 export const blogRouter = Router()
@@ -52,8 +53,6 @@ blogRouter.post('/',
 
 blogRouter.post('/:id/posts',
     postValidateForBlog,
-    mongoIdMiddleware,
-    foundBlogForCreatePost,
     async (req: RequestWithBodyAndParams<URIParamsId, CreateModelPostForBlog>, res: Response<PostViewModel>) => {
         const idPost = await blogsService.createPostForBlog(req.params.id, req.body)
         const foundNewPost = await postsQueryRepository.findPost(idPost)
@@ -64,7 +63,7 @@ blogRouter.post('/:id/posts',
 blogRouter.get('/:id',
     mongoIdMiddleware,
     async (req: RequestWithParams<URIParamsId>, res: Response<BlogViewModel>) => {
-    const foundBlog = await blogsQueryRepository.findBlog(req.params.id)
+    const foundBlog = await blogsQueryRepository.findBlog(formatIdInObjectId(req.params.id))
     if (foundBlog) {
         res.send(foundBlog)
     } else {

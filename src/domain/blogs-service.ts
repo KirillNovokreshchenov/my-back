@@ -1,6 +1,6 @@
 import {blogsRepository} from "../repositories/blogs-repository";
 import {CreateAndUpdateBlogInputModel} from "../models/blog-models/CreateAndUpdateBlogInputModel";
-import {filterProperties} from "../helpers/blog-helpers/filterProperties";
+
 import {ObjectId} from "mongodb";
 import {CreateModelPostForBlog} from "../models/blog-models/CreateModelPostForBlog";
 import {findBlogName} from "../helpers/post-helpers/findBlogName";
@@ -36,9 +36,8 @@ export const blogsService = {
 
     },
 
-    async  updateBlog(id: string,{name, description, websiteUrl, ...optionalProperties}: CreateAndUpdateBlogInputModel): Promise<boolean>{
-        const optionalPropertiesIsValid = filterProperties(optionalProperties)
-        return await blogsRepository.updateBlog(id, name, description, websiteUrl, optionalPropertiesIsValid)
+    async  updateBlog(id: string,{name, description, websiteUrl, createdAt}: CreateAndUpdateBlogInputModel): Promise<boolean>{
+        return await blogsRepository.updateBlog(id, name, description, websiteUrl, createdAt)
     },
 
     async  deleteBlog(id: string) : Promise<boolean> {

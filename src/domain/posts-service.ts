@@ -1,7 +1,6 @@
 import {PostType} from "../db/db-posts-type";
 import {findBlogName} from "../helpers/post-helpers/findBlogName";
 import {CreateAndUpdatePostModel} from "../models/post-models/CreateAndUpdatePostModel";
-import {filterProperties} from "../helpers/blog-helpers/filterProperties";
 import {postsRepository} from "../repositories/posts-repository";
 import {ObjectId} from "mongodb";
 
@@ -24,9 +23,8 @@ export const postsService = {
 
     },
 
-    async updatePost(id: string, {title, shortDescription, content, ...optionalProperties}: CreateAndUpdatePostModel): Promise<boolean>{
-        const optionalPropertiesIsValid = filterProperties(optionalProperties)
-        return await postsRepository.updatePost(id, title, shortDescription, content,optionalPropertiesIsValid)
+    async updatePost(id: string, {title, shortDescription, content, createdAt}: CreateAndUpdatePostModel): Promise<boolean>{
+        return await postsRepository.updatePost(id, title, shortDescription, content, createdAt)
 
     },
     async deletePost(id: string): Promise<boolean> {

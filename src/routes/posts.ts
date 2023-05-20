@@ -7,9 +7,10 @@ import {postValidate} from "../middlewares/post-middleware";
 import {authorizationValidation} from "../middlewares/auth-middleware";
 import {postsService} from "../domain/posts-service";
 import {postsQueryRepository} from "../repositories/query-posts-repository";
-import {mongoIdMiddleware} from "../middlewares/objId-middleware";
+import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
 import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
 import {QueryModel} from "../models/QueryModel";
+import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 
 
 export const postRouter = Router()
@@ -30,7 +31,7 @@ postRouter.post('/',
 postRouter.get('/:id',
     mongoIdMiddleware,
     async (req: RequestWithParams<URIParamsId>, res: Response<PostViewModel>) => {
-    const foundPost = await postsQueryRepository.findPost(req.params.id)
+    const foundPost = await postsQueryRepository.findPost(formatIdInObjectId(req.params.id))
     if (foundPost) {
         res.send(foundPost)
     } else {

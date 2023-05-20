@@ -11,7 +11,6 @@ import {QueryModel} from "../models/QueryModel";
 export const postsQueryRepository = {
     async allPosts({sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<PostQueryViewModel> {
         const totalCount = await collectionPosts.countDocuments()
-
         return {
             pagesCount: pageCount(totalCount, +pageSize),
             page: +pageNumber,
@@ -22,33 +21,26 @@ export const postsQueryRepository = {
                 .skip(limitPages(+pageNumber, +pageSize))
                 .limit(+pageSize)
                 .map(post=>{
-                    const objId = new BSON.ObjectId(post._id)
-                    return {
-                        id: objId.toString(),
-                        title: post.title,
-                        shortDescription: post.shortDescription,
-                        content: post.content,
-                        blogId: post.blogId,
-                        blogName: post.blogName,
-                        createdAt: post.createdAt
-                    }
+                    return mapPost(post)
                 }).toArray()
         }
 
     },
-    async findPost(id: string | ObjectId): Promise<PostViewModel | null> {
-        const objId = new BSON.ObjectId(id)
-        const foundPost: PostType | null = await collectionPosts.findOne(objId)
+    async findPost(id: ObjectId): Promise<PostViewModel | null> {
+        const foundPost: PostType | null = await collectionPosts.findOne(id)
         if (!foundPost) return null
-        return {
-            id: objId.toString(),
-            title: foundPost.title,
-            shortDescription: foundPost.shortDescription,
-            content: foundPost.content,
-            blogId: foundPost.blogId,
-            blogName: foundPost.blogName,
-            createdAt: foundPost.createdAt,
-        }
+        return mapPost(foundPost)
 
     },
+}
+export function mapPost(post: PostType){
+    return {
+        id: post._id.toString(),
+        title: post.title,
+        shortDescription: post.shortDescription,
+        content: post.content,
+        blogId: post.blogId,
+        blogName: post.blogName,
+        createdAt: post.createdAt,
+    }
 }
