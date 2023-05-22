@@ -15,7 +15,8 @@ const post_middleware_1 = require("../middlewares/post-middleware");
 const auth_middleware_1 = require("../middlewares/auth-middleware");
 const posts_service_1 = require("../domain/posts-service");
 const query_posts_repository_1 = require("../repositories/query-posts-repository");
-const objId_middleware_1 = require("../middlewares/objId-middleware");
+const mongoIdMiddleware_1 = require("../middlewares/mongoIdMiddleware");
+const format_id_ObjectId_1 = require("../helpers/format-id-ObjectId");
 exports.postRouter = (0, express_1.Router)();
 exports.postRouter.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const allPosts = yield query_posts_repository_1.postsQueryRepository.allPosts(req.query);
@@ -26,8 +27,8 @@ exports.postRouter.post('/', post_middleware_1.postValidate, (req, res) => __awa
     const foundNewCreatePost = yield query_posts_repository_1.postsQueryRepository.findPost(objId);
     res.status(201).send(foundNewCreatePost);
 }));
-exports.postRouter.get('/:id', objId_middleware_1.mongoIdMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const foundPost = yield query_posts_repository_1.postsQueryRepository.findPost(req.params.id);
+exports.postRouter.get('/:id', mongoIdMiddleware_1.mongoIdMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const foundPost = yield query_posts_repository_1.postsQueryRepository.findPost((0, format_id_ObjectId_1.formatIdInObjectId)(req.params.id));
     if (foundPost) {
         res.send(foundPost);
     }
@@ -35,7 +36,7 @@ exports.postRouter.get('/:id', objId_middleware_1.mongoIdMiddleware, (req, res) 
         res.sendStatus(404);
     }
 }));
-exports.postRouter.put('/:id', post_middleware_1.postValidate, objId_middleware_1.mongoIdMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.postRouter.put('/:id', post_middleware_1.postValidate, mongoIdMiddleware_1.mongoIdMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const isUpdate = yield posts_service_1.postsService.updatePost(req.params.id, req.body);
     if (isUpdate) {
         res.sendStatus(204);
@@ -44,7 +45,7 @@ exports.postRouter.put('/:id', post_middleware_1.postValidate, objId_middleware_
         res.sendStatus(404);
     }
 }));
-exports.postRouter.delete('/:id', auth_middleware_1.authorizationValidation, objId_middleware_1.mongoIdMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.postRouter.delete('/:id', auth_middleware_1.authorizationValidation, mongoIdMiddleware_1.mongoIdMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const isDeleted = yield posts_service_1.postsService.deletePost(req.params.id);
     if (isDeleted) {
         res.sendStatus(204);

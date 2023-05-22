@@ -14,7 +14,9 @@ const express_validator_1 = require("express-validator");
 const auth_middleware_1 = require("./auth-middleware");
 const err_middleware_1 = require("./err-middleware");
 const db_1 = require("../db/db");
-const mongodb_1 = require("mongodb");
+const blog_middlewares_1 = require("./blog-middlewares");
+const mongoIdMiddleware_1 = require("./mongoIdMiddleware");
+const format_id_ObjectId_1 = require("../helpers/format-id-ObjectId");
 const titleValidation = (0, express_validator_1.body)('title')
     .isString()
     .trim()
@@ -46,11 +48,10 @@ const createdAtValidation = (0, express_validator_1.body)('createdAt')
     .withMessage('incorrect ISO date');
 const blogIdValidation = (0, express_validator_1.body)('blogId')
     .custom((value) => __awaiter(void 0, void 0, void 0, function* () {
-    const objId = new mongodb_1.BSON.ObjectId(value);
-    const foundBlog = yield db_1.collectionBlogs.findOne({ _id: objId });
+    const foundBlog = yield db_1.collectionBlogs.findOne({ _id: (0, format_id_ObjectId_1.formatIdInObjectId)(value) });
     if (!foundBlog) {
         throw new Error('incorrect blogId');
     }
 }));
 exports.postValidate = [auth_middleware_1.authorizationValidation, titleValidation, shortDescriptionValidation, contentValidation, createdAtValidation, blogIdValidation, err_middleware_1.errorsValidationMiddleware];
-exports.postValidateForBlog = [auth_middleware_1.authorizationValidation, titleValidation, shortDescriptionValidation, contentValidation, createdAtValidation, err_middleware_1.errorsValidationMiddleware];
+exports.postValidateForBlog = [auth_middleware_1.authorizationValidation, mongoIdMiddleware_1.mongoIdMiddleware, blog_middlewares_1.foundBlogForCreatePost, titleValidation, shortDescriptionValidation, contentValidation, createdAtValidation, err_middleware_1.errorsValidationMiddleware];

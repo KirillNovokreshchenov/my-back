@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.postsRepository = void 0;
 const db_1 = require("../db/db");
-const mongodb_1 = require("mongodb");
+const format_id_ObjectId_1 = require("../helpers/format-id-ObjectId");
 exports.postsRepository = {
     createPost(createPost) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -19,17 +19,15 @@ exports.postsRepository = {
             return createPost._id;
         });
     },
-    updatePost(id, title, shortDescription, content, optionalPropertiesIsValid) {
+    updatePost(id, title, shortDescription, content, createdAt) {
         return __awaiter(this, void 0, void 0, function* () {
-            const objId = new mongodb_1.BSON.ObjectId(id);
-            const result = yield db_1.collectionPosts.updateOne({ _id: objId }, { $set: Object.assign({ title, shortDescription, content }, optionalPropertiesIsValid) });
+            const result = yield db_1.collectionPosts.updateOne({ _id: (0, format_id_ObjectId_1.formatIdInObjectId)(id) }, createdAt ? { $set: { title, shortDescription, content, createdAt } } : { $set: { title, shortDescription, content } });
             return result.matchedCount === 1;
         });
     },
     deletePost(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const objId = new mongodb_1.BSON.ObjectId(id);
-            const result = yield db_1.collectionPosts.deleteOne({ _id: objId });
+            const result = yield db_1.collectionPosts.deleteOne({ _id: (0, format_id_ObjectId_1.formatIdInObjectId)(id) });
             return result.deletedCount === 1;
         });
     }

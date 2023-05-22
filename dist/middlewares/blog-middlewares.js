@@ -13,8 +13,8 @@ exports.blogValidate = exports.foundBlogForCreatePost = void 0;
 const express_validator_1 = require("express-validator");
 const err_middleware_1 = require("./err-middleware");
 const auth_middleware_1 = require("./auth-middleware");
-const mongodb_1 = require("mongodb");
 const db_1 = require("../db/db");
+const format_id_ObjectId_1 = require("../helpers/format-id-ObjectId");
 const nameValidation = (0, express_validator_1.body)('name')
     .isString()
     .withMessage('incorrect name, max length 15 symbols')
@@ -54,8 +54,7 @@ const createdAtValidation = (0, express_validator_1.body)('createdAt')
     .matches(/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/)
     .withMessage('incorrect ISO date');
 const foundBlogForCreatePost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const objId = new mongodb_1.BSON.ObjectId(req.params.id);
-    const foundBlog = yield db_1.collectionBlogs.findOne({ _id: objId });
+    const foundBlog = yield db_1.collectionBlogs.findOne({ _id: (0, format_id_ObjectId_1.formatIdInObjectId)(req.params.id) });
     if (!foundBlog) {
         res.sendStatus(404);
     }

@@ -2,7 +2,7 @@ import request from 'supertest'
 import {VideoCreateAndUpdateModel} from "../src/models/video-model/VideoCreateModel";
 import {VideoViewModel} from "../src/models/video-model/VideoViewModel";
 import {app} from "../src/app";
-import {errorsMessages} from "../src/models/error-model";
+import {errorsMessages} from "../src/models/ErrorModel";
 
 
 describe('/video', ()=>{

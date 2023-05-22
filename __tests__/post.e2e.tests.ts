@@ -1,7 +1,7 @@
 import request from 'supertest'
 import {app} from "../src/app";
-import {errorsMessages} from "../src/models/error-model";
-import {CreateAndUpdateBlogModel} from "../src/models/blog-models/CreateAndUpdateBlogModel";
+import {errorsMessages} from "../src/models/ErrorModel";
+import {CreateAndUpdateBlogInputModel} from "../src/models/blog-models/CreateAndUpdateBlogInputModel";
 import {BlogViewModel} from "../src/models/blog-models/BlogViewModel";
 import {CreateAndUpdatePostModel} from "../src/models/post-models/CreateAndUpdatePostModel";
 import {PostViewModel} from "../src/models/post-models/PostViewModel";
@@ -18,7 +18,13 @@ describe('/post', ()=>{
     it('should return 200 status and empty array',async()=>{
         await request(app)
             .get('/posts')
-            .expect(200, [])
+            .expect(200,   {
+                pagesCount: 0,
+                page: 1,
+                pageSize: 10,
+                totalCount: 0,
+                items: []
+            })
     })
 
     it('should return 404 status for not existing post',async()=>{
@@ -36,10 +42,11 @@ describe('/post', ()=>{
     let createdBlogForPosts: BlogViewModel;
 
     it('should create blog with correct input data for posts', async ()=>{
-        const data: CreateAndUpdateBlogModel = {
+        const data: CreateAndUpdateBlogInputModel = {
             name: 'babylon',
             description: 'Ancient Babylon blog',
-            websiteUrl: 'https://babylon.com'
+            websiteUrl: 'https://babylon.com',
+            createdAt: "2023-05-14T13:42:32.442Z"
         }
         const createResponse =  await request(app)
             .post('/blogs')
@@ -53,13 +60,21 @@ describe('/post', ()=>{
             id: expect.stringMatching(/[0-9]+/),
             name: 'babylon',
             description: 'Ancient Babylon blog',
-            websiteUrl: 'https://babylon.com'
+            websiteUrl: 'https://babylon.com',
+            createdAt: "2023-05-14T13:42:32.442Z",
+            isMembership: false
         })
 
 
         await request(app)
             .get('/blogs')
-            .expect(200, [createdBlogForPosts])
+            .expect(200,   {
+                pagesCount: 1,
+                page: 1,
+                pageSize: 10,
+                totalCount: 1,
+                items: [createdBlogForPosts]
+            })
     })
 
 
@@ -102,10 +117,11 @@ describe('/post', ()=>{
             ]
         };
         const data: CreateAndUpdatePostModel =
-            {"title": 'string',
+            {
+                "title": 'string',
                 "shortDescription": 'string',
                 "content": 'string',
-                "blogId": '-1'
+                "blogId": '507f1f77bcf86cd799439011'
             };
         await request(app)
             .post('/posts')
@@ -125,10 +141,12 @@ describe('/post', ()=>{
 
     it('should create post with correct input data', async ()=>{
         const dataOne: CreateAndUpdatePostModel =
-            {"title": 'Post1',
-            "shortDescription": 'shortDescriptionPost1',
-            "content": 'contentPost1',
-            "blogId": createdBlogForPosts.id
+            {
+                title: 'Post1',
+                shortDescription: 'shortDescriptionPost1',
+                content: 'contentPost1',
+                blogId: createdBlogForPosts.id,
+                createdAt: "2023-05-14T13:45:24.653Z"
             }
         const createResponse =  await request(app)
             .post('/posts')
@@ -144,14 +162,16 @@ describe('/post', ()=>{
             shortDescription: 'shortDescriptionPost1',
             content: 'contentPost1',
             blogId: createdBlogForPosts.id,
-            blogName: createdBlogForPosts.name
+            blogName: createdBlogForPosts.name,
+            createdAt: "2023-05-14T13:45:24.653Z",
+
         })
 
         const dataTwo: CreateAndUpdatePostModel =
-            {"title": 'Post2',
-            "shortDescription": 'shortDescriptionPost2',
-            "content": 'contentPost2',
-            "blogId": createdBlogForPosts.id
+            {title: 'Post2',
+            shortDescription: 'shortDescriptionPost2',
+            content: 'contentPost2',
+            blogId: createdBlogForPosts.id
             }
         const createResponseTwo =  await request(app)
             .post('/posts')
@@ -167,12 +187,19 @@ describe('/post', ()=>{
             shortDescription: 'shortDescriptionPost2',
             content: 'contentPost2',
             blogId: createdBlogForPosts.id,
-            blogName: createdBlogForPosts.name
+            blogName: createdBlogForPosts.name,
+            createdAt: expect.stringMatching(/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/)
         })
 
         await request(app)
             .get('/posts')
-            .expect(200, [createdPostOne, createdPostTwo])
+            .expect(200, {
+                pagesCount: 1,
+                page: 1,
+                pageSize: 10,
+                totalCount: 2,
+                items:[createdPostTwo, createdPostOne]
+            })
     })
 
     it('should return existing post', async ()=>{
@@ -195,9 +222,17 @@ describe('/post', ()=>{
     })
 
     it('should not update post that does not exist',async()=>{
+        const data1: CreateAndUpdatePostModel = {
+            title: 'Post1',
+            shortDescription: 'shortDescriptionPost1',
+            content: 'contentPost1',
+            blogId: createdBlogForPosts.id,
+            createdAt: "2023-05-14T13:45:24.653Z"
+        }
         await request(app)
-            .put('/blogs/-1')
+            .put('/posts/-1')
             .auth('admin','qwerty')
+            .send(data1)
             .expect(404)
     })
 
@@ -236,7 +271,7 @@ describe('/post', ()=>{
             "title": 'title',
             "shortDescription": 'shortDescription',
             "content": 'content',
-            "blogId": '-1'
+            "blogId": '507f1f77bcf86cd799439011'
         };
         const bodyError: errorsMessages = {
             "errorsMessages": [
@@ -295,7 +330,7 @@ describe('/post', ()=>{
     })
     it('should not deleted post that does not exist',async()=>{
         await request(app)
-            .put('/posts/-1')
+            .delete('/posts/507f1f77bcf86cd799439011')
             .auth('admin','qwerty')
             .expect(404)
     })
@@ -315,7 +350,13 @@ describe('/post', ()=>{
 
         await request(app)
             .get('/posts')
-            .expect(200, [])
+            .expect(200, {
+                pagesCount: 0,
+                page: 1,
+                pageSize: 10,
+                totalCount: 0,
+                items: []
+            })
     })
 
 })
