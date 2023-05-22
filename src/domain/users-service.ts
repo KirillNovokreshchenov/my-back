@@ -22,7 +22,9 @@ export const usersService = {
 
     async checkCredentials({loginOrEmail, password}: LoginModel): Promise<boolean> {
         const user = await usersRepository.findByLoginOrEmail(loginOrEmail)
-        return await bcrypt.compare(password, user!.password)
+        if (!user) return false
+
+        return await bcrypt.compare(password, user.password)
 
     },
 
