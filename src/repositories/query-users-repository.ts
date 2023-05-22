@@ -32,7 +32,7 @@ export const usersQueryRepository = {
             totalCount: totalCount,
             items: await collectionUsers
                 .find({
-                $and: [
+                $or: [
                     {login: {$regex: `${searchLoginTerm ? searchLoginTerm : ''}`, $options: 'i'}},
                     {email: {$regex: `${searchEmailTerm ? searchEmailTerm : ''}`, $options: 'i'}}
                 ]
