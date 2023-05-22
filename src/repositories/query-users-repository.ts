@@ -19,7 +19,7 @@ export const usersQueryRepository = {
                    }: UsersQueryInputModel): Promise<UsersQueryViewModel> {
 
         const totalCount = await collectionUsers.countDocuments({
-            $and: [
+            $or: [
                 {login: {$regex: `${searchLoginTerm ? searchLoginTerm : ''}`, $options: 'i'}},
                 {email: {$regex: `${searchEmailTerm ? searchEmailTerm : ''}`, $options: 'i'}}
             ]
