@@ -4,13 +4,16 @@ import {videoRouter} from "./routes/videos";
 import {testingRouter} from "./routes/testing";
 import {blogRouter} from "./routes/blogs";
 import {postRouter} from "./routes/posts";
+import {userRouter} from "./routes/users";
+import {authRouter} from "./routes/auth";
 
 export const app = express()
 export const bodyMiddleware = bodyParser()
 app.use(bodyMiddleware)
 
-
 app.use('/videos', videoRouter)
 app.use('/testing', testingRouter)
 app.use('/blogs', blogRouter)
 app.use('/posts', postRouter)
+app.use('/users',userRouter)
+app.use('/auth', authRouter)

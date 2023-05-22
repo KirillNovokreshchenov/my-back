@@ -4,6 +4,7 @@ import {authorizationValidation} from "./auth-middleware";
 import {NextFunction, Request, Response} from "express";
 import {BSON} from "mongodb";
 import {collectionBlogs} from "../db/db";
+import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 
 
 
@@ -47,8 +48,7 @@ const createdAtValidation = body('createdAt')
     .withMessage('incorrect ISO date')
 
 export const foundBlogForCreatePost = async (req: Request, res: Response, next: NextFunction)=>{
-    const objId =new BSON.ObjectId(req.params.id)
-    const foundBlog = await collectionBlogs.findOne({_id: objId});
+    const foundBlog = await collectionBlogs.findOne({_id: formatIdInObjectId(req.params.id)});
     if(!foundBlog){
         res.sendStatus(404)
     } else{
