@@ -18,12 +18,14 @@ export const usersQueryRepository = {
                        pageSize = 10
                    }: UsersQueryInputModel): Promise<UsersQueryViewModel> {
 
-        const totalCount = await collectionUsers.countDocuments({
-            $or: [
-                {login: {$regex: `${searchLoginTerm ? searchLoginTerm : ''}`, $options: 'i'}},
-                {email: {$regex: `${searchEmailTerm ? searchEmailTerm : ''}`, $options: 'i'}}
-            ]
-        })
+        const totalCount = await collectionUsers.countDocuments(searchLoginTerm && searchEmailTerm ?
+            {$or: [
+                    {login: {$regex: searchLoginTerm, $options: 'i'}},
+                    {email: {$regex: searchEmailTerm, $options: 'i'}}
+                ]}
+            : searchLoginTerm ? {login: {$regex: searchLoginTerm, $options: 'i'}}
+            : searchEmailTerm ? {email: {$regex: searchEmailTerm, $options: 'i'}}
+            : {})
 
         return {
             pagesCount: pageCount(totalCount, +pageSize),
@@ -31,16 +33,18 @@ export const usersQueryRepository = {
             pageSize: +pageSize,
             totalCount: totalCount,
             items: await collectionUsers
-                .find({
-                $or: [
-                    {login: {$regex: `${searchLoginTerm ? searchLoginTerm : ''}`, $options: 'i'}},
-                    {email: {$regex: `${searchEmailTerm ? searchEmailTerm : ''}`, $options: 'i'}}
-                ]
-            })
+                .find(searchLoginTerm && searchEmailTerm ?
+                    {$or: [
+                        {login: {$regex: searchLoginTerm, $options: 'i'}},
+                        {email: {$regex: searchEmailTerm, $options: 'i'}}
+                    ]}
+                    : searchLoginTerm ? {login: {$regex: searchLoginTerm, $options: 'i'}}
+                    : searchEmailTerm ? {email: {$regex: searchEmailTerm, $options: 'i'}}
+                    : {})
                 .sort({[sortBy]: sortDirection === 'asc' ? 1 : -1})
                 .skip(limitPages(+pageNumber, +pageSize))
                 .limit(+pageSize)
-                .map(user=>this._mapUser(user))
+                .map(user => this._mapUser(user))
                 .toArray()
         }
     },
