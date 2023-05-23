@@ -48,7 +48,7 @@ export const blogsQueryRepository = {
         const {sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10} = blogQuery
 
         const foundPosts: PostViewModel[] = await collectionPosts.find({blogId: id})
-            .sort({['sortBy']: sortDirection === 'asc'? 1: -1})
+            .sort({[sortBy]: sortDirection === 'asc'? 1: -1} as Sort)
             .skip(limitPages(+pageNumber, +pageSize))
             .limit(+pageSize)
             .map(post=>{
