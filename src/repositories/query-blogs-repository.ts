@@ -1,10 +1,10 @@
 import {BlogViewModel} from "../models/blog-models/BlogViewModel";
 import {collectionBlogs, collectionPosts} from "../db/db";
-import {BSON, FindCursor, ObjectId} from "mongodb";
+import {BSON, FindCursor, ObjectId, Sort} from "mongodb";
 import {BlogType} from "../db/db-blogs-type";
 import {PostType} from "../db/db-posts-type";
 import {PostViewModel} from "../models/post-models/PostViewModel";
-import {QueryModel} from "../models/QueryModel";
+import {QueryInputModel} from "../models/QueryInputModel";
 import {limitPages} from "../helpers/limitPages";
 import {BlogQueryViewModel} from "../models/blog-models/BlogQueryViewModel";
 import {pageCount} from "../helpers/pageCount";
@@ -13,7 +13,8 @@ import {mapPost} from "./query-posts-repository";
 
 export const blogsQueryRepository = {
 
-    async allBlogs({searchNameTerm = null, sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<BlogQueryViewModel> {
+    async allBlogs(query: QueryInputModel): Promise<BlogQueryViewModel> {
+        const {searchNameTerm = null, sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10} = query
 
         const totalCount = await collectionBlogs.countDocuments({name: {$regex: `${searchNameTerm ? searchNameTerm : ''}`, $options: 'i'}})
 
@@ -23,7 +24,7 @@ export const blogsQueryRepository = {
             pageSize: +pageSize,
             totalCount: totalCount,
             items: await collectionBlogs.find({name: {$regex: `${searchNameTerm ? searchNameTerm : ''}`, $options: 'i'}})
-                .sort({[sortBy]: sortDirection === 'asc'? 1: -1})
+                .sort({[sortBy]: sortDirection === 'asc'? 1: -1} as Sort)
                 .skip(limitPages(+pageNumber, +pageSize))
                 .limit(+pageSize)
                 .map(blog=>{
@@ -43,10 +44,11 @@ export const blogsQueryRepository = {
 
     },
 
-    async allPostsForBlog(id: string, {sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<PostQueryViewModel|null>{
+    async allPostsForBlog(id: string, blogQuery: QueryInputModel): Promise<PostQueryViewModel|null>{
+        const {sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10} = blogQuery
 
         const foundPosts: PostViewModel[] = await collectionPosts.find({blogId: id})
-            .sort({[sortBy]: sortDirection === 'asc'? 1: -1})
+            .sort({['sortBy']: sortDirection === 'asc'? 1: -1})
             .skip(limitPages(+pageNumber, +pageSize))
             .limit(+pageSize)
             .map(post=>{

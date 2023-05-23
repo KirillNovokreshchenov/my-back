@@ -9,13 +9,14 @@ import {authorizationValidation} from "../middlewares/auth-middleware";
 import {UsersQueryViewModel} from "../models/user-models/UsersQueryViewModel";
 import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
 import {URIParamsId} from "../models/URIParamsIdModel";
+import {UsersQueryInputModel} from "../models/user-models/UsersQueryInputModel";
 
 
 export const userRouter = Router()
 
 userRouter.get('/',
     authorizationValidation,
-    async (req: RequestWithQuery<any>, res: Response<UsersQueryViewModel>) => {
+    async (req: RequestWithQuery<UsersQueryInputModel>, res: Response<UsersQueryViewModel>) => {
         const allUsers = await usersQueryRepository.allUsers(req.query)
         res.send(allUsers)
     })

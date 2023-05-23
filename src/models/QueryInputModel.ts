@@ -1,6 +1,5 @@
-export type UsersQueryInputModel = {
-    searchLoginTerm?: string
-    searchEmailTerm?: string
+export type QueryInputModel = {
+    searchNameTerm?: string
     sortBy?: string
     sortDirection?: string
     pageNumber?: string

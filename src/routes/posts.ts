@@ -9,14 +9,14 @@ import {postsService} from "../domain/posts-service";
 import {postsQueryRepository} from "../repositories/query-posts-repository";
 import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
 import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
-import {QueryModel} from "../models/QueryModel";
+import {QueryInputModel} from "../models/QueryInputModel";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 
 
 
 export const postRouter = Router()
 
-postRouter.get('/', async (req: RequestWithQuery<QueryModel>, res: Response<PostQueryViewModel>) => {
+postRouter.get('/', async (req: RequestWithQuery<QueryInputModel>, res: Response<PostQueryViewModel>) => {
     const allPosts = await postsQueryRepository.allPosts(req.query)
     res.send(allPosts)
 })

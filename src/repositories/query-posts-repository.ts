@@ -1,15 +1,16 @@
 import {PostType} from "../db/db-posts-type";
-import {collectionBlogs, collectionPosts} from "../db/db";
-import {BSON, ObjectId} from "mongodb";
+import {collectionPosts} from "../db/db";
+import {ObjectId, Sort} from "mongodb";
 import {PostViewModel} from "../models/post-models/PostViewModel";
 import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
 import {pageCount} from "../helpers/pageCount";
 import {limitPages} from "../helpers/limitPages";
-import {QueryModel} from "../models/QueryModel";
+import {QueryInputModel} from "../models/QueryInputModel";
 
 
 export const postsQueryRepository = {
-    async allPosts({sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10}: QueryModel): Promise<PostQueryViewModel> {
+    async allPosts(query: QueryInputModel): Promise<PostQueryViewModel> {
+        const {sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10} = query
         const totalCount = await collectionPosts.countDocuments()
         return {
             pagesCount: pageCount(totalCount, +pageSize),
@@ -17,7 +18,7 @@ export const postsQueryRepository = {
             pageSize:+pageSize,
             totalCount: totalCount,
             items: await collectionPosts.find({})
-                .sort({[sortBy]: sortDirection === 'asc'? 1: -1})
+                .sort({[sortBy]: sortDirection === 'asc'? 1: -1} as Sort)
                 .skip(limitPages(+pageNumber, +pageSize))
                 .limit(+pageSize)
                 .map(post=>{

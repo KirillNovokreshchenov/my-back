@@ -1,6 +1,6 @@
-import {ObjectId} from "mongodb";
+import {ObjectId, Sort} from "mongodb";
 import {UserViewModel} from "../models/user-models/UserViewModel";
-import {collectionBlogs, collectionUsers} from "../db/db";
+import {collectionUsers} from "../db/db";
 import {UserType} from "../db/db-users-type";
 import {UsersQueryInputModel} from "../models/user-models/UsersQueryInputModel";
 import {UsersQueryViewModel} from "../models/user-models/UsersQueryViewModel";
@@ -9,23 +9,10 @@ import {limitPages} from "../helpers/limitPages";
 
 export const usersQueryRepository = {
 
-    async allUsers({
-                       searchLoginTerm = null,
-                       searchEmailTerm = null,
-                       sortBy = 'createdAt',
-                       sortDirection = 'desc',
-                       pageNumber = 1,
-                       pageSize = 10
-                   }: UsersQueryInputModel): Promise<UsersQueryViewModel> {
+    allUsers: async function (userQuery: UsersQueryInputModel): Promise<UsersQueryViewModel> {
+        const {searchLoginTerm =null, searchEmailTerm = null, sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10} = userQuery
 
-        const totalCount = await collectionUsers.countDocuments(searchLoginTerm && searchEmailTerm ?
-            {$or: [
-                    {login: {$regex: searchLoginTerm, $options: 'i'}},
-                    {email: {$regex: searchEmailTerm, $options: 'i'}}
-                ]}
-            : searchLoginTerm ? {login: {$regex: searchLoginTerm, $options: 'i'}}
-            : searchEmailTerm ? {email: {$regex: searchEmailTerm, $options: 'i'}}
-            : {})
+        const totalCount = await collectionUsers.countDocuments(this._sortedLoginEmail(searchLoginTerm, searchEmailTerm))
 
         return {
             pagesCount: pageCount(totalCount, +pageSize),
@@ -33,15 +20,8 @@ export const usersQueryRepository = {
             pageSize: +pageSize,
             totalCount: totalCount,
             items: await collectionUsers
-                .find(searchLoginTerm && searchEmailTerm ?
-                    {$or: [
-                        {login: {$regex: searchLoginTerm, $options: 'i'}},
-                        {email: {$regex: searchEmailTerm, $options: 'i'}}
-                    ]}
-                    : searchLoginTerm ? {login: {$regex: searchLoginTerm, $options: 'i'}}
-                    : searchEmailTerm ? {email: {$regex: searchEmailTerm, $options: 'i'}}
-                    : {})
-                .sort({[sortBy]: sortDirection === 'asc' ? 1 : -1})
+                .find(this._sortedLoginEmail(searchLoginTerm, searchEmailTerm))
+                .sort({[sortBy]: sortDirection === 'asc' ? 1 : -1}as Sort)
                 .skip(limitPages(+pageNumber, +pageSize))
                 .limit(+pageSize)
                 .map(user => this._mapUser(user))
@@ -62,5 +42,17 @@ export const usersQueryRepository = {
             email: user.email,
             createdAt: user.createdAt
         }
+    },
+    _sortedLoginEmail(searchLoginTerm: string|null|undefined, searchEmailTerm: string|null|undefined){
+        return searchLoginTerm && searchEmailTerm ?
+            {
+                $or: [
+                    {login: {$regex: searchLoginTerm, $options: 'i'}},
+                    {email: {$regex: searchEmailTerm, $options: 'i'}}
+                ]
+            }
+            : searchLoginTerm ? {login: {$regex: searchLoginTerm, $options: 'i'}}
+            : searchEmailTerm ? {email: {$regex: searchEmailTerm, $options: 'i'}}
+            : {}
     }
 }
