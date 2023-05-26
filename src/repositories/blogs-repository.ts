@@ -1,11 +1,12 @@
 import {collectionBlogs, collectionPosts} from "../db/db";
 import {BSON, ObjectId} from "mongodb";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
+import {BlogType} from "../db/db-blogs-type";
 
 
 export const blogsRepository = {
 
-    async createBlog(newBlog: any): Promise<ObjectId>{
+    async createBlog(newBlog: BlogType): Promise<ObjectId>{
         await collectionBlogs.insertOne(newBlog)
         return newBlog._id
     },

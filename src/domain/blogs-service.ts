@@ -5,6 +5,7 @@ import {ObjectId} from "mongodb";
 import {CreateModelPostForBlog} from "../models/blog-models/CreateModelPostForBlog";
 import {collectionBlogs} from "../db/db";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
+import {BlogType} from "../db/db-blogs-type";
 
 
 
@@ -13,13 +14,15 @@ export const blogsService = {
 
     async createBlog({name, description, websiteUrl, createdAt}: CreateAndUpdateBlogInputModel): Promise<ObjectId>{
 
-        const newBlog = {
+        const newBlog:BlogType = {
+            _id:new ObjectId(),
             name: name,
             description: description,
             websiteUrl: websiteUrl,
             createdAt: createdAt || new Date().toISOString(),
             isMembership: false
         }
+
          return await blogsRepository.createBlog(newBlog)
 
 
