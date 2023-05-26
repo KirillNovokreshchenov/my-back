@@ -8,15 +8,16 @@ import {authorizationValidation} from "../middlewares/auth-middleware";
 import {postsService} from "../domain/posts-service";
 import {postsQueryRepository} from "../repositories/query-posts-repository";
 import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
-import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
 import {QueryInputModel} from "../models/QueryInputModel";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
+import {QueryViewModel} from "../models/QueryViewModel";
+import {BlogViewModel} from "../models/blog-models/BlogViewModel";
 
 
 
 export const postRouter = Router()
 
-postRouter.get('/', async (req: RequestWithQuery<QueryInputModel>, res: Response<PostQueryViewModel>) => {
+postRouter.get('/', async (req: RequestWithQuery<QueryInputModel>, res: Response<QueryViewModel<PostViewModel>>) => {
     const allPosts = await postsQueryRepository.allPosts(req.query)
     res.send(allPosts)
 })

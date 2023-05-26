@@ -3,14 +3,16 @@ import {CreateAndUpdateBlogInputModel} from "../models/blog-models/CreateAndUpda
 
 import {ObjectId} from "mongodb";
 import {CreateModelPostForBlog} from "../models/blog-models/CreateModelPostForBlog";
-import {findBlogName} from "../helpers/post-helpers/findBlogName";
-import {postsRepository} from "../repositories/posts-repository";
+import {collectionBlogs} from "../db/db";
+import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
+
 
 
 
 export const blogsService = {
 
     async createBlog({name, description, websiteUrl, createdAt}: CreateAndUpdateBlogInputModel): Promise<ObjectId>{
+
         const newBlog = {
             name: name,
             description: description,
@@ -23,12 +25,13 @@ export const blogsService = {
 
     },
     async createPostForBlog(id:string, {title, shortDescription, content, createdAt}: CreateModelPostForBlog): Promise<ObjectId>{
+        const foundBlogName = await collectionBlogs.findOne({_id: formatIdInObjectId(id)})
         const newPost = {
             title: title,
             shortDescription: shortDescription,
             content: content,
             blogId: id,
-            blogName: await findBlogName(id),
+            blogName: foundBlogName!.name,
             createdAt: createdAt || new Date().toISOString(),
             isMembership: false
         }

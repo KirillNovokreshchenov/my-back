@@ -3,13 +3,13 @@ import {UserViewModel} from "../models/user-models/UserViewModel";
 import {collectionUsers} from "../db/db";
 import {UserType} from "../db/db-users-type";
 import {UsersQueryInputModel} from "../models/user-models/UsersQueryInputModel";
-import {UsersQueryViewModel} from "../models/user-models/UsersQueryViewModel";
 import {pageCount} from "../helpers/pageCount";
 import {limitPages} from "../helpers/limitPages";
+import {QueryViewModel} from "../models/QueryViewModel";
 
 export const usersQueryRepository = {
 
-    allUsers: async function (userQuery: UsersQueryInputModel): Promise<UsersQueryViewModel> {
+    allUsers: async function (userQuery: UsersQueryInputModel): Promise<QueryViewModel<UserViewModel>> {
         const {searchLoginTerm =null, searchEmailTerm = null, sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10} = userQuery
 
         const totalCount = await collectionUsers.countDocuments(this._sortedLoginEmail(searchLoginTerm, searchEmailTerm))

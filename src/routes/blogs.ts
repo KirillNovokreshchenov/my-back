@@ -19,22 +19,21 @@ import {postsQueryRepository} from "../repositories/query-posts-repository";
 import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
 import {postValidateForBlog} from "../middlewares/post-middleware";
 import {QueryInputModel} from "../models/QueryInputModel";
-import {BlogQueryViewModel} from "../models/blog-models/BlogQueryViewModel";
-import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
+import {QueryViewModel} from "../models/QueryViewModel";
 
 
 export const blogRouter = Router()
 
 
-blogRouter.get('/', async (req: RequestWithQuery<QueryInputModel>, res: Response<BlogQueryViewModel>) => {
+blogRouter.get('/', async (req: RequestWithQuery<QueryInputModel>, res: Response<QueryViewModel<BlogViewModel>>) => {
     const allBlogs =  await blogsQueryRepository.allBlogs(req.query)
     res.json(allBlogs)
 })
 
 blogRouter.get('/:id/posts',
     mongoIdMiddleware,
-    async (req: RequestWithQueryAndParams<URIParamsId, QueryInputModel>, res: Response<PostQueryViewModel>)=>{
+    async (req: RequestWithQueryAndParams<URIParamsId, QueryInputModel>, res: Response<QueryViewModel<PostViewModel>>)=>{
     const allPostsForBlog= await blogsQueryRepository.allPostsForBlog(req.params.id, req.query)
     if (!allPostsForBlog) {
         res.sendStatus(404)

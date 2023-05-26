@@ -1,19 +1,17 @@
 import {BlogViewModel} from "../models/blog-models/BlogViewModel";
 import {collectionBlogs, collectionPosts} from "../db/db";
-import {BSON, FindCursor, ObjectId, Sort} from "mongodb";
+import {ObjectId, Sort} from "mongodb";
 import {BlogType} from "../db/db-blogs-type";
-import {PostType} from "../db/db-posts-type";
 import {PostViewModel} from "../models/post-models/PostViewModel";
 import {QueryInputModel} from "../models/QueryInputModel";
 import {limitPages} from "../helpers/limitPages";
-import {BlogQueryViewModel} from "../models/blog-models/BlogQueryViewModel";
 import {pageCount} from "../helpers/pageCount";
-import {PostQueryViewModel} from "../models/post-models/PostQueryViewModel";
 import {mapPost} from "./query-posts-repository";
+import {QueryViewModel} from "../models/QueryViewModel";
 
 export const blogsQueryRepository = {
 
-    async allBlogs(query: QueryInputModel): Promise<BlogQueryViewModel> {
+    async allBlogs(query: QueryInputModel): Promise<QueryViewModel<BlogViewModel>> {
         const {searchNameTerm = null, sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10} = query
 
         const totalCount = await collectionBlogs.countDocuments({name: {$regex: `${searchNameTerm ? searchNameTerm : ''}`, $options: 'i'}})
@@ -44,7 +42,7 @@ export const blogsQueryRepository = {
 
     },
 
-    async allPostsForBlog(id: string, blogQuery: QueryInputModel): Promise<PostQueryViewModel|null>{
+    async allPostsForBlog(id: string, blogQuery: QueryInputModel): Promise<QueryViewModel<PostViewModel>|null>{
         const {sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10} = blogQuery
 
         const foundPosts: PostViewModel[] = await collectionPosts.find({blogId: id})
