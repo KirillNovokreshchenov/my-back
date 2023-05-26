@@ -4,7 +4,7 @@ import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 import {UserType} from "../db/db-users-type";
 
 export const usersRepository = {
-    async createUser(newUser: any): Promise<ObjectId> {
+    async createUser(newUser: UserType): Promise<ObjectId> {
         await collectionUsers.insertOne(newUser)
         return newUser._id
     },

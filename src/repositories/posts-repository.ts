@@ -6,7 +6,7 @@ import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 
 export const postsRepository = {
 
-    async createPost(createPost: any): Promise<ObjectId>{
+    async createPost(createPost: PostType): Promise<ObjectId>{
         await collectionPosts.insertOne(createPost)
         return createPost._id
 

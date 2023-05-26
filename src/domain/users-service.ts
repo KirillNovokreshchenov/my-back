@@ -3,11 +3,13 @@ import {ObjectId} from "mongodb";
 import bcrypt from 'bcrypt'
 import {usersRepository} from "../repositories/users-repository";
 import {LoginModel} from "../models/auth-models/LoginModel";
+import {UserType} from "../db/db-users-type";
 
 export const usersService = {
     async createUser({login, email, password}: CreateUserInputModel): Promise<ObjectId> {
         const passwordHash = await this._generateHash(password)
-        const newUser = {
+        const newUser: UserType = {
+            _id: new ObjectId(),
             login: login,
             email,
             password: passwordHash,

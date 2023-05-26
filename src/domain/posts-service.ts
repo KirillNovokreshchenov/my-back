@@ -4,6 +4,7 @@ import {postsRepository} from "../repositories/posts-repository";
 import {ObjectId} from "mongodb";
 import {collectionBlogs} from "../db/db";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
+import {PostType} from "../db/db-posts-type";
 
 
 export const postsService = {
@@ -12,7 +13,8 @@ export const postsService = {
 
         const foundBlogName = await collectionBlogs.findOne({_id: formatIdInObjectId(blogId)})
 
-        const createPost= {
+        const createPost: PostType = {
+            _id: new ObjectId(),
             title: title,
             shortDescription: shortDescription,
             content: content,
