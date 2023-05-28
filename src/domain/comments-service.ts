@@ -24,7 +24,8 @@ export const commentsService = {
                 userId: _id.toString(),
                 userLogin: login,
             },
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            postId: isExistingPost.id
         }
 
         return commentsRepository.createComment(newComment)

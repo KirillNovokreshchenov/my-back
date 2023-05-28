@@ -17,11 +17,13 @@ export const queryCommentsRepository = {
 
     async getComments(id: string, query: CommentsQueryInputModel): Promise<QueryViewModel<CommentViewModel> | null> {
         const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10} = query
+
         const post = await collectionPosts.findOne(formatIdInObjectId(id))
 
         if (!post) return null
 
-        const totalCount = await collectionComments.countDocuments()
+        const totalCount = await collectionComments.countDocuments({postId: post._id.toString()})
+
         return {
             pagesCount: pageCount(totalCount, +pageSize),
             page: +pageNumber,

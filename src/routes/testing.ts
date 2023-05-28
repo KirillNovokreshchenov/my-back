@@ -12,7 +12,7 @@ testingRouter.delete('/all-data', async (req: Request, res: Response)=>{
     const promiseUsers = collectionUsers.deleteMany({})
     const promiseComments = collectionComments.deleteMany({})
 
-    await Promise.all([promiseBlogs, promisePosts, promiseUsers, promiseComments])
+    Promise.all([promiseBlogs, promisePosts, promiseUsers, promiseComments])
         .catch((err) => {
             console.error(err);
         });
