@@ -19,7 +19,8 @@ exports.testingRouter.delete('/all-data', (req, res) => __awaiter(void 0, void 0
     const promiseBlogs = db_1.collectionBlogs.deleteMany({});
     const promisePosts = db_1.collectionPosts.deleteMany({});
     const promiseUsers = db_1.collectionUsers.deleteMany({});
-    Promise.all([promiseBlogs, promisePosts, promiseUsers])
+    const promiseComments = db_1.collectionComments.deleteMany({});
+    Promise.all([promiseBlogs, promisePosts, promiseUsers, promiseComments])
         .catch((err) => {
         console.error(err);
     });
