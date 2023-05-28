@@ -18,7 +18,9 @@ export const queryCommentsRepository = {
     async getComments(id: string, query: CommentsQueryInputModel): Promise<QueryViewModel<CommentViewModel> | null> {
         const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10} = query
         const post = await collectionPosts.findOne(formatIdInObjectId(id))
+
         if (!post) return null
+
         const totalCount = await collectionComments.countDocuments()
         return {
             pagesCount: pageCount(totalCount, +pageSize),
