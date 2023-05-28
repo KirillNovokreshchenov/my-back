@@ -1,3 +1,3 @@
 export function limitPages(pageNumber:number, pageSize: number){
-    return (+pageNumber-1)*(+pageSize)
+    return (pageNumber-1)*(pageSize)
 }

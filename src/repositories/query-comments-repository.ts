@@ -29,7 +29,7 @@ export const queryCommentsRepository = {
             page: +pageNumber,
             pageSize:+pageSize,
             totalCount: totalCount,
-            items: await collectionComments.find({})
+            items: await collectionComments.find({postId: post._id.toString()})
                 .sort({[sortBy]: sortDirection === 'asc'? 1: -1} as Sort)
                 .skip(limitPages(+pageNumber, +pageSize))
                 .limit(+pageSize)
