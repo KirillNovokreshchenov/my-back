@@ -21,6 +21,7 @@ const auth_jwt_middleware_1 = require("../middlewares/auth-jwt-middleware");
 const comment_middleware_1 = require("../middlewares/comment-middleware");
 const comments_service_1 = require("../domain/comments-service");
 const query_comments_repository_1 = require("../repositories/query-comments-repository");
+const err_middleware_1 = require("../middlewares/err-middleware");
 exports.postRouter = (0, express_1.Router)();
 exports.postRouter.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const allPosts = yield query_posts_repository_1.postsQueryRepository.allPosts(req.query);
@@ -58,14 +59,14 @@ exports.postRouter.delete('/:id', auth_middleware_1.authorizationValidation, mon
         res.sendStatus(404);
     }
 }));
-exports.postRouter.post('/:id/comments', auth_jwt_middleware_1.jwtMiddleware, mongoIdMiddleware_1.mongoIdMiddleware, comment_middleware_1.contentValidation, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.postRouter.post('/:id/comments', auth_jwt_middleware_1.jwtMiddleware, mongoIdMiddleware_1.mongoIdMiddleware, comment_middleware_1.contentValidation, err_middleware_1.errorsValidationMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const commentId = yield comments_service_1.commentsService.createComment(req.params.id, req.user, req.body.content);
     if (!commentId) {
         res.sendStatus(404);
     }
     else {
         const newComment = yield query_comments_repository_1.queryCommentsRepository.findComment(commentId);
-        res.send(newComment);
+        res.status(201).send(newComment);
     }
 }));
 exports.postRouter.get('/:id/comments', (req, res) => __awaiter(void 0, void 0, void 0, function* () {

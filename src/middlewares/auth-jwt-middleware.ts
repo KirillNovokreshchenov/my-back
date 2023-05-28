@@ -21,6 +21,7 @@ export const jwtMiddleware = async(req: Request, res: Response, next: NextFuncti
         next()
     } else {
         res.sendStatus(401)
+        return
     }
 
 

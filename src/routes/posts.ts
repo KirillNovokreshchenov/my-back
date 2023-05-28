@@ -25,6 +25,7 @@ import {CommentType} from "../db/db-comments-type";
 import {CommentViewModel} from "../models/comment-models/CommentViewModel";
 import {CommentCreateAndUpdateModel} from "../models/comment-models/CommentCreateAndUpdateModel";
 import {CommentsQueryInputModel} from "../models/comment-models/CommentsQueryInputModel";
+import {errorsValidationMiddleware} from "../middlewares/err-middleware";
 
 
 export const postRouter = Router()
@@ -82,13 +83,14 @@ postRouter.post('/:id/comments',
     jwtMiddleware,
     mongoIdMiddleware,
     contentValidation,
+    errorsValidationMiddleware,
     async (req: RequestWithBodyAndParams<URIParamsId, CommentCreateAndUpdateModel>, res: Response<CommentViewModel>) => {
         const commentId = await commentsService.createComment(req.params.id, req.user!, req.body.content)
         if(!commentId){
             res.sendStatus(404)
         } else{
             const newComment = await queryCommentsRepository.findComment(commentId)
-            res.send(newComment!)
+            res.status(201).send(newComment!)
         }
     })
 

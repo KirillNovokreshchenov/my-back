@@ -9,6 +9,7 @@ import {jwtMiddleware} from "../middlewares/auth-jwt-middleware";
 import {contentValidation} from "../middlewares/comment-middleware";
 import {CommentCreateAndUpdateModel} from "../models/comment-models/CommentCreateAndUpdateModel";
 import {commentsService, ResponseOptions} from "../domain/comments-service";
+import {errorsValidationMiddleware} from "../middlewares/err-middleware";
 
 
 export const commentRouter = Router()
@@ -28,6 +29,7 @@ commentRouter.put('/:id',
     jwtMiddleware,
     mongoIdMiddleware,
     contentValidation,
+    errorsValidationMiddleware,
     async (req: RequestWithBodyAndParams<URIParamsId, CommentCreateAndUpdateModel>, res: Response)=>{
     const isUpdate = await commentsService.updateComment(req.params.id, req.body.content, req.user!._id)
         switch (isUpdate) {
