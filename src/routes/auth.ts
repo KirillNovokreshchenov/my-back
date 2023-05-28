@@ -6,13 +6,14 @@ import {loginValidation} from "../middlewares/login-middleware";
 import {jwtService} from "../application/jwt-service";
 import {jwtMiddleware} from "../middlewares/auth-jwt-middleware";
 import {usersQueryRepository} from "../repositories/query-users-repository";
+import {JWTtokenViewModel} from "../models/auth-models/JWTtokenViewModel";
 
 
 export const authRouter = Router()
 
 authRouter.post('/login',
     loginValidation,
-    async (req: RequestWithBody<LoginModel>, res: Response) => {
+    async (req: RequestWithBody<LoginModel>, res: Response<JWTtokenViewModel>) => {
         const userId = await usersService.checkCredentials(req.body)
         if (userId) {
             const token = await jwtService.createJWT(userId)
