@@ -1,6 +1,6 @@
 import {Request, Response, Router} from "express";
 import {VideoViewModel} from "../models/video-model/VideoViewModel";
-import {RequestWithBody, RequestWithBodyAndParams, RequestWithParams} from "../types";
+import {RequestWithBody, RequestWithBodyAndParams, RequestWithParams} from "../types/types";
 import {URIParamsId} from "../models/URIParamsIdModel";
 import {VideoCreateAndUpdateModel} from "../models/video-model/VideoCreateModel";
 import {validation} from "../helpers/videoHelpers/validation";

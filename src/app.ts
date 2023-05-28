@@ -6,6 +6,7 @@ import {blogRouter} from "./routes/blogs";
 import {postRouter} from "./routes/posts";
 import {userRouter} from "./routes/users";
 import {authRouter} from "./routes/auth";
+import {commentRouter} from "./routes/comments";
 
 export const app = express()
 export const bodyMiddleware = bodyParser()
@@ -17,3 +18,4 @@ app.use('/blogs', blogRouter)
 app.use('/posts', postRouter)
 app.use('/users',userRouter)
 app.use('/auth', authRouter)
+app.use('/comments', commentRouter)

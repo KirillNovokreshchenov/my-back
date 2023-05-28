@@ -1,6 +1,6 @@
 import {Response, Router} from "express";
 import {userValidation} from "../middlewares/user-middleware";
-import {RequestWithBody, RequestWithParams, RequestWithQuery} from "../types";
+import {RequestWithBody, RequestWithParams, RequestWithQuery} from "../types/types";
 import {CreateUserInputModel} from "../models/user-models/CreateUserInputModel";
 import {UserViewModel} from "../models/user-models/UserViewModel";
 import {usersService} from "../domain/users-service";

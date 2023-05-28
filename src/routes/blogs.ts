@@ -5,7 +5,7 @@ import {
     RequestWithParams,
     RequestWithQuery,
     RequestWithQueryAndParams
-} from "../types";
+} from "../types/types";
 import {URIParamsId} from "../models/URIParamsIdModel";
 import {blogsService} from "../domain/blogs-service";
 import {CreateAndUpdateBlogInputModel} from "../models/blog-models/CreateAndUpdateBlogInputModel";

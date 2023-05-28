@@ -4,6 +4,7 @@ import {PostType} from "./db-posts-type";
 
 import * as dotenv from 'dotenv'
 import {UserType} from "./db-users-type";
+import {CommentType} from "./db-comments-type";
 dotenv.config()
 
 const uri = process.env.MONGO_URI
@@ -17,6 +18,7 @@ const db = client.db('')
 export const collectionBlogs = db.collection<BlogType>('blogs')
 export const collectionPosts = db.collection<PostType>('posts')
 export const collectionUsers = db.collection<UserType>('users')
+export const collectionComments = db.collection<CommentType>('comments')
 
 
 export async function runDB() {

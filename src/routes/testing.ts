@@ -1,5 +1,5 @@
 import {Request, Response, Router} from "express";
-import {collectionBlogs, collectionPosts, collectionUsers} from "../db/db";
+import {collectionBlogs, collectionComments, collectionPosts, collectionUsers} from "../db/db";
 import {dbVideos} from "../db/db-videos";
 
 
@@ -10,6 +10,7 @@ testingRouter.delete('/all-data', async (req: Request, res: Response)=>{
     const promiseBlogs = collectionBlogs.deleteMany({});
     const promisePosts = collectionPosts.deleteMany({});
     const promiseUsers = collectionUsers.deleteMany({})
+    const promiseComments = collectionComments.deleteMany({})
 
     Promise.all([promiseBlogs, promisePosts, promiseUsers])
         .catch((err) => {

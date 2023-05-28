@@ -34,6 +34,16 @@ export const usersQueryRepository = {
         return this._mapUser(foundUser!)
 
     },
+    async findUserWithToken(id:ObjectId){
+        const foundUser = await collectionUsers.findOne(id)
+        return  {
+            email: foundUser!.email,
+            login: foundUser!.login,
+            userId: foundUser!._id.toString()
+        }
+
+
+    },
 
     _mapUser(user: UserType) {
         return {
