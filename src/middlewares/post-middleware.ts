@@ -2,9 +2,6 @@ import {body, param} from "express-validator";
 import {authorizationValidation} from "./auth-middleware";
 import {errorsValidationMiddleware} from "./err-middleware";
 import {collectionBlogs} from "../db/db";
-import {BSON, ObjectId} from "mongodb";
-import {NextFunction, Request, Response} from "express";
-import {foundBlogForCreatePost} from "./blog-middlewares";
 import {mongoIdMiddleware} from "./mongoIdMiddleware";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 
@@ -53,4 +50,4 @@ const blogIdValidation = body('blogId')
 
 export const postValidate = [authorizationValidation, titleValidation, shortDescriptionValidation, contentValidation, createdAtValidation, blogIdValidation, errorsValidationMiddleware]
 
-export const postValidateForBlog = [authorizationValidation, mongoIdMiddleware, foundBlogForCreatePost, titleValidation, shortDescriptionValidation, contentValidation, createdAtValidation, errorsValidationMiddleware]
+export const postValidateForBlog = [authorizationValidation, mongoIdMiddleware, titleValidation, shortDescriptionValidation, contentValidation, createdAtValidation, errorsValidationMiddleware]

@@ -27,14 +27,17 @@ export const blogsService = {
 
 
     },
-    async createPostForBlog(id:string, {title, shortDescription, content, createdAt}: CreateModelPostForBlog): Promise<ObjectId>{
+    async createPostForBlog(id:string, {title, shortDescription, content, createdAt}: CreateModelPostForBlog): Promise<ObjectId|null>{
         const foundBlogName = await collectionBlogs.findOne({_id: formatIdInObjectId(id)})
+        if(!foundBlogName){
+            return null
+        }
         const newPost = {
             title: title,
             shortDescription: shortDescription,
             content: content,
             blogId: id,
-            blogName: foundBlogName!.name,
+            blogName: foundBlogName.name,
             createdAt: createdAt || new Date().toISOString(),
             isMembership: false
         }

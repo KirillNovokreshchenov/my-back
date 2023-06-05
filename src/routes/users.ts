@@ -1,7 +1,7 @@
 import {Response, Router} from "express";
 import {userValidation} from "../middlewares/user-middleware";
 import {RequestWithBody, RequestWithParams, RequestWithQuery} from "../types/types";
-import {CreateUserInputModel} from "../models/user-models/CreateUserInputModel";
+import {UserInputModel} from "../models/user-models/UserInputModel";
 import {UserViewModel} from "../models/user-models/UserViewModel";
 import {usersService} from "../domain/users-service";
 import {usersQueryRepository} from "../repositories/query-users-repository";
@@ -10,7 +10,6 @@ import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
 import {URIParamsId} from "../models/URIParamsIdModel";
 import {UsersQueryInputModel} from "../models/user-models/UsersQueryInputModel";
 import {QueryViewModel} from "../models/QueryViewModel";
-import {BlogViewModel} from "../models/blog-models/BlogViewModel";
 
 
 export const userRouter = Router()
@@ -24,7 +23,7 @@ userRouter.get('/',
 
 userRouter.post('/',
     userValidation,
-    async (req: RequestWithBody<CreateUserInputModel>, res: Response<UserViewModel>) => {
+    async (req: RequestWithBody<UserInputModel>, res: Response<UserViewModel>) => {
         const userObjectId = await usersService.createUser(req.body)
         const newUser = await usersQueryRepository.findUser(userObjectId)
         res.status(201).send(newUser)

@@ -133,7 +133,7 @@ describe('/post', ()=>{
     it('should return 200 status and empty array',async()=>{
         await request(app)
             .get('/posts')
-            .expect(200, [])
+            .expect(200, { pagesCount: 0, page: 1, pageSize: 10, totalCount: 0, items: [] })
     })
 
     let createdPostOne: PostViewModel;

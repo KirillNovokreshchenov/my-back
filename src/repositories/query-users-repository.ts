@@ -1,11 +1,12 @@
 import {ObjectId, Sort} from "mongodb";
 import {UserViewModel} from "../models/user-models/UserViewModel";
-import {collectionUsers} from "../db/db";
-import {UserType} from "../db/db-users-type";
+import {collectionEmailConfirmations, collectionUsers} from "../db/db";
+import {EmailConfirmationType, UserType} from "../db/db-users-type";
 import {UsersQueryInputModel} from "../models/user-models/UsersQueryInputModel";
 import {pageCount} from "../helpers/pageCount";
 import {limitPages} from "../helpers/limitPages";
 import {QueryViewModel} from "../models/QueryViewModel";
+import {DataViewByToken} from "../models/auth-models/DataViewByToken";
 
 export const usersQueryRepository = {
 
@@ -34,15 +35,20 @@ export const usersQueryRepository = {
         return this._mapUser(foundUser!)
 
     },
-    async findUserWithToken(id:ObjectId){
+    async findUserWithToken(id:ObjectId): Promise<DataViewByToken|null>{
         const foundUser = await collectionUsers.findOne(id)
+        if(!foundUser) return null
         return  {
-            email: foundUser!.email,
-            login: foundUser!.login,
-            userId: foundUser!._id.toString()
+            email: foundUser.email,
+            login: foundUser.login,
+            userId: foundUser._id.toString()
         }
 
 
+    },
+
+    async getEmailConfirmation(email: string): Promise<EmailConfirmationType|null>{
+        return await collectionEmailConfirmations.findOne({email: email})
     },
 
     _mapUser(user: UserType) {

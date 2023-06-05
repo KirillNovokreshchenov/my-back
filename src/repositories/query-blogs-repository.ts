@@ -25,9 +25,8 @@ export const blogsQueryRepository = {
                 .sort({[sortBy]: sortDirection === 'asc'? 1: -1} as Sort)
                 .skip(limitPages(+pageNumber, +pageSize))
                 .limit(+pageSize)
-                .map(blog=>{
-                    return mapBlog(blog)
-                }).toArray()
+                .map(blog => mapBlog(blog))
+                .toArray()
         }
     },
 

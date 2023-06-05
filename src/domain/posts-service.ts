@@ -9,9 +9,12 @@ import {PostType} from "../db/db-posts-type";
 
 export const postsService = {
 
-    async createPost({title, shortDescription, content, blogId, createdAt}: CreateAndUpdatePostModel): Promise<ObjectId>{
+    async createPost({title, shortDescription, content, blogId, createdAt}: CreateAndUpdatePostModel): Promise<ObjectId|null>{
 
         const foundBlogName = await collectionBlogs.findOne({_id: formatIdInObjectId(blogId)})
+        if(!foundBlogName){
+            return null
+        }
 
         const createPost: PostType = {
             _id: new ObjectId(),
@@ -19,7 +22,7 @@ export const postsService = {
             shortDescription: shortDescription,
             content: content,
             blogId: blogId,
-            blogName: foundBlogName!.name,
+            blogName: foundBlogName.name,
             createdAt: createdAt || new Date().toISOString(),
             isMembership: false
         }

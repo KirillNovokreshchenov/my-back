@@ -8,9 +8,12 @@ import {userRouter} from "./routes/users";
 import {authRouter} from "./routes/auth";
 import {commentRouter} from "./routes/comments";
 
+
+
 export const app = express()
-export const bodyMiddleware = bodyParser()
-app.use(bodyMiddleware)
+// export const bodyMiddleware = bodyParser()
+app.use(express.json())
+
 
 app.use('/videos', videoRouter)
 app.use('/testing', testingRouter)
@@ -19,3 +22,4 @@ app.use('/posts', postRouter)
 app.use('/users',userRouter)
 app.use('/auth', authRouter)
 app.use('/comments', commentRouter)
+

@@ -54,7 +54,9 @@ videoRouter.put('/:id([0-9]+)', (req: RequestWithBodyAndParams<URIParamsId, Vide
         }
     } else res.sendStatus(404)
 })
+
 videoRouter.delete('/:id([0-9]+)', (req: RequestWithParams<URIParamsId>, res: Response) => {
+
     if (dbVideos.videos.find(el => el.id === +req.params.id)) {
         dbVideos.videos = dbVideos.videos.filter(el => el.id !== +req.params.id)
         res.sendStatus(204)

@@ -18,12 +18,12 @@ const loginValidation = body('login')
         }
     })
 
-
 const passwordValidation = body('password')
     .isString()
     .trim()
     .notEmpty()
     .isLength({min: 6, max: 20})
+
 const emailValidation = body('email')
     .isString()
     .trim()
@@ -36,10 +36,18 @@ const emailValidation = body('email')
         }
     })
 
+export const emailValidationResending = body('email')
+    .isString()
+    .trim()
+    .notEmpty()
+    .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
+
+
+
 
 
 
 
 export const userValidation = [authorizationValidation, loginValidation, passwordValidation, emailValidation, errorsValidationMiddleware]
 
-
+export const userValidationByRegistration = [loginValidation, passwordValidation, emailValidation, errorsValidationMiddleware]

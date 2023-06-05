@@ -47,15 +47,6 @@ const createdAtValidation = body('createdAt')
     .matches(/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/)
     .withMessage('incorrect ISO date')
 
-export const foundBlogForCreatePost = async (req: Request, res: Response, next: NextFunction)=>{
-    const foundBlog = await collectionBlogs.findOne({_id: formatIdInObjectId(req.params.id)});
-    if(!foundBlog){
-        res.sendStatus(404)
-    } else{
-        next()
-    }
-
-}
 
 
 

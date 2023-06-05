@@ -39,8 +39,16 @@ postRouter.post('/',
     postValidate,
     async (req: RequestWithBody<CreateAndUpdatePostModel>, res: Response<PostViewModel>) => {
         const objId = await postsService.createPost(req.body)
+        if (!objId) {
+            res.sendStatus(500)
+            return
+        }
         const foundNewCreatePost = await postsQueryRepository.findPost(objId)
-        res.status(201).send(foundNewCreatePost!)
+        if (!foundNewCreatePost) {
+            res.sendStatus(500)
+            return
+        }
+        res.status(201).send(foundNewCreatePost)
     })
 
 postRouter.get('/:id',
@@ -85,18 +93,22 @@ postRouter.post('/:id/comments',
     contentValidation,
     errorsValidationMiddleware,
     async (req: RequestWithBodyAndParams<URIParamsId, CommentCreateAndUpdateModel>, res: Response<CommentViewModel>) => {
-        const commentId = await commentsService.createComment(req.params.id, req.user!, req.body.content)
-        if(!commentId){
+        if (!req.user) {
+            res.sendStatus(401)
+            return
+        }
+        const commentId = await commentsService.createComment(req.params.id, req.user, req.body.content)
+        if (!commentId) {
             res.sendStatus(404)
-        } else{
+        } else {
             const newComment = await queryCommentsRepository.findComment(commentId)
             res.status(201).send(newComment!)
         }
     })
 
-postRouter.get('/:id/comments', async(req: RequestWithQueryAndParams<URIParamsId, CommentsQueryInputModel>, res: Response<QueryViewModel<CommentViewModel>>)=>{
+postRouter.get('/:id/comments', async (req: RequestWithQueryAndParams<URIParamsId, CommentsQueryInputModel>, res: Response<QueryViewModel<CommentViewModel>>) => {
     const comments = await queryCommentsRepository.getComments(req.params.id, req.query)
-    if(!comments){
+    if (!comments) {
         res.sendStatus(404)
     } else {
         res.send(comments)
