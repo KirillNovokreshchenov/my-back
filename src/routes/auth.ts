@@ -9,8 +9,13 @@ import {usersQueryRepository} from "../repositories/query-users-repository";
 import {JWTtokenViewModel} from "../models/auth-models/JWTtokenViewModel";
 import {DataViewByToken} from "../models/auth-models/DataViewByToken";
 import {UserInputModel} from "../models/user-models/UserInputModel";
-import {emailValidationResending, userValidationByRegistration} from "../middlewares/user-middleware";
+import {
+    codeConfirmationValidation,
+    emailValidationResending,
+    userValidationByRegistration
+} from "../middlewares/user-middleware";
 import {CodeConfirmation, EmailType} from "../db/db-users-type";
+import {errorsValidationMiddleware} from "../middlewares/err-middleware";
 
 
 export const authRouter = Router()
@@ -58,7 +63,10 @@ authRouter.post('/registration',
 
 })
 
-authRouter.post('/registration-confirmation', async (req: RequestWithBody<CodeConfirmation>, res: Response)=>{
+authRouter.post('/registration-confirmation',
+    codeConfirmationValidation,
+    errorsValidationMiddleware,
+    async (req: RequestWithBody<CodeConfirmation>, res: Response)=>{
  const codeIsConfirmed = await usersService.confirmEmail(req.body.code)
     if(!codeIsConfirmed){
         res.sendStatus(400)
@@ -69,6 +77,7 @@ authRouter.post('/registration-confirmation', async (req: RequestWithBody<CodeCo
 
 authRouter.post('/registration-email-resending',
     emailValidationResending,
+    errorsValidationMiddleware,
     async (req: RequestWithBody<EmailType>, res: Response)=>{
     const emailResending = await usersService.emailResending(req.body.email)
         if(!emailResending){

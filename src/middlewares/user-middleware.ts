@@ -1,7 +1,7 @@
 import {body} from "express-validator";
 import {authorizationValidation} from "./auth-middleware";
 import {errorsValidationMiddleware} from "./err-middleware";
-import {collectionUsers} from "../db/db";
+import {collectionEmailConfirmations, collectionUsers} from "../db/db";
 
 
 
@@ -41,6 +41,17 @@ export const emailValidationResending = body('email')
     .trim()
     .notEmpty()
     .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
+
+export const codeConfirmationValidation = body('code')
+    .isString()
+    .trim()
+    .notEmpty()
+    .custom(async value =>{
+        const foundCode = await collectionEmailConfirmations.findOne({confirmationCode: value});
+        if(!foundCode) {
+            throw new Error('incorrect code')
+        }
+    })
 
 
 
