@@ -69,7 +69,14 @@ authRouter.post('/registration-confirmation',
     async (req: RequestWithBody<CodeConfirmation>, res: Response)=>{
  const codeIsConfirmed = await usersService.confirmEmail(req.body.code)
     if(!codeIsConfirmed){
-        res.sendStatus(400)
+        res.status(400).send({
+            "errorsMessages": [
+                {
+                    "message": "string",
+                    "field": "code"
+                }
+            ]
+        })
     } else {
         res.sendStatus(204)
     }
@@ -81,7 +88,14 @@ authRouter.post('/registration-email-resending',
     async (req: RequestWithBody<EmailType>, res: Response)=>{
     const emailResending = await usersService.emailResending(req.body.email)
         if(!emailResending){
-            res.sendStatus(400)
+            res.status(400).send({
+                "errorsMessages": [
+                    {
+                        "message": "string",
+                        "field": "email"
+                    }
+                ]
+            })
         } else{
             res.sendStatus(204)
         }

@@ -22,23 +22,14 @@ export const usersService = {
 
         const userId = await usersRepository.createUser(newUser)
 
-        const newEmailConfirmation: EmailConfirmationType = {
-            userId: userId,
-            email: newUser.email,
-            confirmationCode: uuid(),
-            expirationDate: add(new Date(), {
-                hours: 1,
-                minutes: 2
-            }),
-            isConfirmed: false
-        }
+        const newEmailConfirmation: EmailConfirmationType = await this._createEmailConfirmation(userId, newUser.email)
 
         await usersRepository.emailConfirmation(newEmailConfirmation)
 
         try {
             await emailManagers.emailRegistration(newEmailConfirmation)
             return true
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             await usersRepository.deleteUser(userId.toString())
             await usersRepository.deleteEmailConfirmation(userId)
@@ -66,18 +57,23 @@ export const usersService = {
         if (!codeIsExisting) return false
         if (codeIsExisting.expirationDate < new Date()) return false
         if (codeIsExisting.isConfirmed) return false
-       return await usersRepository.updateConfirm(code)
+        return await usersRepository.updateConfirm(code)
     },
 
-    async emailResending(email: string): Promise<boolean>{
+    async emailResending(email: string): Promise<boolean> {
         const emailConfirmation = await usersQueryRepository.getEmailConfirmation(email)
-        if(!emailConfirmation) return false
-        if(emailConfirmation.isConfirmed) return false
+        if (!emailConfirmation) return false
+        if (emailConfirmation.isConfirmed) return false
+
+        const newCode = uuid()
+        // const emailConfirmationChanged = await usersRepository.updateEmailConfirmationCode(emailConfirmation.userId, newCode)
+        // if(!emailConfirmationChanged) return false
 
         try {
-            await emailManagers.emailRegistration(emailConfirmation)
+            await usersRepository.updateEmailConfirmationCode(emailConfirmation.userId, newCode)
+            await emailManagers.emailRegistration({...emailConfirmation, confirmationCode: newCode})
             return true
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             return false
         }
@@ -97,6 +93,19 @@ export const usersService = {
             createdAt: new Date().toISOString()
         }
         return newUser
+    },
+
+    async _createEmailConfirmation(userId: ObjectId, email: string) {
+        return {
+            userId: userId,
+            email: email,
+            confirmationCode: uuid(),
+            expirationDate: add(new Date(), {
+                hours: 1,
+                minutes: 2
+            }),
+            isConfirmed: false
+        }
     }
 
 }

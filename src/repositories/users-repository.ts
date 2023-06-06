@@ -24,7 +24,11 @@ export const usersRepository = {
         return await collectionEmailConfirmations.findOne({confirmationCode: code})
     },
     async updateConfirm(code: string){
-        const result =await collectionEmailConfirmations.updateOne({confirmationCode:code}, {$set:{isConfirmed: true}})
+        const result = await collectionEmailConfirmations.updateOne({confirmationCode:code}, {$set:{isConfirmed: true}})
+        return result.modifiedCount === 1
+    },
+    async updateEmailConfirmationCode(id: ObjectId, newCode: string){
+        const result = await collectionEmailConfirmations.updateOne({userId: id}, {$set: {confirmationCode: newCode}})
         return result.modifiedCount === 1
     },
     async deleteEmailConfirmation(userId: ObjectId){
