@@ -23,3 +23,8 @@ export type CodeConfirmation = {
 export type EmailType = {
     email: string
 }
+
+export type RefreshTokenType = {
+    userId: ObjectId,
+    refreshToken: string
+}

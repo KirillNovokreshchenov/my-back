@@ -1,7 +1,7 @@
 import {ObjectId} from "mongodb";
-import {collectionEmailConfirmations, collectionUsers} from "../db/db";
+import {collectionEmailConfirmations, collectionRefreshTokens, collectionUsers} from "../db/db";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
-import {EmailConfirmationType, UserType} from "../db/db-users-type";
+import {EmailConfirmationType, RefreshTokenType, UserType} from "../db/db-users-type";
 
 export const usersRepository = {
     async createUser(newUser: UserType): Promise<ObjectId> {
@@ -16,6 +16,8 @@ export const usersRepository = {
         return await collectionUsers.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
     },
 
+
+
     async emailConfirmation(newEmailConfirmation: EmailConfirmationType){
         await collectionEmailConfirmations.insertOne(newEmailConfirmation)
 
@@ -27,13 +29,18 @@ export const usersRepository = {
         const result = await collectionEmailConfirmations.updateOne({confirmationCode:code}, {$set:{isConfirmed: true}})
         return result.modifiedCount === 1
     },
-    async updateEmailConfirmationCode(id: ObjectId, newCode: string){
-        const result = await collectionEmailConfirmations.updateOne({userId: id}, {$set: {confirmationCode: newCode}})
+    async updateEmailConfirmationCode(id: ObjectId, newCode: string, date: Date){
+        const result = await collectionEmailConfirmations.updateOne({userId: id}, {$set: {confirmationCode: newCode, expirationDate: date}})
         return result.modifiedCount === 1
     },
     async deleteEmailConfirmation(userId: ObjectId){
         const result = await collectionEmailConfirmations.deleteOne({userId: userId})
         return result.deletedCount === 1
+    },
+
+
+    async blackListRefreshToken(refreshToken: RefreshTokenType){
+        await collectionRefreshTokens.insertOne(refreshToken)
     }
 
 }

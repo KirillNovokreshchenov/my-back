@@ -24,5 +24,4 @@ export const jwtMiddleware = async(req: Request, res: Response, next: NextFuncti
         return
     }
 
-
 }

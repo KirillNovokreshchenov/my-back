@@ -66,11 +66,14 @@ export const usersService = {
         if (emailConfirmation.isConfirmed) return false
 
         const newCode = uuid()
+        const newDate = add(new Date(), {
+            hours: 1
+        })
         // const emailConfirmationChanged = await usersRepository.updateEmailConfirmationCode(emailConfirmation.userId, newCode)
         // if(!emailConfirmationChanged) return false
 
         try {
-            await usersRepository.updateEmailConfirmationCode(emailConfirmation.userId, newCode)
+            await usersRepository.updateEmailConfirmationCode(emailConfirmation.userId, newCode, newDate)
             await emailManagers.emailRegistration({...emailConfirmation, confirmationCode: newCode})
             return true
         } catch (e) {
@@ -101,8 +104,7 @@ export const usersService = {
             email: email,
             confirmationCode: uuid(),
             expirationDate: add(new Date(), {
-                hours: 1,
-                minutes: 2
+                hours: 1
             }),
             isConfirmed: false
         }

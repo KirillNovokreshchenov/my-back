@@ -3,7 +3,7 @@ import {BlogType} from "./db-blogs-type";
 import {PostType} from "./db-posts-type";
 
 import * as dotenv from 'dotenv'
-import {EmailConfirmationType, UserType} from "./db-users-type";
+import {EmailConfirmationType, RefreshTokenType, UserType} from "./db-users-type";
 import {CommentType} from "./db-comments-type";
 dotenv.config()
 
@@ -20,6 +20,7 @@ export const collectionPosts = db.collection<PostType>('posts')
 export const collectionUsers = db.collection<UserType>('users')
 export const collectionComments = db.collection<CommentType>('comments')
 export const collectionEmailConfirmations= db.collection<EmailConfirmationType>('emailConfirmations')
+export const collectionRefreshTokens = db.collection<RefreshTokenType>('blackListRefreshToken')
 
 
 export async function runDB() {
@@ -31,3 +32,5 @@ export async function runDB() {
         await client.close();
     }
 }
+
+
