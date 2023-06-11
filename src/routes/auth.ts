@@ -27,7 +27,7 @@ authRouter.post('/login',
         const userId = await usersService.checkCredentials(req.body)
         if (userId) {
             const tokens = await jwtService.createJWT(userId)
-            res.cookie('refreshJWT', tokens.refreshToken, {httpOnly: true, secure: true})
+            res.cookie('refreshToken', tokens.refreshToken, {httpOnly: true, secure: true})
             res.status(200).send(tokens.accessToken)
         } else {
             res.sendStatus(401)
@@ -48,7 +48,7 @@ authRouter.post('/refresh-token',
         }
 
         const tokens = await jwtService.createJWT(req.user!._id)
-        res.cookie('refreshJWT', tokens.refreshToken, {httpOnly: true, secure: true})
+        res.cookie('refreshToken', tokens.refreshToken, {httpOnly: true, secure: true})
         res.status(200).send(tokens.accessToken)
 
     })
