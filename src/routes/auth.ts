@@ -37,7 +37,7 @@ authRouter.post('/login',
 authRouter.post('/refresh-token',
     jwtRefreshMiddleware,
     async (req: Request, res: Response<JWTtokenViewModel>) => {
-        const refreshToken = req.cookies.refreshJWT
+        const refreshToken = req.cookies.refreshToken
 
         try {
             await jwtService.addRefreshTokenToBlackList(req.user!._id, refreshToken)
@@ -57,7 +57,7 @@ authRouter.post('/logout',
     jwtRefreshMiddleware,
     async (req: Request, res: Response) => {
         try {
-            await jwtService.addRefreshTokenToBlackList(req.user!._id, req.cookies.refreshJWT)
+            await jwtService.addRefreshTokenToBlackList(req.user!._id, req.cookies.refreshToken)
             res.sendStatus(204)
         } catch (e) {
             console.log(e)
