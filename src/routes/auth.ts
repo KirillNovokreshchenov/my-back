@@ -1,5 +1,5 @@
 import {Request, Response, Router} from "express";
-import {RequestWithBody, RequestWithQuery} from "../types/types";
+import {RequestWithBody} from "../types/types";
 import {LoginModel} from "../models/auth-models/LoginModel";
 import {usersService} from "../domain/users-service";
 import {loginValidation} from "../middlewares/login-middleware";
@@ -17,6 +17,7 @@ import {
 import {CodeConfirmation, EmailType} from "../db/db-users-type";
 import {errorsValidationMiddleware} from "../middlewares/err-middleware";
 import {jwtRefreshMiddleware} from "../middlewares/auth-refresh-middleware";
+import {RESPONSE_STATUS} from "../types/resStatus";
 
 
 export const authRouter = Router()
@@ -28,22 +29,23 @@ authRouter.post('/login',
         if (userId) {
             const tokens = await jwtService.createJWT(userId)
             res.cookie('refreshToken', tokens.refreshToken, {httpOnly: true, secure: true})
-            res.status(200).send(tokens.accessToken)
+            res.status(RESPONSE_STATUS.OK_200).send(tokens.accessToken)
         } else {
-            res.sendStatus(401)
+            res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
         }
     })
 
 authRouter.post('/refresh-token',
     jwtRefreshMiddleware,
     async (req: Request, res: Response<JWTtokenViewModel>) => {
+
         const refreshToken = req.cookies.refreshToken
 
         try {
             await jwtService.addRefreshTokenToBlackList(req.user!._id, refreshToken)
         } catch (e) {
             console.log(e)
-            res.sendStatus(401)
+            res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
             return
         }
 
@@ -58,10 +60,10 @@ authRouter.post('/logout',
     async (req: Request, res: Response) => {
         try {
             await jwtService.addRefreshTokenToBlackList(req.user!._id, req.cookies.refreshToken)
-            res.sendStatus(204)
+            res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         } catch (e) {
             console.log(e)
-            res.sendStatus(401)
+            res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
         }
     })
 
@@ -69,19 +71,14 @@ authRouter.post('/logout',
 authRouter.get('/me',
     jwtMiddleware,
     async (req: Request, res: Response<DataViewByToken>) => {
-
-        if (!req.user) {
-            res.sendStatus(401)
-            return
-        }
-
-        const user = await usersQueryRepository.findUserWithToken(req.user._id)
+        const user = await usersQueryRepository.findUserWithToken(req.user!._id)
 
         if (!user) {
-            res.sendStatus(404)
+            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
             return
         }
-        res.status(200).send(user)
+
+        res.status(RESPONSE_STATUS.OK_200).send(user)
     })
 
 authRouter.post('/registration',
@@ -89,9 +86,9 @@ authRouter.post('/registration',
     async (req: RequestWithBody<UserInputModel>, res: Response) => {
         const newUser = await usersService.createUserByRegistration(req.body)
         if (!newUser) {
-            res.sendStatus(500)
+            res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
         } else {
-            res.sendStatus(204)
+            res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         }
 
     })
@@ -102,7 +99,7 @@ authRouter.post('/registration-confirmation',
     async (req: RequestWithBody<CodeConfirmation>, res: Response) => {
         const codeIsConfirmed = await usersService.confirmEmail(req.body.code)
         if (!codeIsConfirmed) {
-            res.status(400).send({
+            res.status(RESPONSE_STATUS.BAD_REQUEST_400).send({
                 "errorsMessages": [
                     {
                         "message": "string",
@@ -111,7 +108,7 @@ authRouter.post('/registration-confirmation',
                 ]
             })
         } else {
-            res.sendStatus(204)
+            res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         }
     })
 
@@ -121,7 +118,7 @@ authRouter.post('/registration-email-resending',
     async (req: RequestWithBody<EmailType>, res: Response) => {
         const emailResending = await usersService.emailResending(req.body.email)
         if (!emailResending) {
-            res.status(400).send({
+            res.status(RESPONSE_STATUS.BAD_REQUEST_400).send({
                 "errorsMessages": [
                     {
                         "message": "string",
@@ -130,6 +127,6 @@ authRouter.post('/registration-email-resending',
                 ]
             })
         } else {
-            res.sendStatus(204)
+            res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         }
     })

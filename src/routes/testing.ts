@@ -7,6 +7,7 @@ import {
     collectionUsers
 } from "../db/db";
 import {dbVideos} from "../db/db-videos";
+import {RESPONSE_STATUS} from "../types/resStatus";
 
 
 export const testingRouter = Router()
@@ -23,5 +24,5 @@ testingRouter.delete('/all-data', async (req: Request, res: Response)=>{
         .catch((err) => {
             console.error(err);
         });
-    res.sendStatus(204)
+    res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
 })

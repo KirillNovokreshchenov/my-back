@@ -6,7 +6,7 @@ import {CommentType} from "../db/db-comments-type";
 import {commentsRepository} from "../repositories/comments-repository";
 import {queryCommentsRepository} from "../repositories/query-comments-repository";
 
-export enum ResponseOptions{
+export enum RESPONSE_OPTIONS{
     NO_CONTENT = 'No Content',
     FORBIDDEN = 'Forbidden',
     NOT_FOUND = 'Not Found'
@@ -31,28 +31,28 @@ export const commentsService = {
         return commentsRepository.createComment(newComment)
 
     },
-    async updateComment(commentId: string, content: string, userId: ObjectId): Promise<ResponseOptions> {
+    async updateComment(commentId: string, content: string, userId: ObjectId): Promise<RESPONSE_OPTIONS> {
 
         const foundComment = await queryCommentsRepository.findComment(formatIdInObjectId(commentId))
 
-        if(!foundComment) return ResponseOptions.NOT_FOUND
+        if(!foundComment) return RESPONSE_OPTIONS.NOT_FOUND
 
-        if(foundComment.commentatorInfo.userId !== userId.toString()) return ResponseOptions.FORBIDDEN
+        if(foundComment.commentatorInfo.userId !== userId.toString()) return RESPONSE_OPTIONS.FORBIDDEN
 
         await commentsRepository.updateComment(formatIdInObjectId(commentId), content)
 
-        return ResponseOptions.NO_CONTENT
+        return RESPONSE_OPTIONS.NO_CONTENT
     },
 
-    async deleteComment (commentId: string, userId: ObjectId): Promise<ResponseOptions>{
+    async deleteComment (commentId: string, userId: ObjectId): Promise<RESPONSE_OPTIONS>{
         const foundComment = await queryCommentsRepository.findComment(formatIdInObjectId(commentId))
 
-        if(!foundComment) return ResponseOptions.NOT_FOUND
+        if(!foundComment) return RESPONSE_OPTIONS.NOT_FOUND
 
-        if(foundComment.commentatorInfo.userId !== userId.toString()) return ResponseOptions.FORBIDDEN
+        if(foundComment.commentatorInfo.userId !== userId.toString()) return RESPONSE_OPTIONS.FORBIDDEN
 
         await commentsRepository.deleteComment(formatIdInObjectId(commentId))
 
-        return ResponseOptions.NO_CONTENT
+        return RESPONSE_OPTIONS.NO_CONTENT
     }
 }

@@ -26,6 +26,7 @@ import {CommentViewModel} from "../models/comment-models/CommentViewModel";
 import {CommentCreateAndUpdateModel} from "../models/comment-models/CommentCreateAndUpdateModel";
 import {CommentsQueryInputModel} from "../models/comment-models/CommentsQueryInputModel";
 import {errorsValidationMiddleware} from "../middlewares/err-middleware";
+import {RESPONSE_STATUS} from "../types/resStatus";
 
 
 export const postRouter = Router()
@@ -40,15 +41,15 @@ postRouter.post('/',
     async (req: RequestWithBody<CreateAndUpdatePostModel>, res: Response<PostViewModel>) => {
         const objId = await postsService.createPost(req.body)
         if (!objId) {
-            res.sendStatus(500)
+            res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
             return
         }
         const foundNewCreatePost = await postsQueryRepository.findPost(objId)
         if (!foundNewCreatePost) {
-            res.sendStatus(500)
+            res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
             return
         }
-        res.status(201).send(foundNewCreatePost)
+        res.status(RESPONSE_STATUS.CREATED_201).send(foundNewCreatePost)
     })
 
 postRouter.get('/:id',
@@ -58,7 +59,7 @@ postRouter.get('/:id',
         if (foundPost) {
             res.send(foundPost)
         } else {
-            res.sendStatus(404)
+            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         }
     })
 
@@ -68,9 +69,9 @@ postRouter.put('/:id',
     async (req: RequestWithBodyAndParams<URIParamsId, CreateAndUpdatePostModel>, res: Response) => {
         const isUpdate = await postsService.updatePost(req.params.id, req.body)
         if (isUpdate) {
-            res.sendStatus(204)
+            res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         } else {
-            res.sendStatus(404)
+            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         }
     })
 
@@ -80,9 +81,9 @@ postRouter.delete('/:id',
     async (req: RequestWithParams<URIParamsId>, res: Response) => {
         const isDeleted: boolean = await postsService.deletePost(req.params.id)
         if (isDeleted) {
-            res.sendStatus(204)
+            res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         } else {
-            res.sendStatus(404)
+            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         }
     })
 
@@ -94,22 +95,22 @@ postRouter.post('/:id/comments',
     errorsValidationMiddleware,
     async (req: RequestWithBodyAndParams<URIParamsId, CommentCreateAndUpdateModel>, res: Response<CommentViewModel>) => {
         if (!req.user) {
-            res.sendStatus(401)
+            res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
             return
         }
         const commentId = await commentsService.createComment(req.params.id, req.user, req.body.content)
         if (!commentId) {
-            res.sendStatus(404)
+            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         } else {
             const newComment = await queryCommentsRepository.findComment(commentId)
-            res.status(201).send(newComment!)
+            res.status(RESPONSE_STATUS.CREATED_201).send(newComment!)
         }
     })
 
 postRouter.get('/:id/comments', async (req: RequestWithQueryAndParams<URIParamsId, CommentsQueryInputModel>, res: Response<QueryViewModel<CommentViewModel>>) => {
     const comments = await queryCommentsRepository.getComments(req.params.id, req.query)
     if (!comments) {
-        res.sendStatus(404)
+        res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
     } else {
         res.send(comments)
     }

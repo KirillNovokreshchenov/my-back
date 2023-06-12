@@ -21,6 +21,7 @@ import {postValidateForBlog} from "../middlewares/post-middleware";
 import {QueryInputModel} from "../models/QueryInputModel";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 import {QueryViewModel} from "../models/QueryViewModel";
+import {RESPONSE_STATUS} from "../types/resStatus";
 
 
 export const blogRouter = Router()
@@ -36,7 +37,7 @@ blogRouter.get('/:id/posts',
     async (req: RequestWithQueryAndParams<URIParamsId, QueryInputModel>, res: Response<QueryViewModel<PostViewModel>>) => {
         const allPostsForBlog = await blogsQueryRepository.allPostsForBlog(req.params.id, req.query)
         if (!allPostsForBlog) {
-            res.sendStatus(404)
+            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         } else {
             res.send(allPostsForBlog)
         }
@@ -48,10 +49,10 @@ blogRouter.post('/',
         const idBlog = await blogsService.createBlog(req.body)
         const newBlog = await blogsQueryRepository.findBlog(idBlog)
         if(!newBlog){
-            res.sendStatus(500)
+            res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
             return
         }
-        res.status(201).send(newBlog)
+        res.status(RESPONSE_STATUS.CREATED_201).send(newBlog)
     })
 
 blogRouter.post('/:id/posts',
@@ -60,16 +61,16 @@ blogRouter.post('/:id/posts',
 
         const idPost = await blogsService.createPostForBlog(req.params.id, req.body)
         if (!idPost) {
-            res.sendStatus(404)
+            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
             return
         }
         const foundNewPost = await postsQueryRepository.findPost(idPost)
 
         if (!foundNewPost) {
-            res.sendStatus(500)
+            res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
             return
         }
-        res.status(201).send(foundNewPost)
+        res.status(RESPONSE_STATUS.CREATED_201).send(foundNewPost)
 
     })
 
@@ -80,7 +81,7 @@ blogRouter.get('/:id',
         if (foundBlog) {
             res.send(foundBlog)
         } else {
-            res.sendStatus(404)
+            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         }
     })
 
@@ -90,9 +91,9 @@ blogRouter.put('/:id',
     async (req: RequestWithBodyAndParams<URIParamsId, CreateAndUpdateBlogInputModel>, res: Response) => {
         const isUpdate: boolean = await blogsService.updateBlog(req.params.id, req.body)
         if (isUpdate) {
-            res.sendStatus(204)
+            res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         } else {
-            res.sendStatus(404)
+            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         }
     })
 
@@ -102,9 +103,9 @@ blogRouter.delete('/:id',
     async (req: RequestWithParams<URIParamsId>, res: Response) => {
         const isDeleted: boolean = await blogsService.deleteBlog(req.params.id)
         if (isDeleted) {
-            res.sendStatus(204)
+            res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         } else {
-            res.sendStatus(404)
+            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         }
     })
 
