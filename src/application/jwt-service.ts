@@ -7,8 +7,8 @@ import {usersRepository} from "../repositories/users-repository";
 
 export const jwtService = {
     async createJWT(userId: ObjectId) {
-        const token = jwt.sign({userId: userId}, settings.SECRET_JWT, {expiresIn: '10000'})
-        const refreshToken = jwt.sign({userId: userId}, settings.SECRET_REFRESH, {expiresIn: '20000'})
+        const token = jwt.sign({userId: userId}, settings.SECRET_JWT, {expiresIn: '10m'})
+        const refreshToken = jwt.sign({userId: userId}, settings.SECRET_REFRESH, {expiresIn: '20m'})
         return {
             accessToken: {
                 accessToken: token
