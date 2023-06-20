@@ -24,7 +24,17 @@ export type EmailType = {
     email: string
 }
 
-export type RefreshTokenType = {
-    userId: ObjectId,
-    refreshToken: string
+export type DeviceAuthSession = {
+    userId: ObjectId
+    ip: string
+    title: string
+    lastActiveDate: Date
+    expDate: Date
+    deviceId: string
+}
+
+export type RateLimit = {
+    ip: string
+    url: string
+    date: Date
 }

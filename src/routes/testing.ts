@@ -1,7 +1,7 @@
 import {Request, Response, Router} from "express";
 import {
     collectionBlogs,
-    collectionComments,
+    collectionComments, collectionDevicesAuthSessions,
     collectionEmailConfirmations,
     collectionPosts,
     collectionUsers
@@ -19,8 +19,9 @@ testingRouter.delete('/all-data', async (req: Request, res: Response)=>{
     const promiseUsers = collectionUsers.deleteMany({})
     const promiseComments = collectionComments.deleteMany({})
     const promiseEmailConfirmations = collectionEmailConfirmations.deleteMany({})
+    const promiseDeviceAuth = collectionDevicesAuthSessions.deleteMany({})
 
-    await Promise.all([promiseBlogs, promisePosts, promiseUsers, promiseComments, promiseEmailConfirmations])
+    await Promise.all([promiseBlogs, promisePosts, promiseUsers, promiseComments, promiseEmailConfirmations, promiseDeviceAuth])
         .catch((err) => {
             console.error(err);
         });

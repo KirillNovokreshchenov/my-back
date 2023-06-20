@@ -2,6 +2,7 @@ import {body} from "express-validator";
 import {authorizationValidation} from "./auth-middleware";
 import {errorsValidationMiddleware} from "./err-middleware";
 import {collectionEmailConfirmations, collectionUsers} from "../db/db";
+import {rateLimitsMiddleware} from "./rateLimits-middleware";
 
 
 
@@ -61,4 +62,4 @@ export const codeConfirmationValidation = body('code')
 
 export const userValidation = [authorizationValidation, loginValidation, passwordValidation, emailValidation, errorsValidationMiddleware]
 
-export const userValidationByRegistration = [loginValidation, passwordValidation, emailValidation, errorsValidationMiddleware]
+export const userValidationByRegistration = [rateLimitsMiddleware, loginValidation, passwordValidation, emailValidation, errorsValidationMiddleware]
