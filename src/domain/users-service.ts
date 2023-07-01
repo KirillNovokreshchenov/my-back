@@ -8,6 +8,8 @@ import {uuid} from "uuidv4";
 import {add} from 'date-fns'
 import {emailManagers} from "../managers/email-managers";
 import {usersQueryRepository} from "../repositories/query-users-repository";
+import {UserModelClass} from "../db/schemas/schema-user";
+import {HydratedDocument} from "mongoose";
 
 
 export const usersService = {
@@ -57,7 +59,7 @@ export const usersService = {
         if (!codeIsExisting) return false
         if (codeIsExisting.expirationDate < new Date()) return false
         if (codeIsExisting.isConfirmed) return false
-        return await usersRepository.updateConfirm(code)
+        return usersRepository.updateConfirm(code)
     },
 
     async emailResending(email: string): Promise<boolean> {
@@ -69,8 +71,6 @@ export const usersService = {
         const newDate = add(new Date(), {
             hours: 1
         })
-        // const emailConfirmationChanged = await usersRepository.updateEmailConfirmationCode(emailConfirmation.userId, newCode)
-        // if(!emailConfirmationChanged) return false
 
         try {
             await usersRepository.updateEmailConfirmationCode(emailConfirmation.userId, newCode, newDate)

@@ -10,7 +10,7 @@ import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
 import {URIParamsId} from "../models/URIParamsIdModel";
 import {UsersQueryInputModel} from "../models/user-models/UsersQueryInputModel";
 import {QueryViewModel} from "../models/QueryViewModel";
-import {RESPONSE_STATUS} from "../types/resStatus";
+import {RESPONSE_STATUS} from "../types/res-status";
 
 
 export const userRouter = Router()
@@ -27,7 +27,10 @@ userRouter.post('/',
     async (req: RequestWithBody<UserInputModel>, res: Response<UserViewModel>) => {
         const userObjectId = await usersService.createUser(req.body)
         const newUser = await usersQueryRepository.findUser(userObjectId)
-        res.status(RESPONSE_STATUS.CREATED_201).send(newUser)
+        if(!newUser) {
+            return res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
+        }
+        return res.status(RESPONSE_STATUS.CREATED_201).send(newUser)
 
     })
 

@@ -1,13 +1,16 @@
 import {MongoClient} from "mongodb";
 import {BlogType} from "./db-blogs-type";
 import {PostType} from "./db-posts-type";
-
 import * as dotenv from 'dotenv'
 import {DeviceAuthSession, EmailConfirmationType, RateLimit, UserType} from "./db-users-type";
 import {CommentType} from "./db-comments-type";
+import * as mongoose from "mongoose";
+import {settings} from "../settings";
 dotenv.config()
 
-const uri = process.env.MONGO_URI
+const dbName = 'MyDB'
+const uri = process.env.MONGO_URI || `mongodb://0.0.0.0:27017/${dbName}`
+
 if(!uri){
     throw new Error('incorrect mongo URL')
 }
@@ -27,10 +30,12 @@ export const collectionRateLimits = db.collection<RateLimit>('RateLimits')
 
 export async function runDB() {
     try {
+        await mongoose.connect(uri)
         await client.connect();
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        console.log("You successfully connected to MongoDB!");
     } catch {
         console.log('No connect')
+        await mongoose.disconnect()
         await client.close();
     }
 }

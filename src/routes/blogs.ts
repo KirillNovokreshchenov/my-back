@@ -21,7 +21,7 @@ import {postValidateForBlog} from "../middlewares/post-middleware";
 import {QueryInputModel} from "../models/QueryInputModel";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 import {QueryViewModel} from "../models/QueryViewModel";
-import {RESPONSE_STATUS} from "../types/resStatus";
+import {RESPONSE_STATUS} from "../types/res-status";
 
 
 export const blogRouter = Router()

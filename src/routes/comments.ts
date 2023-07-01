@@ -8,9 +8,9 @@ import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
 import {jwtMiddleware} from "../middlewares/auth-jwt-middleware";
 import {contentValidation} from "../middlewares/comment-middleware";
 import {CommentCreateAndUpdateModel} from "../models/comment-models/CommentCreateAndUpdateModel";
-import {commentsService, RESPONSE_OPTIONS} from "../domain/comments-service";
+import {commentsService} from "../domain/comments-service";
 import {errorsValidationMiddleware} from "../middlewares/err-middleware";
-import {RESPONSE_STATUS} from "../types/resStatus";
+import {RESPONSE_OPTIONS, RESPONSE_STATUS} from "../types/res-status";
 
 
 export const commentRouter = Router()

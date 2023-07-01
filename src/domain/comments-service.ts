@@ -5,12 +5,10 @@ import {UserType} from "../db/db-users-type";
 import {CommentType} from "../db/db-comments-type";
 import {commentsRepository} from "../repositories/comments-repository";
 import {queryCommentsRepository} from "../repositories/query-comments-repository";
+import {RESPONSE_OPTIONS} from "../types/res-status";
 
-export enum RESPONSE_OPTIONS{
-    NO_CONTENT = 'No Content',
-    FORBIDDEN = 'Forbidden',
-    NOT_FOUND = 'Not Found'
-}
+
+
 
 export const commentsService = {
 

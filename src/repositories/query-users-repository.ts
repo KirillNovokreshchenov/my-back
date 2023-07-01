@@ -7,6 +7,7 @@ import {pageCount} from "../helpers/pageCount";
 import {limitPages} from "../helpers/limitPages";
 import {QueryViewModel} from "../models/QueryViewModel";
 import {DataViewByToken} from "../models/auth-models/DataViewByToken";
+import {UserModelClass} from "../db/schemas/schema-user";
 
 export const usersQueryRepository = {
 
@@ -20,26 +21,40 @@ export const usersQueryRepository = {
             pageSize = 10
         } = userQuery
 
-        const totalCount = await collectionUsers.countDocuments(this._sortedLoginEmail(searchLoginTerm, searchEmailTerm))
+
+
+        const totalCount = await UserModelClass.countDocuments(this._sortedLoginEmail(searchLoginTerm, searchEmailTerm))
+
 
         return {
             pagesCount: pageCount(totalCount, +pageSize),
             page: +pageNumber,
             pageSize: +pageSize,
             totalCount: totalCount,
-            items: await collectionUsers
+            items: await UserModelClass
                 .find(this._sortedLoginEmail(searchLoginTerm, searchEmailTerm))
-                .sort({[sortBy]: sortDirection === 'asc' ? 1 : -1} as Sort)
+                .sort(sortDirection ==='asc'? `${sortBy}`: `-${sortBy}`)
                 .skip(limitPages(+pageNumber, +pageSize))
                 .limit(+pageSize)
-                .map(user => this._mapUser(user))
-                .toArray()
+                .lean()
+                .then((users)=>{
+                    return Array.from(users).map((user: UserType) => {
+                        return {
+                            id: user._id.toString(),
+                            login: user.login,
+                            email: user.email,
+                            createdAt: user.createdAt
+                        };
+                    })
+                })
         }
     },
 
-    async findUser(id: ObjectId): Promise<UserViewModel> {
-        const foundUser = await collectionUsers.findOne(id)
-        return this._mapUser(foundUser!)
+    async findUser(id: ObjectId): Promise<UserViewModel|null> {
+        const foundUser = await UserModelClass.findOne(id).lean()
+        if(!foundUser) return null
+        return this._mapUser(foundUser)
+
 
     },
     async findUserWithToken(id: ObjectId): Promise<DataViewByToken | null> {

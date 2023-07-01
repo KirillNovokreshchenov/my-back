@@ -7,10 +7,12 @@ import {
     collectionUsers
 } from "../db/db";
 import {dbVideos} from "../db/db-videos";
-import {RESPONSE_STATUS} from "../types/resStatus";
+import {RESPONSE_STATUS} from "../types/res-status";
 
 
 export const testingRouter = Router()
+
+
 
 testingRouter.delete('/all-data', async (req: Request, res: Response)=>{
     dbVideos.videos = []

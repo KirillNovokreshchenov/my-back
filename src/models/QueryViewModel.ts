@@ -5,3 +5,4 @@ export type QueryViewModel<I> = {
     totalCount: number
     items:I[]
 }
+

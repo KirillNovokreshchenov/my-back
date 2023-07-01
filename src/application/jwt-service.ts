@@ -5,7 +5,9 @@ import {usersRepository} from "../repositories/users-repository";
 import {uuid} from "uuidv4";
 import {add} from "date-fns";
 import {usersQueryRepository} from "../repositories/query-users-repository";
-import {RESPONSE_OPTIONS} from "../domain/comments-service";
+import {RESPONSE_OPTIONS} from "../types/res-status";
+import {sessionsRepository} from "../repositories/sessions-repository";
+
 
 export const jwtService = {
     async createJWT(userId: ObjectId, ip: string, deviceName?: string) {
@@ -21,12 +23,12 @@ export const jwtService = {
             title: deviceName ?? 'Chrome',
             lastActiveDate: dateForSessions,
             expDate: add(dateForSessions, {
-                minutes: 20
+                seconds: 20
             }),
             deviceId: deviceId,
         }
 
-        await usersRepository.createDeviceSession(DevicesAuthSessions)
+        await sessionsRepository.createDeviceSession(DevicesAuthSessions)
 
         return bothTokens
     },
@@ -56,7 +58,7 @@ export const jwtService = {
     async newTokens(userId: ObjectId, deviceId: string) {
         const newDate = new Date()
         const tokens = this._createTokens(userId, deviceId, newDate)
-        await usersRepository.updateDate(deviceId, newDate)
+        await sessionsRepository.updateDate(deviceId, newDate)
         return tokens
 
     },
@@ -80,11 +82,11 @@ export const jwtService = {
     },
 
     async logout(deviceId: string){
-        return await usersRepository.logoutSession(deviceId)
+        return await sessionsRepository.logoutSession(deviceId)
     },
 
     async deleteAllSessions(userId: ObjectId, deviceId: string) {
-        return await usersRepository.deleteAllSessions(userId, deviceId)
+        return await sessionsRepository.deleteAllSessions(userId, deviceId)
     },
     async deleteSession(userId: ObjectId, deviceId: string): Promise<RESPONSE_OPTIONS>{
         const session = await usersQueryRepository.findDeviceSession(deviceId)
@@ -94,19 +96,9 @@ export const jwtService = {
             return RESPONSE_OPTIONS.FORBIDDEN
         }
 
-        await usersRepository.deleteSession(deviceId)
+        await sessionsRepository.deleteSession(deviceId)
         return RESPONSE_OPTIONS.NO_CONTENT
 
     }
 
-
-
-
-    // async addRefreshTokenToBlackList(userId: ObjectId, refreshToken: string) {
-    //     const refreshTokenToBlackList: RefreshTokenType = {
-    //         userId: userId,
-    //         refreshToken: refreshToken
-    //     }
-    //     await usersRepository.blackListRefreshToken(refreshTokenToBlackList)
-    // }
 }

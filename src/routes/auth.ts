@@ -17,7 +17,7 @@ import {
 import {CodeConfirmation, EmailType} from "../db/db-users-type";
 import {errorsValidationMiddleware} from "../middlewares/err-middleware";
 import {jwtRefreshMiddleware} from "../middlewares/auth-refresh-middleware";
-import {RESPONSE_STATUS} from "../types/resStatus";
+import {RESPONSE_STATUS} from "../types/res-status";
 import {rateLimitsMiddleware} from "../middlewares/rateLimits-middleware";
 
 
@@ -26,7 +26,6 @@ export const authRouter = Router()
 authRouter.post('/login',
     loginValidation,
     async (req: RequestWithBody<LoginModel>, res: Response<JWTtokenViewModel>) => {
-        console.log(req.originalUrl)
         const userId = await usersService.checkCredentials(req.body)
         if (userId) {
             const tokens = await jwtService.createJWT(userId, req.ip, req.headers['user-agent'])
@@ -43,16 +42,6 @@ authRouter.post('/refresh-token',
     jwtRefreshMiddleware,
 
     async (req: Request, res: Response<JWTtokenViewModel>) => {
-
-        // const refreshToken = req.cookies.refreshToken
-
-        // try {
-        //     await jwtService.addRefreshTokenToBlackList(req.user!._id, refreshToken)
-        // } catch (e) {
-        //     console.log(e)
-        //     res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
-        //     return
-        // }
 
         const tokens = await jwtService.newTokens(req.user!._id, req.deviceId)
         res.cookie('refreshToken', tokens.refreshToken, {httpOnly: true, secure: true})

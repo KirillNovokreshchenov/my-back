@@ -8,3 +8,9 @@ export enum RESPONSE_STATUS {
     SERVER_ERROR_500 =500,
     CREATED_201 = 201
 }
+
+export enum RESPONSE_OPTIONS{
+    NO_CONTENT = 'No Content',
+    FORBIDDEN = 'Forbidden',
+    NOT_FOUND = 'Not Found'
+}

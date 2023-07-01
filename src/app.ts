@@ -11,7 +11,6 @@ import cookieParser from "cookie-parser";
 import {deviseRouter} from "./routes/security-devices";
 
 
-
 export const app = express()
 // export const bodyMiddleware = bodyParser()
 app.use(express.json())

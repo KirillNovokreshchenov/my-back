@@ -3,8 +3,8 @@ import {jwtRefreshMiddleware} from "../middlewares/auth-refresh-middleware";
 import {usersQueryRepository} from "../repositories/query-users-repository";
 import {DeviceSessionModel} from "../models/user-models/DeviceSessionModel";
 import {jwtService} from "../application/jwt-service";
-import {RESPONSE_OPTIONS} from "../domain/comments-service";
-import {RESPONSE_STATUS} from "../types/resStatus";
+import {RESPONSE_OPTIONS} from "../types/res-status";
+import {RESPONSE_STATUS} from "../types/res-status";
 
 
 export const deviseRouter = Router({})

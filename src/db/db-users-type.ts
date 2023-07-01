@@ -1,12 +1,13 @@
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
+import {UserViewModel} from "../models/user-models/UserViewModel";
+import {Model} from "mongoose";
 
-export type UserType = {
-    _id: ObjectId
+export type UserType = WithId<{
     login: string
     email: string
     password: string
     createdAt: string
-}
+}>
 
 export type EmailConfirmationType = {
     userId: ObjectId

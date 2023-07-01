@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response} from "express";
 import {jwtService} from "../application/jwt-service";
 import {collectionRefreshTokens, collectionUsers} from "../db/db";
-import {RESPONSE_STATUS} from "../types/resStatus";
+import {RESPONSE_STATUS} from "../types/res-status";
 import {ObjectId} from "mongodb";
 
 export const jwtRefreshMiddleware = async(req: Request, res: Response, next: NextFunction)=>{

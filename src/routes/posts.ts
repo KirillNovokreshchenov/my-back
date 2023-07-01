@@ -26,7 +26,7 @@ import {CommentViewModel} from "../models/comment-models/CommentViewModel";
 import {CommentCreateAndUpdateModel} from "../models/comment-models/CommentCreateAndUpdateModel";
 import {CommentsQueryInputModel} from "../models/comment-models/CommentsQueryInputModel";
 import {errorsValidationMiddleware} from "../middlewares/err-middleware";
-import {RESPONSE_STATUS} from "../types/resStatus";
+import {RESPONSE_STATUS} from "../types/res-status";
 
 
 export const postRouter = Router()
