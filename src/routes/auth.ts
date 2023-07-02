@@ -11,10 +11,10 @@ import {DataViewByToken} from "../models/auth-models/DataViewByToken";
 import {UserInputModel} from "../models/user-models/UserInputModel";
 import {
     codeConfirmationValidation,
-    emailValidationResending,
+    emailValidationResending, newPasswordValidation,
     userValidationByRegistration
 } from "../middlewares/user-middleware";
-import {CodeConfirmation, EmailType} from "../db/db-users-type";
+import {CodeConfirmationEmail, CodeRecoveryPassword, EmailType} from "../db/db-users-type";
 import {errorsValidationMiddleware} from "../middlewares/err-middleware";
 import {jwtRefreshMiddleware} from "../middlewares/auth-refresh-middleware";
 import {RESPONSE_STATUS} from "../types/res-status";
@@ -91,7 +91,7 @@ authRouter.post('/registration-confirmation',
     rateLimitsMiddleware,
     codeConfirmationValidation,
     errorsValidationMiddleware,
-    async (req: RequestWithBody<CodeConfirmation>, res: Response) => {
+    async (req: RequestWithBody<CodeConfirmationEmail>, res: Response) => {
         const codeIsConfirmed = await usersService.confirmEmail(req.body.code)
         if (!codeIsConfirmed) {
             res.status(RESPONSE_STATUS.BAD_REQUEST_400).send({
@@ -126,3 +126,48 @@ authRouter.post('/registration-email-resending',
             res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         }
     })
+
+
+authRouter.post('/password-recovery',
+    rateLimitsMiddleware,
+    emailValidationResending,
+    errorsValidationMiddleware,
+    async (req: RequestWithBody<EmailType>, res: Response) => {
+        try {
+            await usersService.recoveryPassword(req.body.email)
+        } catch {
+            return res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
+        }
+
+
+        return res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
+
+    })
+
+authRouter.post('/new-password',
+    rateLimitsMiddleware,
+    newPasswordValidation,
+    errorsValidationMiddleware,
+    async (req: RequestWithBody<CodeRecoveryPassword>, res: Response) => {
+
+        try {
+            const newPassword = await usersService.newPassword(req.body.newPassword, req.body.recoveryCode)
+            if (newPassword) {
+                res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
+            } else {
+                res.status(RESPONSE_STATUS.BAD_REQUEST_400).send({
+                    "errorsMessages": [
+                        {
+                            "message": "string",
+                            "field": "recoveryCode"
+                        }
+                    ]
+                })
+            }
+
+        } catch {
+            res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
+        }
+
+    }
+)

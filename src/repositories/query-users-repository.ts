@@ -1,6 +1,6 @@
 import {ObjectId, Sort} from "mongodb";
 import {UserViewModel} from "../models/user-models/UserViewModel";
-import {collectionDevicesAuthSessions, collectionEmailConfirmations, collectionUsers} from "../db/db";
+import {collectionDevicesAuthSessions, collectionEmail, collectionUsers} from "../db/db";
 import {EmailConfirmationType, UserType} from "../db/db-users-type";
 import {UsersQueryInputModel} from "../models/user-models/UsersQueryInputModel";
 import {pageCount} from "../helpers/pageCount";
@@ -67,8 +67,12 @@ export const usersQueryRepository = {
         }
     },
 
-    async getEmailConfirmation(email: string): Promise<EmailConfirmationType | null> {
-        return await collectionEmailConfirmations.findOne({email: email})
+    async getEmailConfirmation(emailOrCode: string): Promise<EmailConfirmationType | null> {
+        return collectionEmail.findOne({$or: [{email: emailOrCode}, {confirmationCode: emailOrCode}]}) as Promise<EmailConfirmationType | null>
+    },
+
+    async getRecoveryData(recoveryCode: string){
+        return collectionEmail.findOne({recoveryCode})
     },
 
     async findDeviceSession(deviceId: string, date?: Date) {

@@ -1,7 +1,7 @@
 import {body} from "express-validator";
 import {authorizationValidation} from "./auth-middleware";
 import {errorsValidationMiddleware} from "./err-middleware";
-import {collectionEmailConfirmations, collectionUsers} from "../db/db";
+import {collectionEmail, collectionUsers} from "../db/db";
 import {rateLimitsMiddleware} from "./rateLimits-middleware";
 
 
@@ -20,6 +20,12 @@ const loginValidation = body('login')
     })
 
 const passwordValidation = body('password')
+    .isString()
+    .trim()
+    .notEmpty()
+    .isLength({min: 6, max: 20})
+
+export const newPasswordValidation = body('newPassword')
     .isString()
     .trim()
     .notEmpty()
@@ -48,7 +54,7 @@ export const codeConfirmationValidation = body('code')
     .trim()
     .notEmpty()
     .custom(async value =>{
-        const foundCode = await collectionEmailConfirmations.findOne({confirmationCode: value});
+        const foundCode = await collectionEmail.findOne({confirmationCode: value});
         if(!foundCode) {
             throw new Error('incorrect code')
         }

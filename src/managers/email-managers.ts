@@ -1,4 +1,4 @@
-import {EmailConfirmationType} from "../db/db-users-type";
+import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-users-type";
 import {emailAdapter} from "../adapters/email-adapter";
 
 
@@ -17,5 +17,22 @@ export const emailManagers = {
         await emailAdapter.sendEmail(emailUser, subject, htmlMessages)
 
 
+    },
+    async passwordRecovery({email, recoveryCode}: PasswordRecoveryType) {
+        const emailUser = email
+
+        const subject = 'Password recovery'
+
+        const htmlMessages =
+            `<h1>Password recovery</h1>
+       <p>To finish password recovery please follow the link below:
+          <a href='https://somesite.com/password-recovery?recoveryCode=${recoveryCode}'>recovery password</a>
+      </p>`
+
+        await emailAdapter.sendEmail(emailUser, subject, htmlMessages)
+
+
     }
+
+
 }

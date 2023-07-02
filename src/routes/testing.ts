@@ -2,7 +2,7 @@ import {Request, Response, Router} from "express";
 import {
     collectionBlogs,
     collectionComments, collectionDevicesAuthSessions,
-    collectionEmailConfirmations,
+    collectionEmail,
     collectionPosts,
     collectionUsers
 } from "../db/db";
@@ -20,7 +20,7 @@ testingRouter.delete('/all-data', async (req: Request, res: Response)=>{
     const promisePosts = collectionPosts.deleteMany({});
     const promiseUsers = collectionUsers.deleteMany({})
     const promiseComments = collectionComments.deleteMany({})
-    const promiseEmailConfirmations = collectionEmailConfirmations.deleteMany({})
+    const promiseEmailConfirmations = collectionEmail.deleteMany({})
     const promiseDeviceAuth = collectionDevicesAuthSessions.deleteMany({})
 
     await Promise.all([promiseBlogs, promisePosts, promiseUsers, promiseComments, promiseEmailConfirmations, promiseDeviceAuth])

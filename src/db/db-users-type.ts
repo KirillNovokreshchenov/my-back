@@ -17,7 +17,20 @@ export type EmailConfirmationType = {
     isConfirmed: boolean
 }
 
-export type CodeConfirmation = {
+export type PasswordRecoveryType = {
+    email: string
+    recoveryCode: string
+    expirationDate: Date
+}
+
+export type EmailTypeDB = EmailConfirmationType|PasswordRecoveryType
+
+export type CodeRecoveryPassword = {
+    newPassword: string,
+    recoveryCode: string
+}
+
+export type CodeConfirmationEmail = {
     code: string
 }
 

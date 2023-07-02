@@ -1,11 +1,11 @@
-import {ObjectId} from "mongodb";
+import {ModifyResult, ObjectId} from "mongodb";
 import {
     collectionDevicesAuthSessions,
-    collectionEmailConfirmations,
+    collectionEmail,
     collectionUsers
 } from "../db/db";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
-import {DeviceAuthSession, EmailConfirmationType, UserType} from "../db/db-users-type";
+import {DeviceAuthSession, EmailConfirmationType, PasswordRecoveryType, UserType} from "../db/db-users-type";
 import {UserModelClass} from "../db/schemas/schema-user";
 
 export const usersRepository = {
@@ -23,18 +23,18 @@ export const usersRepository = {
 
 
     async emailConfirmation(newEmailConfirmation: EmailConfirmationType) {
-        await collectionEmailConfirmations.insertOne(newEmailConfirmation)
+        await collectionEmail.insertOne(newEmailConfirmation)
 
     },
     async codeConfirmation(code: string): Promise<EmailConfirmationType | null> {
-        return collectionEmailConfirmations.findOne({confirmationCode: code})
+        return collectionEmail.findOne({confirmationCode: code}) as Promise<EmailConfirmationType | null>
     },
-    async updateConfirm(code: string) {
-        const result = await collectionEmailConfirmations.updateOne({confirmationCode: code}, {$set: {isConfirmed: true}})
+    async updateConfirm(code: string): Promise<boolean> {
+        const result = await collectionEmail.updateOne({confirmationCode: code}, {$set: {isConfirmed: true}})
         return result.matchedCount === 1
     },
-    async updateEmailConfirmationCode(id: ObjectId, newCode: string, date: Date) {
-        const result = await collectionEmailConfirmations.updateOne({userId: id}, {
+    async updateEmailConfirmationCode(id: ObjectId, newCode: string, date: Date): Promise<boolean> {
+        const result = await collectionEmail.updateOne({userId: id}, {
             $set: {
                 confirmationCode: newCode,
                 expirationDate: date
@@ -42,10 +42,21 @@ export const usersRepository = {
         })
         return result.modifiedCount === 1
     },
-    async deleteEmailConfirmation(userId: ObjectId) {
-        const result = await collectionEmailConfirmations.deleteOne({userId: userId})
+    async deleteEmailConfirmation(userId: ObjectId): Promise<boolean> {
+        const result = await collectionEmail.deleteOne({userId: userId})
         return result.deletedCount === 1
+    },
+
+    async emailRecoveryPassword(recoveryPassword: PasswordRecoveryType) {
+        await collectionEmail.insertOne(recoveryPassword)
+    },
+
+    async newPassword(newPassword: string, email: string): Promise<boolean> {
+       const result = await collectionUsers.updateOne({email: email},{$set: {password: newPassword}})
+        return result.modifiedCount === 1
+
     }
+
 
 
 }
