@@ -1,7 +1,6 @@
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 
-export type CommentType = {
-    _id: ObjectId
+export type CommentType = WithId<{
     content: string
     commentatorInfo: {
         userId: string,
@@ -9,4 +8,4 @@ export type CommentType = {
     },
     createdAt: string,
     postId: string
-}
+}>

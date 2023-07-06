@@ -4,6 +4,7 @@ import {errorsValidationMiddleware} from "./err-middleware";
 import {collectionBlogs} from "../db/db";
 import {mongoIdMiddleware} from "./mongoIdMiddleware";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
+import {ObjectId} from "mongodb";
 
 
 const titleValidation = body('title')
@@ -37,7 +38,7 @@ const createdAtValidation = body('createdAt')
     .withMessage('incorrect ISO date')
 const blogIdValidation = body('blogId')
     .custom(async value =>{
-        const foundBlog = await collectionBlogs.findOne({_id: formatIdInObjectId(value)});
+        const foundBlog = await collectionBlogs.findOne({_id: new ObjectId(value)});
         if(!foundBlog){
             throw new Error('incorrect blogId')
         }

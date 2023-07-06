@@ -3,5 +3,5 @@ export type CreateAndUpdatePostModel = {
     shortDescription: string
     content: string
     blogId: string
-    createdAt?: string
+
 }

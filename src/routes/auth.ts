@@ -40,7 +40,6 @@ authRouter.post('/login',
 
 authRouter.post('/refresh-token',
     jwtRefreshMiddleware,
-
     async (req: Request, res: Response<JWTtokenViewModel>) => {
 
         const tokens = await jwtService.newTokens(req.user!._id, req.deviceId)

@@ -1,12 +1,11 @@
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 
 
-export type BlogType = {
-    _id: ObjectId
+export type BlogType = WithId<{
     name: string
     description: string
     websiteUrl: string
     createdAt: string
     isMembership: boolean
-}
+}>
 

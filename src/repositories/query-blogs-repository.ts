@@ -6,75 +6,74 @@ import {PostViewModel} from "../models/post-models/PostViewModel";
 import {QueryInputModel} from "../models/QueryInputModel";
 import {limitPages} from "../helpers/limitPages";
 import {pageCount} from "../helpers/pageCount";
-import {mapPost} from "./query-posts-repository";
 import {QueryViewModel} from "../models/QueryViewModel";
+import {BlogModelClass} from "../db/schemas/schema-blog";
+import {UserType} from "../db/db-users-type";
 
 export const blogsQueryRepository = {
 
     async allBlogs(query: QueryInputModel): Promise<QueryViewModel<BlogViewModel>> {
-        const {searchNameTerm = null, sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10} = query
+        const {
+            searchNameTerm = null,
+            sortBy = 'createdAt',
+            sortDirection = 'desc',
+            pageNumber = 1,
+            pageSize = 10
+        } = query
 
-        const totalCount = await collectionBlogs.countDocuments({name: {$regex: `${searchNameTerm ? searchNameTerm : ''}`, $options: 'i'}})
+        const totalCount = await BlogModelClass.countDocuments({
+            name: {
+                $regex: `${searchNameTerm ? searchNameTerm : ''}`,
+                $options: 'i'
+            }
+        })
+
+        const items = await BlogModelClass.find({
+            name: {
+                $regex: `${searchNameTerm ? searchNameTerm : ''}`,
+                $options: 'i'
+            }
+        })
+            .sort(sortDirection === 'asc' ? `${sortBy}` : `-${sortBy}`)
+            .skip(limitPages(+pageNumber, +pageSize))
+            .limit(+pageSize)
+            .lean()
+            .then((blogs) => {
+                return Array.from(blogs).map((blog: BlogType) => this._mapBlog(blog))
+            })
 
         return {
             pagesCount: pageCount(totalCount, +pageSize),
             page: +pageNumber,
             pageSize: +pageSize,
             totalCount: totalCount,
-            items: await collectionBlogs.find({name: {$regex: `${searchNameTerm ? searchNameTerm : ''}`, $options: 'i'}})
-                .sort({[sortBy]: sortDirection === 'asc'? 1: -1} as Sort)
-                .skip(limitPages(+pageNumber, +pageSize))
-                .limit(+pageSize)
-                .map(blog => mapBlog(blog))
-                .toArray()
+            items: items
+
+
         }
     },
 
     async findBlog(id: ObjectId): Promise<BlogViewModel | null> {
 
-        const foundBlog: BlogType|null = await collectionBlogs.findOne(id)
+        const foundBlog: BlogType | null = await BlogModelClass.findOne(id)
         if (!foundBlog) {
             return null
         }
-
-        return mapBlog(foundBlog)
+        return this._mapBlog(foundBlog)
 
     },
 
-    async allPostsForBlog(id: string, blogQuery: QueryInputModel): Promise<QueryViewModel<PostViewModel>|null>{
-        const {sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10} = blogQuery
-
-        const foundPosts: PostViewModel[] = await collectionPosts.find({blogId: id})
-            .sort({[sortBy]: sortDirection === 'asc'? 1: -1} as Sort)
-            .skip(limitPages(+pageNumber, +pageSize))
-            .limit(+pageSize)
-            .map(post=>{
-                return mapPost(post)
-            }).toArray()
-
-        if(foundPosts.length===0) return null
-
-        const totalCount = await collectionPosts.countDocuments({blogId: id})
+    _mapBlog(blog: BlogType) {
         return {
-                pagesCount: pageCount(totalCount, +pageSize),
-                page: +pageNumber,
-                pageSize:+pageSize,
-                totalCount: totalCount,
-                items: foundPosts
+            id: blog._id.toString(),
+            name: blog.name,
+            description: blog.description,
+            websiteUrl: blog.websiteUrl,
+            createdAt: blog.createdAt,
+            isMembership: blog.isMembership,
+
         }
-
     }
 
 }
 
-function mapBlog(blog: BlogType){
-    return {
-        id: blog._id.toString(),
-        name: blog.name,
-        description: blog.description,
-        websiteUrl: blog.websiteUrl,
-        createdAt: blog.createdAt,
-        isMembership: blog.isMembership,
-
-    }
-}

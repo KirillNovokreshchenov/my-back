@@ -7,35 +7,42 @@ import {CommentsQueryInputModel} from "../models/comment-models/CommentsQueryInp
 import {QueryViewModel} from "../models/QueryViewModel";
 import {pageCount} from "../helpers/pageCount";
 import {limitPages} from "../helpers/limitPages";
+import {CommentModelClass} from "../db/schemas/schema-comment";
+import {PostModelClass} from "../db/schemas/schema-post";
+import {PostType} from "../db/db-posts-type";
+import {FlattenMaps} from "mongoose";
 
 export const queryCommentsRepository = {
     async findComment(id: ObjectId): Promise<CommentViewModel|null> {
-        const comment = await collectionComments.findOne(id)
-        if(!comment) return null
+        const comment:CommentType|null= await CommentModelClass.findOne({ _id: id })
+       if(!comment) return null
         return this._mapComment(comment)
     },
 
     async getComments(id: string, query: CommentsQueryInputModel): Promise<QueryViewModel<CommentViewModel> | null> {
         const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10} = query
 
-        const post = await collectionPosts.findOne(formatIdInObjectId(id))
+        const post = await collectionPosts.findOne(new ObjectId(id))
 
         if (!post) return null
 
-        const totalCount = await collectionComments.countDocuments({postId: post._id.toString()})
+        const totalCount = await CommentModelClass.countDocuments({postId: id})
+
+        const items = await CommentModelClass.find({postId: id})
+            .sort(sortDirection ==='asc'? `${sortBy}`: `-${sortBy}`)
+            .skip(limitPages(+pageNumber, +pageSize))
+            .limit(+pageSize)
+            .lean()
+            .then((comments)=>{
+                return Array.from(comments).map((comment:CommentType) => this._mapComment(comment))
+            })
 
         return {
             pagesCount: pageCount(totalCount, +pageSize),
             page: +pageNumber,
             pageSize:+pageSize,
             totalCount: totalCount,
-            items: await collectionComments.find({postId: post._id.toString()})
-                .sort({[sortBy]: sortDirection === 'asc'? 1: -1} as Sort)
-                .skip(limitPages(+pageNumber, +pageSize))
-                .limit(+pageSize)
-                .map(comment=>{
-                    return this._mapComment(comment)
-                }).toArray()
+            items: items
         }
     },
 

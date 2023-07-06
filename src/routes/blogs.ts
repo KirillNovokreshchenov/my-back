@@ -22,6 +22,7 @@ import {QueryInputModel} from "../models/QueryInputModel";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 import {QueryViewModel} from "../models/QueryViewModel";
 import {RESPONSE_STATUS} from "../types/res-status";
+import {ObjectId} from "mongodb";
 
 
 export const blogRouter = Router()
@@ -35,12 +36,13 @@ blogRouter.get('/', async (req: RequestWithQuery<QueryInputModel>, res: Response
 blogRouter.get('/:id/posts',
     mongoIdMiddleware,
     async (req: RequestWithQueryAndParams<URIParamsId, QueryInputModel>, res: Response<QueryViewModel<PostViewModel>>) => {
-        const allPostsForBlog = await blogsQueryRepository.allPostsForBlog(req.params.id, req.query)
-        if (!allPostsForBlog) {
-            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
-        } else {
-            res.send(allPostsForBlog)
-        }
+
+        const blogIsExists = blogsQueryRepository.findBlog(new ObjectId(req.params.id))
+        if (!blogIsExists) return res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
+
+        const allPostsForBlog = await postsQueryRepository.allPosts(req.query, req.params.id)
+        return res.send(allPostsForBlog)
+
     })
 
 blogRouter.post('/',
@@ -48,7 +50,7 @@ blogRouter.post('/',
     async (req: RequestWithBody<CreateAndUpdateBlogInputModel>, res: Response<BlogViewModel>) => {
         const idBlog = await blogsService.createBlog(req.body)
         const newBlog = await blogsQueryRepository.findBlog(idBlog)
-        if(!newBlog){
+        if (!newBlog) {
             res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
             return
         }

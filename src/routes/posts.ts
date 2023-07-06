@@ -21,7 +21,6 @@ import {jwtMiddleware} from "../middlewares/auth-jwt-middleware";
 import {contentValidation} from "../middlewares/comment-middleware";
 import {commentsService} from "../domain/comments-service";
 import {queryCommentsRepository} from "../repositories/query-comments-repository";
-import {CommentType} from "../db/db-comments-type";
 import {CommentViewModel} from "../models/comment-models/CommentViewModel";
 import {CommentCreateAndUpdateModel} from "../models/comment-models/CommentCreateAndUpdateModel";
 import {CommentsQueryInputModel} from "../models/comment-models/CommentsQueryInputModel";
@@ -94,11 +93,8 @@ postRouter.post('/:id/comments',
     contentValidation,
     errorsValidationMiddleware,
     async (req: RequestWithBodyAndParams<URIParamsId, CommentCreateAndUpdateModel>, res: Response<CommentViewModel>) => {
-        if (!req.user) {
-            res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
-            return
-        }
-        const commentId = await commentsService.createComment(req.params.id, req.user, req.body.content)
+
+        const commentId = await commentsService.createComment(req.params.id, req.user!, req.body.content)
         if (!commentId) {
             res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         } else {

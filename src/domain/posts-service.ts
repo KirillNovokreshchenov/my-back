@@ -5,13 +5,16 @@ import {ObjectId} from "mongodb";
 import {collectionBlogs} from "../db/db";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 import {PostType} from "../db/db-posts-type";
+import {blogsQueryRepository} from "../repositories/query-blogs-repository";
+import {BlogType} from "../db/db-blogs-type";
+import {BlogViewModel} from "../models/blog-models/BlogViewModel";
 
 
 export const postsService = {
 
-    async createPost({title, shortDescription, content, blogId, createdAt}: CreateAndUpdatePostModel): Promise<ObjectId|null>{
+    async createPost({title, shortDescription, content, blogId}: CreateAndUpdatePostModel): Promise<ObjectId|null>{
 
-        const foundBlogName = await collectionBlogs.findOne({_id: formatIdInObjectId(blogId)})
+        const foundBlogName = await blogsQueryRepository.findBlog(new ObjectId(blogId))
         if(!foundBlogName){
             return null
         }
@@ -23,8 +26,7 @@ export const postsService = {
             content: content,
             blogId: blogId,
             blogName: foundBlogName.name,
-            createdAt: createdAt || new Date().toISOString(),
-            isMembership: false
+            createdAt: new Date().toISOString(),
         }
 
         return await postsRepository.createPost(createPost)
@@ -32,8 +34,10 @@ export const postsService = {
 
     },
 
-    async updatePost(id: string, {title, shortDescription, content, createdAt}: CreateAndUpdatePostModel): Promise<boolean>{
-        return await postsRepository.updatePost(id, title, shortDescription, content, createdAt)
+    async updatePost(postId: string, {title, shortDescription, content, blogId}: CreateAndUpdatePostModel): Promise<boolean>{
+        const blog:BlogViewModel|null = await blogsQueryRepository.findBlog(new ObjectId(blogId))
+        if(!blog) return false
+        return await postsRepository.updatePost(new ObjectId(postId), title, shortDescription, content, blogId, blog.name)
 
     },
     async deletePost(id: string): Promise<boolean> {

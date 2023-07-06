@@ -3,7 +3,7 @@ import {
     collectionBlogs,
     collectionComments, collectionDevicesAuthSessions,
     collectionEmail,
-    collectionPosts,
+    collectionPosts, collectionRateLimits,
     collectionUsers
 } from "../db/db";
 import {dbVideos} from "../db/db-videos";
@@ -22,8 +22,9 @@ testingRouter.delete('/all-data', async (req: Request, res: Response)=>{
     const promiseComments = collectionComments.deleteMany({})
     const promiseEmailConfirmations = collectionEmail.deleteMany({})
     const promiseDeviceAuth = collectionDevicesAuthSessions.deleteMany({})
+    const promiseRiteLimit = collectionRateLimits.deleteMany({})
 
-    await Promise.all([promiseBlogs, promisePosts, promiseUsers, promiseComments, promiseEmailConfirmations, promiseDeviceAuth])
+    await Promise.all([promiseBlogs, promisePosts, promiseUsers, promiseComments, promiseEmailConfirmations, promiseDeviceAuth,promiseRiteLimit])
         .catch((err) => {
             console.error(err);
         });

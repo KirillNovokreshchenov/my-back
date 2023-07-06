@@ -1,17 +1,19 @@
 import {CommentType} from "../db/db-comments-type";
 import {collectionComments} from "../db/db";
 import {ObjectId} from "mongodb";
+import {CommentModelClass} from "../db/schemas/schema-comment";
 
 export const commentsRepository = {
     async createComment(newComment: CommentType): Promise<ObjectId>{
-        await collectionComments.insertOne(newComment)
+        await CommentModelClass.create(newComment)
         return newComment._id
     },
     async updateComment(id:ObjectId, content: string): Promise<void>{
-        await collectionComments.updateOne({_id: id}, {$set: {content: content}})
+        await CommentModelClass.updateOne({_id: id}, {$set: {content: content}})
+
     },
 
     async deleteComment(id: ObjectId): Promise<void>{
-        await collectionComments.deleteOne({_id: id})
+        await CommentModelClass.deleteOne({_id: id})
     }
 }

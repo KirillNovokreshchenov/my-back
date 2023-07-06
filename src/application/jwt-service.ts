@@ -23,7 +23,7 @@ export const jwtService = {
             title: deviceName ?? 'Chrome',
             lastActiveDate: dateForSessions,
             expDate: add(dateForSessions, {
-                seconds: 20
+                minutes: 20
             }),
             deviceId: deviceId,
         }

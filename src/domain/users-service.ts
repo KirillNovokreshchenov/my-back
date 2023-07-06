@@ -140,7 +140,7 @@ export const usersService = {
         return newUser
     },
 
-    async _createEmailConfirmation(userId: ObjectId, email: string) {
+     _createEmailConfirmation(userId: ObjectId, email: string): EmailConfirmationType {
         return {
             userId: userId,
             email: email,

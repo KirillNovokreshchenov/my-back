@@ -31,13 +31,13 @@ export const commentsService = {
     },
     async updateComment(commentId: string, content: string, userId: ObjectId): Promise<RESPONSE_OPTIONS> {
 
-        const foundComment = await queryCommentsRepository.findComment(formatIdInObjectId(commentId))
+        const foundComment = await queryCommentsRepository.findComment(new ObjectId(commentId))
 
         if(!foundComment) return RESPONSE_OPTIONS.NOT_FOUND
 
         if(foundComment.commentatorInfo.userId !== userId.toString()) return RESPONSE_OPTIONS.FORBIDDEN
 
-        await commentsRepository.updateComment(formatIdInObjectId(commentId), content)
+        await commentsRepository.updateComment(new ObjectId(commentId), content)
 
         return RESPONSE_OPTIONS.NO_CONTENT
     },

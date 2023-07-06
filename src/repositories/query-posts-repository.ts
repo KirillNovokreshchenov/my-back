@@ -6,42 +6,51 @@ import {pageCount} from "../helpers/pageCount";
 import {limitPages} from "../helpers/limitPages";
 import {QueryInputModel} from "../models/QueryInputModel";
 import {QueryViewModel} from "../models/QueryViewModel";
+import {PostModelClass} from "../db/schemas/schema-post";
+import {BlogType} from "../db/db-blogs-type";
 
 
 export const postsQueryRepository = {
-    async allPosts(query: QueryInputModel): Promise<QueryViewModel<PostViewModel>> {
+    async allPosts(query: QueryInputModel, blogId?: string): Promise<QueryViewModel<PostViewModel>> {
+
         const {sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10} = query
-        const totalCount = await collectionPosts.countDocuments()
+
+        const totalCount = await PostModelClass.countDocuments(blogId?{blogId}:{})
+
+        const items = await PostModelClass.find(blogId?{blogId}:{})
+            .sort(sortDirection ==='asc'? `${sortBy}`: `-${sortBy}`)
+            .skip(limitPages(+pageNumber, +pageSize))
+            .limit(+pageSize)
+            .lean()
+            .then((posts)=>{
+                return Array.from(posts).map((post: PostType) => this._mapPost(post))
+            })
+
         return {
             pagesCount: pageCount(totalCount, +pageSize),
             page: +pageNumber,
             pageSize:+pageSize,
             totalCount: totalCount,
-            items: await collectionPosts.find({})
-                .sort({[sortBy]: sortDirection === 'asc'? 1: -1} as Sort)
-                .skip(limitPages(+pageNumber, +pageSize))
-                .limit(+pageSize)
-                .map(post=>{
-                    return mapPost(post)
-                }).toArray()
+            items: items
         }
 
     },
     async findPost(id: ObjectId): Promise<PostViewModel | null> {
-        const foundPost: PostType | null = await collectionPosts.findOne(id)
+        const foundPost: PostType | null = await PostModelClass.findOne(id)
         if (!foundPost) return null
-        return mapPost(foundPost)
+        return this._mapPost(foundPost)
 
     },
-}
-export function mapPost(post: PostType){
-    return {
-        id: post._id.toString(),
-        title: post.title,
-        shortDescription: post.shortDescription,
-        content: post.content,
-        blogId: post.blogId,
-        blogName: post.blogName,
-        createdAt: post.createdAt,
+
+    _mapPost(post: PostType){
+        return {
+            id: post._id.toString(),
+            title: post.title,
+            shortDescription: post.shortDescription,
+            content: post.content,
+            blogId: post.blogId,
+            blogName: post.blogName,
+            createdAt: post.createdAt,
+        }
     }
 }
