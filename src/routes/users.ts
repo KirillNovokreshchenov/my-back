@@ -15,29 +15,22 @@ import {RESPONSE_STATUS} from "../types/res-status";
 
 export const userRouter = Router()
 
-userRouter.get('/',
-    authorizationValidation,
-    async (req: RequestWithQuery<UsersQueryInputModel>, res: Response<QueryViewModel<UserViewModel>>) => {
+class UsersController {
+    async getUsers(req: RequestWithQuery<UsersQueryInputModel>, res: Response<QueryViewModel<UserViewModel>>) {
         const allUsers = await usersQueryRepository.allUsers(req.query)
         res.send(allUsers)
-    })
+    }
 
-userRouter.post('/',
-    userValidation,
-    async (req: RequestWithBody<UserInputModel>, res: Response<UserViewModel>) => {
+    async createUser(req: RequestWithBody<UserInputModel>, res: Response<UserViewModel>) {
         const userObjectId = await usersService.createUser(req.body)
         const newUser = await usersQueryRepository.findUser(userObjectId)
-        if(!newUser) {
+        if (!newUser) {
             return res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
         }
         return res.status(RESPONSE_STATUS.CREATED_201).send(newUser)
+    }
 
-    })
-
-userRouter.delete('/:id',
-    authorizationValidation,
-    mongoIdMiddleware,
-    async(req: RequestWithParams<URIParamsId>, res: Response)=>{
+    async deleteUser(req: RequestWithParams<URIParamsId>, res: Response) {
         const isDeleted: boolean = await usersService.deleteUser(req.params.id)
         if (isDeleted) {
             res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
@@ -45,4 +38,21 @@ userRouter.delete('/:id',
             res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         }
     }
-    )
+}
+
+
+const usersController = new UsersController()
+
+userRouter.get('/',
+    authorizationValidation,
+    usersController.getUsers
+)
+
+userRouter.post('/',
+    userValidation, usersController.createUser)
+
+userRouter.delete('/:id',
+    authorizationValidation,
+    mongoIdMiddleware,
+    usersController.deleteUser
+)

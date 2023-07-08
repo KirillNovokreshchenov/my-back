@@ -9,27 +9,23 @@ import {RESPONSE_STATUS} from "../types/res-status";
 
 export const deviseRouter = Router({})
 
-deviseRouter.get('/',
-    jwtRefreshMiddleware,
-    async (req: Request, res: Response<DeviceSessionModel[]>) => {
+class DeviceController {
+
+    async getSessions(req: Request, res: Response<DeviceSessionModel[]>) {
         const allSessions = await usersQueryRepository.getAllSessions(req.user!._id)
         res.status(200).send(allSessions)
-    })
+    }
 
-deviseRouter.delete('/',
-    jwtRefreshMiddleware,
-    async (req: Request, res: Response) => {
+    async deleteAllSessions(req: Request, res: Response) {
         const isDeleted = await jwtService.deleteAllSessions(req.user!._id, req.deviceId)
         if (!isDeleted) {
             res.sendStatus(401)
         } else {
             res.sendStatus(204)
         }
-    })
+    }
 
-deviseRouter.delete('/:id',
-    jwtRefreshMiddleware,
-    async (req: Request, res: Response) => {
+    async deleteSessionById(req: Request, res: Response) {
         const condition = await jwtService.deleteSession(req.user!._id, req.params.id)
         switch (condition) {
             case RESPONSE_OPTIONS.NOT_FOUND:
@@ -43,4 +39,20 @@ deviseRouter.delete('/:id',
                 break
         }
 
-    })
+    }
+
+}
+
+const deviceController = new DeviceController()
+
+deviseRouter.get('/',
+    jwtRefreshMiddleware,
+    deviceController.getSessions)
+
+deviseRouter.delete('/',
+    jwtRefreshMiddleware,
+    deviceController.deleteAllSessions)
+
+deviseRouter.delete('/:id',
+    jwtRefreshMiddleware,
+    deviceController.deleteSessionById)

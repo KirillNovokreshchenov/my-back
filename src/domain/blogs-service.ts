@@ -7,53 +7,58 @@ import {collectionBlogs} from "../db/db";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 import {BlogType} from "../db/db-blogs-type";
 import {blogsQueryRepository} from "../repositories/query-blogs-repository";
+import {PostType} from "../db/db-posts-type";
+
+class BlogsService {
+
+    async createBlog({name, description, websiteUrl}: CreateAndUpdateBlogInputModel): Promise<ObjectId> {
+
+        const newBlog: BlogType = new BlogType(
+            new ObjectId(),
+            name,
+            description,
+            websiteUrl,
+            new Date().toISOString(),
+            false
+        )
+
+        return await blogsRepository.createBlog(newBlog)
 
 
+    }
 
+    async createPostForBlog(BlogId: string, {
+        title,
+        shortDescription,
+        content
+    }: CreateModelPostForBlog): Promise<ObjectId | null> {
 
-export const blogsService = {
-
-    async createBlog({name, description, websiteUrl}: CreateAndUpdateBlogInputModel): Promise<ObjectId>{
-
-        const newBlog: BlogType = {
-            _id:new ObjectId(),
-            name: name,
-            description: description,
-            websiteUrl: websiteUrl,
-            createdAt: new Date().toISOString(),
-            isMembership: false
-        }
-
-         return await blogsRepository.createBlog(newBlog)
-
-
-    },
-    async createPostForBlog(id:string, {title, shortDescription, content}: CreateModelPostForBlog): Promise<ObjectId|null>{
-        const foundBlogName = await blogsQueryRepository.findBlog(new ObjectId(id))
-        if(!foundBlogName){
+        const foundBlogName = await blogsQueryRepository.findBlog(new ObjectId(BlogId))
+        if (!foundBlogName) {
             return null
         }
-        const newPost = {
-            _id: new ObjectId(),
-            title: title,
-            shortDescription: shortDescription,
-            content: content,
-            blogId: id,
-            blogName: foundBlogName.name,
-            createdAt: new Date().toISOString(),
-            isMembership: false
-        }
+        const newPost = new PostType(
+            new ObjectId(),
+            title,
+            shortDescription,
+            content,
+            BlogId,
+            foundBlogName.name,
+            new Date().toISOString(),
+        )
         return blogsRepository.createPostForBlog(newPost)
 
-    },
+    }
 
-    async  updateBlog(id: string,{name, description, websiteUrl}: CreateAndUpdateBlogInputModel): Promise<boolean>{
+    async updateBlog(id: string, {name, description, websiteUrl}: CreateAndUpdateBlogInputModel): Promise<boolean> {
         return await blogsRepository.updateBlog(id, name, description, websiteUrl)
-    },
+    }
 
-    async  deleteBlog(id: string) : Promise<boolean> {
-        return  await blogsRepository.deleteBlog(id)
+    async deleteBlog(id: string): Promise<boolean> {
+        return await blogsRepository.deleteBlog(id)
 
 
     }
 }
+
+export const blogsService = new BlogsService()

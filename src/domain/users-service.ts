@@ -3,7 +3,7 @@ import {ObjectId} from "mongodb";
 import bcrypt from 'bcrypt'
 import {usersRepository} from "../repositories/users-repository";
 import {LoginModel} from "../models/auth-models/LoginModel";
-import {EmailConfirmationType, PasswordRecoveryType, UserType} from "../db/db-users-type";
+import {UserType} from "../db/db-users-type";
 import {uuid} from "uuidv4";
 import {add} from 'date-fns'
 import {emailManagers} from "../managers/email-managers";
@@ -11,13 +11,14 @@ import {usersQueryRepository} from "../repositories/query-users-repository";
 import {UserModelClass} from "../db/schemas/schema-user";
 import {HydratedDocument} from "mongoose";
 import {collectionEmail} from "../db/db";
+import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-email-type";
 
 
-export const usersService = {
+class UsersService {
     async createUser(userData: UserInputModel): Promise<ObjectId> {
         const newUser: UserType = await this._newUser(userData)
         return usersRepository.createUser(newUser)
-    },
+    }
 
     async createUserByRegistration(dataRegistration: UserInputModel): Promise<boolean> {
 
@@ -42,11 +43,11 @@ export const usersService = {
         }
 
 
-    },
+    }
 
     async deleteUser(id: string) {
         return await usersRepository.deleteUser(id)
-    },
+    }
 
     async checkCredentials({loginOrEmail, password}: LoginModel): Promise<false | ObjectId> {
         const user = await usersRepository.findByLoginOrEmail(loginOrEmail)
@@ -55,7 +56,7 @@ export const usersService = {
         if (!isValid) return false
         return user._id
 
-    },
+    }
 
     async confirmEmail(code: string): Promise<boolean> {
         const codeIsExisting = await usersQueryRepository.getEmailConfirmation(code)
@@ -63,7 +64,7 @@ export const usersService = {
         if (codeIsExisting.expirationDate < new Date()) return false
         if (codeIsExisting.isConfirmed) return false
         return usersRepository.updateConfirm(code)
-    },
+    }
 
     async emailResending(email: string): Promise<boolean> {
         const emailConfirmation = await usersQueryRepository.getEmailConfirmation(email)
@@ -83,18 +84,19 @@ export const usersService = {
             console.log(e)
             return false
         }
-    },
+    }
 
     async recoveryPassword(email: string) {
         const recoveryCode = uuid()
         const date = add(new Date(), {
             hours: 1
         })
-        const recoveryPassword: PasswordRecoveryType = {
-            email: email,
-            recoveryCode: recoveryCode,
-            expirationDate: date
-        }
+        const recoveryPassword: PasswordRecoveryType = new PasswordRecoveryType(
+            new ObjectId(),
+            email,
+            recoveryCode,
+            date
+        )
 
         try {
             await emailManagers.passwordRecovery(recoveryPassword)
@@ -103,7 +105,7 @@ export const usersService = {
         }
         await usersRepository.emailRecoveryPassword(recoveryPassword)
 
-    },
+    }
 
     async newPassword(newPassword: string, recoveryCode: string): Promise<boolean> {
 
@@ -119,38 +121,39 @@ export const usersService = {
         return updatePassword;
 
 
-
-
-    },
+    }
 
 
     async _generateHash(password: string) {
         return bcrypt.hash(password, 10)
-    },
+    }
 
     async _newUser({login, email, password}: UserInputModel) {
         const passwordHash = await this._generateHash(password)
-        const newUser: UserType = {
-            _id: new ObjectId(),
-            login: login,
+        const newUser: UserType = new UserType(
+            new ObjectId(),
+            login,
             email,
-            password: passwordHash,
-            createdAt: new Date().toISOString()
-        }
-        return newUser
-    },
+            passwordHash,
+            new Date().toISOString()
+        )
 
-     _createEmailConfirmation(userId: ObjectId, email: string): EmailConfirmationType {
-        return {
-            userId: userId,
-            email: email,
-            confirmationCode: uuid(),
-            expirationDate: add(new Date(), {
+        return newUser
+    }
+
+    _createEmailConfirmation(userId: ObjectId, email: string): EmailConfirmationType {
+        return new EmailConfirmationType(
+            new ObjectId(),
+            userId,
+            email,
+            uuid(),
+            add(new Date(), {
                 hours: 1
             }),
-            isConfirmed: false
-        }
+            false)
     }
 
 
 }
+
+export const usersService = new UsersService()

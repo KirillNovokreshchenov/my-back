@@ -12,12 +12,13 @@ import {PostModelClass} from "../db/schemas/schema-post";
 import {PostType} from "../db/db-posts-type";
 import {FlattenMaps} from "mongoose";
 
-export const queryCommentsRepository = {
+
+class QueryCommentsRepository {
     async findComment(id: ObjectId): Promise<CommentViewModel|null> {
         const comment:CommentType|null= await CommentModelClass.findOne({ _id: id })
        if(!comment) return null
         return this._mapComment(comment)
-    },
+    }
 
     async getComments(id: string, query: CommentsQueryInputModel): Promise<QueryViewModel<CommentViewModel> | null> {
         const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10} = query
@@ -44,7 +45,7 @@ export const queryCommentsRepository = {
             totalCount: totalCount,
             items: items
         }
-    },
+    }
 
 
     _mapComment(comment: CommentType): CommentViewModel {
@@ -59,3 +60,5 @@ export const queryCommentsRepository = {
         }
     }
 }
+
+export const queryCommentsRepository = new QueryCommentsRepository()

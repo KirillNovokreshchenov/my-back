@@ -1,5 +1,6 @@
-import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-users-type";
+
 import {emailAdapter} from "../adapters/email-adapter";
+import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-email-type";
 
 
 export const emailManagers = {

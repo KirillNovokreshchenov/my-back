@@ -14,11 +14,12 @@ import {
     emailValidationResending, newPasswordValidation,
     userValidationByRegistration
 } from "../middlewares/user-middleware";
-import {CodeConfirmationEmail, CodeRecoveryPassword, EmailType} from "../db/db-users-type";
 import {errorsValidationMiddleware} from "../middlewares/err-middleware";
 import {jwtRefreshMiddleware} from "../middlewares/auth-refresh-middleware";
 import {RESPONSE_STATUS} from "../types/res-status";
 import {rateLimitsMiddleware} from "../middlewares/rateLimits-middleware";
+import {CodeConfirmationEmail, CodeRecoveryPassword, EmailType} from "../models/email-models/EmailModels";
+
 
 
 export const authRouter = Router()

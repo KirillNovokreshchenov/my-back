@@ -3,6 +3,7 @@ import {authorizationValidation} from "./auth-middleware";
 import {errorsValidationMiddleware} from "./err-middleware";
 import {collectionEmail, collectionUsers} from "../db/db";
 import {rateLimitsMiddleware} from "./rateLimits-middleware";
+import {EmailConfirmationClass} from "../db/schemas/schemas-email";
 
 
 
@@ -54,7 +55,7 @@ export const codeConfirmationValidation = body('code')
     .trim()
     .notEmpty()
     .custom(async value =>{
-        const foundCode = await collectionEmail.findOne({confirmationCode: value});
+        const foundCode = await EmailConfirmationClass.findOne({confirmationCode: value});
         if(!foundCode) {
             throw new Error('incorrect code')
         }

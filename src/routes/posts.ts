@@ -30,14 +30,22 @@ import {RESPONSE_STATUS} from "../types/res-status";
 
 export const postRouter = Router()
 
-postRouter.get('/', async (req: RequestWithQuery<QueryInputModel>, res: Response<QueryViewModel<PostViewModel>>) => {
-    const allPosts = await postsQueryRepository.allPosts(req.query)
-    res.send(allPosts)
-})
+class PostsController {
+    async getPosts(req: RequestWithQuery<QueryInputModel>, res: Response<QueryViewModel<PostViewModel>>) {
+        const allPosts = await postsQueryRepository.allPosts(req.query)
+        res.send(allPosts)
+    }
 
-postRouter.post('/',
-    postValidate,
-    async (req: RequestWithBody<CreateAndUpdatePostModel>, res: Response<PostViewModel>) => {
+    async getPost(req: RequestWithParams<URIParamsId>, res: Response<PostViewModel>) {
+        const foundPost = await postsQueryRepository.findPost(formatIdInObjectId(req.params.id))
+        if (foundPost) {
+            res.send(foundPost)
+        } else {
+            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
+        }
+    }
+
+    async createPost(req: RequestWithBody<CreateAndUpdatePostModel>, res: Response<PostViewModel>) {
         const objId = await postsService.createPost(req.body)
         if (!objId) {
             res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
@@ -49,50 +57,27 @@ postRouter.post('/',
             return
         }
         res.status(RESPONSE_STATUS.CREATED_201).send(foundNewCreatePost)
-    })
+    }
 
-postRouter.get('/:id',
-    mongoIdMiddleware,
-    async (req: RequestWithParams<URIParamsId>, res: Response<PostViewModel>) => {
-        const foundPost = await postsQueryRepository.findPost(formatIdInObjectId(req.params.id))
-        if (foundPost) {
-            res.send(foundPost)
-        } else {
-            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
-        }
-    })
-
-postRouter.put('/:id',
-    postValidate,
-    mongoIdMiddleware,
-    async (req: RequestWithBodyAndParams<URIParamsId, CreateAndUpdatePostModel>, res: Response) => {
+    async updatePost(req: RequestWithBodyAndParams<URIParamsId, CreateAndUpdatePostModel>, res: Response) {
         const isUpdate = await postsService.updatePost(req.params.id, req.body)
         if (isUpdate) {
             res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         } else {
             res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         }
-    })
+    }
 
-postRouter.delete('/:id',
-    authorizationValidation,
-    mongoIdMiddleware,
-    async (req: RequestWithParams<URIParamsId>, res: Response) => {
+    async deletePost(req: RequestWithParams<URIParamsId>, res: Response) {
         const isDeleted: boolean = await postsService.deletePost(req.params.id)
         if (isDeleted) {
             res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         } else {
             res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         }
-    })
+    }
 
-
-postRouter.post('/:id/comments',
-    jwtMiddleware,
-    mongoIdMiddleware,
-    contentValidation,
-    errorsValidationMiddleware,
-    async (req: RequestWithBodyAndParams<URIParamsId, CommentCreateAndUpdateModel>, res: Response<CommentViewModel>) => {
+    async createCommentForPost(req: RequestWithBodyAndParams<URIParamsId, CommentCreateAndUpdateModel>, res: Response<CommentViewModel>) {
 
         const commentId = await commentsService.createComment(req.params.id, req.user!, req.body.content)
         if (!commentId) {
@@ -101,14 +86,48 @@ postRouter.post('/:id/comments',
             const newComment = await queryCommentsRepository.findComment(commentId)
             res.status(RESPONSE_STATUS.CREATED_201).send(newComment!)
         }
-    })
-
-postRouter.get('/:id/comments', async (req: RequestWithQueryAndParams<URIParamsId, CommentsQueryInputModel>, res: Response<QueryViewModel<CommentViewModel>>) => {
-    const comments = await queryCommentsRepository.getComments(req.params.id, req.query)
-    if (!comments) {
-        res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
-    } else {
-        res.send(comments)
     }
-})
+
+    async getCommentsForPost(req: RequestWithQueryAndParams<URIParamsId, CommentsQueryInputModel>, res: Response<QueryViewModel<CommentViewModel>>) {
+        const comments = await queryCommentsRepository.getComments(req.params.id, req.query)
+        if (!comments) {
+            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
+        } else {
+            res.send(comments)
+        }
+    }
+
+}
+
+const postsController = new PostsController()
+
+postRouter.get('/', postsController.getPosts)
+
+postRouter.post('/',
+    postValidate,
+    postsController.createPost)
+
+postRouter.get('/:id',
+    mongoIdMiddleware,
+    postsController.getPost)
+
+postRouter.put('/:id',
+    postValidate,
+    mongoIdMiddleware,
+    postsController.updatePost)
+
+postRouter.delete('/:id',
+    authorizationValidation,
+    mongoIdMiddleware,
+    postsController.deletePost)
+
+
+postRouter.post('/:id/comments',
+    jwtMiddleware,
+    mongoIdMiddleware,
+    contentValidation,
+    errorsValidationMiddleware,
+    postsController.createCommentForPost)
+
+postRouter.get('/:id/comments', postsController.getCommentsForPost)
 

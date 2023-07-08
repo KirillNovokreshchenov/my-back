@@ -11,49 +11,65 @@ import {CommentCreateAndUpdateModel} from "../models/comment-models/CommentCreat
 import {commentsService} from "../domain/comments-service";
 import {errorsValidationMiddleware} from "../middlewares/err-middleware";
 import {RESPONSE_OPTIONS, RESPONSE_STATUS} from "../types/res-status";
+import {ObjectId} from "mongodb";
 
 
 export const commentRouter = Router()
 
-const switchResponseComment = (condition: RESPONSE_OPTIONS, res: Response) => {
-    switch (condition) {
-        case RESPONSE_OPTIONS.NOT_FOUND:
-            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
-            break;
-        case RESPONSE_OPTIONS.FORBIDDEN:
-            res.sendStatus(RESPONSE_STATUS.FORBIDDEN_403)
-            break
-        case RESPONSE_OPTIONS.NO_CONTENT:
-            res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
-            break
-    }
-}
+class CommentsController{
 
-commentRouter.get('/:id',
-    mongoIdMiddleware,
-    async (req: RequestWithParams<URIParamsId>, res: Response<CommentViewModel>) => {
-        const comment = await queryCommentsRepository.findComment(formatIdInObjectId(req.params.id))
+    async getComment(req: RequestWithParams<URIParamsId>, res: Response<CommentViewModel>) {
+        const comment = await queryCommentsRepository.findComment(new ObjectId(req.params.id))
         if (!comment) {
             res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         } else {
             res.send(comment)
         }
-    })
+    }
+
+    async updateComment(req: RequestWithBodyAndParams<URIParamsId, CommentCreateAndUpdateModel>, res: Response) {
+        const isUpdate = await commentsService.updateComment(req.params.id, req.body.content, req.user!._id)
+        this._switchResponseComment(isUpdate, res)
+    }
+
+    async deleteComment(req: RequestWithParams<URIParamsId>, res: Response) {
+
+        const isDeleted = await commentsService.deleteComment(req.params.id, req.user!._id)
+        this._switchResponseComment(isDeleted, res)
+    }
+
+
+    _switchResponseComment(condition: RESPONSE_OPTIONS, res: Response) {
+        switch (condition) {
+            case RESPONSE_OPTIONS.NOT_FOUND:
+                res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
+                break;
+            case RESPONSE_OPTIONS.FORBIDDEN:
+                res.sendStatus (RESPONSE_STATUS.FORBIDDEN_403)
+                break
+            case RESPONSE_OPTIONS.NO_CONTENT:
+                res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
+                break
+        }
+    }
+}
+
+const commentsController = new CommentsController()
+
+
+
+commentRouter.get('/:id',
+    mongoIdMiddleware,
+    commentsController.getComment)
 
 commentRouter.put('/:id',
     jwtMiddleware,
     mongoIdMiddleware,
     contentValidation,
     errorsValidationMiddleware,
-    async (req: RequestWithBodyAndParams<URIParamsId, CommentCreateAndUpdateModel>, res: Response) => {
-        const isUpdate = await commentsService.updateComment(req.params.id, req.body.content, req.user!._id)
-        switchResponseComment(isUpdate, res)
-    })
+    commentsController.updateComment.bind(commentsController))
 
 commentRouter.delete('/:id',
     jwtMiddleware,
     mongoIdMiddleware,
-    async (req: RequestWithParams<URIParamsId>, res: Response) => {
-        const isDeleted = await commentsService.deleteComment(req.params.id, req.user!._id)
-        switchResponseComment(isDeleted, res)
-    })
+    commentsController.deleteComment.bind(commentsController))

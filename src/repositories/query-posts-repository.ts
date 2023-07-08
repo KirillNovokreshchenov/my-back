@@ -10,7 +10,7 @@ import {PostModelClass} from "../db/schemas/schema-post";
 import {BlogType} from "../db/db-blogs-type";
 
 
-export const postsQueryRepository = {
+class PostsQueryRepository {
     async allPosts(query: QueryInputModel, blogId?: string): Promise<QueryViewModel<PostViewModel>> {
 
         const {sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10} = query
@@ -34,13 +34,13 @@ export const postsQueryRepository = {
             items: items
         }
 
-    },
+    }
     async findPost(id: ObjectId): Promise<PostViewModel | null> {
         const foundPost: PostType | null = await PostModelClass.findOne(id)
         if (!foundPost) return null
         return this._mapPost(foundPost)
 
-    },
+    }
 
     _mapPost(post: PostType){
         return {
@@ -54,3 +54,5 @@ export const postsQueryRepository = {
         }
     }
 }
+
+export const postsQueryRepository = new PostsQueryRepository()

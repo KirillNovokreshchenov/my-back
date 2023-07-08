@@ -10,8 +10,8 @@ import {QueryViewModel} from "../models/QueryViewModel";
 import {BlogModelClass} from "../db/schemas/schema-blog";
 import {UserType} from "../db/db-users-type";
 
-export const blogsQueryRepository = {
 
+class QueryBlogsRepository {
     async allBlogs(query: QueryInputModel): Promise<QueryViewModel<BlogViewModel>> {
         const {
             searchNameTerm = null,
@@ -48,10 +48,9 @@ export const blogsQueryRepository = {
             pageSize: +pageSize,
             totalCount: totalCount,
             items: items
-
-
         }
-    },
+
+    }
 
     async findBlog(id: ObjectId): Promise<BlogViewModel | null> {
 
@@ -61,7 +60,7 @@ export const blogsQueryRepository = {
         }
         return this._mapBlog(foundBlog)
 
-    },
+    }
 
     _mapBlog(blog: BlogType) {
         return {
@@ -74,6 +73,7 @@ export const blogsQueryRepository = {
 
         }
     }
-
 }
+
+export const blogsQueryRepository = new QueryBlogsRepository()
 
