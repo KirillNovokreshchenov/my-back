@@ -1,11 +1,11 @@
 import {Request, Response, Router} from "express";
 import {RequestWithBody} from "../types/types";
 import {LoginModel} from "../models/auth-models/LoginModel";
-import {usersService} from "../domain/users-service";
+import {UsersService} from "../domain/users-service";
 import {loginValidation} from "../middlewares/login-middleware";
-import {jwtService} from "../application/jwt-service";
+import {JwtService} from "../application/jwt-service";
 import {jwtMiddleware} from "../middlewares/auth-jwt-middleware";
-import {usersQueryRepository} from "../repositories/query-users-repository";
+import {UsersQueryRepository} from "../repositories/query-users-repository";
 import {JWTtokenViewModel} from "../models/auth-models/JWTtokenViewModel";
 import {DataViewByToken} from "../models/auth-models/DataViewByToken";
 import {UserInputModel} from "../models/user-models/UserInputModel";
@@ -21,15 +21,24 @@ import {rateLimitsMiddleware} from "../middlewares/rateLimits-middleware";
 import {CodeConfirmationEmail, CodeRecoveryPassword, EmailType} from "../models/email-models/EmailModels";
 
 
-
 export const authRouter = Router()
 
-authRouter.post('/login',
-    loginValidation,
-    async (req: RequestWithBody<LoginModel>, res: Response<JWTtokenViewModel>) => {
-        const userId = await usersService.checkCredentials(req.body)
+class AuthController {
+
+    private usersService: UsersService
+    private jwtService: JwtService
+    private usersQueryRepository: UsersQueryRepository
+
+    constructor() {
+        this.jwtService = new JwtService()
+        this.usersService = new UsersService()
+        this.usersQueryRepository= new UsersQueryRepository()
+    }
+
+    async login(req: RequestWithBody<LoginModel>, res: Response<JWTtokenViewModel>) {
+        const userId = await this.usersService.checkCredentials(req.body)
         if (userId) {
-            const tokens = await jwtService.createJWT(userId, req.ip, req.headers['user-agent'])
+            const tokens = await this.jwtService.createJWT(userId, req.ip, req.headers['user-agent'])
 
             res.cookie('refreshToken', tokens.refreshToken, {httpOnly: true, secure: true})
             res.status(RESPONSE_STATUS.OK_200).send(tokens.accessToken)
@@ -37,35 +46,27 @@ authRouter.post('/login',
         } else {
             res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
         }
-    })
+    }
 
-authRouter.post('/refresh-token',
-    jwtRefreshMiddleware,
-    async (req: Request, res: Response<JWTtokenViewModel>) => {
+    async refreshToken(req: Request, res: Response<JWTtokenViewModel>) {
 
-        const tokens = await jwtService.newTokens(req.user!._id, req.deviceId)
+        const tokens = await this.jwtService.newTokens(req.user!._id, req.deviceId)
         res.cookie('refreshToken', tokens.refreshToken, {httpOnly: true, secure: true})
         res.status(200).send(tokens.accessToken)
 
-    })
+    }
 
-authRouter.post('/logout',
-    jwtRefreshMiddleware,
-    async (req: Request, res: Response) => {
-        const logout = await jwtService.logout(req.deviceId)
+    async logout(req: Request, res: Response) {
+        const logout = await this.jwtService.logout(req.deviceId)
         if (logout) {
             res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         } else {
             res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
         }
+    }
 
-    })
-
-
-authRouter.get('/me',
-    jwtMiddleware,
-    async (req: Request, res: Response<DataViewByToken>) => {
-        const user = await usersQueryRepository.findUserWithToken(req.user!._id)
+    async me(req: Request, res: Response<DataViewByToken>) {
+        const user = await this.usersQueryRepository.findUserWithToken(req.user!._id)
 
         if (!user) {
             res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
@@ -73,26 +74,19 @@ authRouter.get('/me',
         }
 
         res.status(RESPONSE_STATUS.OK_200).send(user)
-    })
+    }
 
-authRouter.post('/registration',
-    userValidationByRegistration,
-    async (req: RequestWithBody<UserInputModel>, res: Response) => {
-        const newUser = await usersService.createUserByRegistration(req.body)
+    async registration(req: RequestWithBody<UserInputModel>, res: Response) {
+        const newUser = await this.usersService.createUserByRegistration(req.body)
         if (!newUser) {
             res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
         } else {
             res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         }
+    }
 
-    })
-
-authRouter.post('/registration-confirmation',
-    rateLimitsMiddleware,
-    codeConfirmationValidation,
-    errorsValidationMiddleware,
-    async (req: RequestWithBody<CodeConfirmationEmail>, res: Response) => {
-        const codeIsConfirmed = await usersService.confirmEmail(req.body.code)
+    async registrationConfirmation(req: RequestWithBody<CodeConfirmationEmail>, res: Response) {
+        const codeIsConfirmed = await this.usersService.confirmEmail(req.body.code)
         if (!codeIsConfirmed) {
             res.status(RESPONSE_STATUS.BAD_REQUEST_400).send({
                 "errorsMessages": [
@@ -105,14 +99,10 @@ authRouter.post('/registration-confirmation',
         } else {
             res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         }
-    })
+    }
 
-authRouter.post('/registration-email-resending',
-    rateLimitsMiddleware,
-    emailValidationResending,
-    errorsValidationMiddleware,
-    async (req: RequestWithBody<EmailType>, res: Response) => {
-        const emailResending = await usersService.emailResending(req.body.email)
+    async registrationEmailResending(req: RequestWithBody<EmailType>, res: Response) {
+        const emailResending = await this.usersService.emailResending(req.body.email)
         if (!emailResending) {
             res.status(RESPONSE_STATUS.BAD_REQUEST_400).send({
                 "errorsMessages": [
@@ -125,33 +115,22 @@ authRouter.post('/registration-email-resending',
         } else {
             res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         }
-    })
+    }
 
+    async passwordRecovery(req: RequestWithBody<EmailType>, res: Response) {
 
-authRouter.post('/password-recovery',
-    rateLimitsMiddleware,
-    emailValidationResending,
-    errorsValidationMiddleware,
-    async (req: RequestWithBody<EmailType>, res: Response) => {
         try {
-            await usersService.recoveryPassword(req.body.email)
+            await this.usersService.recoveryPassword(req.body.email)
         } catch {
             return res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
         }
-
-
         return res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
 
-    })
+    }
 
-authRouter.post('/new-password',
-    rateLimitsMiddleware,
-    newPasswordValidation,
-    errorsValidationMiddleware,
-    async (req: RequestWithBody<CodeRecoveryPassword>, res: Response) => {
-
+    async newPassword(req: RequestWithBody<CodeRecoveryPassword>, res: Response) {
         try {
-            const newPassword = await usersService.newPassword(req.body.newPassword, req.body.recoveryCode)
+            const newPassword = await this.usersService.newPassword(req.body.newPassword, req.body.recoveryCode)
             if (newPassword) {
                 res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
             } else {
@@ -170,4 +149,54 @@ authRouter.post('/new-password',
         }
 
     }
+
+}
+
+const authController = new AuthController()
+
+authRouter.post('/login',
+    loginValidation,
+    authController.login.bind(authController))
+
+authRouter.post('/refresh-token',
+    jwtRefreshMiddleware,
+    authController.refreshToken.bind(authController))
+
+authRouter.post('/logout',
+    jwtRefreshMiddleware,
+    authController.logout.bind(authController))
+
+
+authRouter.get('/me',
+    jwtMiddleware,
+    authController.me.bind(authController))
+
+authRouter.post('/registration',
+    userValidationByRegistration,
+    authController.registration.bind(authController))
+
+authRouter.post('/registration-confirmation',
+    rateLimitsMiddleware,
+    codeConfirmationValidation,
+    errorsValidationMiddleware,
+    authController.registrationConfirmation.bind(authController))
+
+authRouter.post('/registration-email-resending',
+    rateLimitsMiddleware,
+    emailValidationResending,
+    errorsValidationMiddleware,
+    authController.registrationEmailResending.bind(authController))
+
+
+authRouter.post('/password-recovery',
+    rateLimitsMiddleware,
+    emailValidationResending,
+    errorsValidationMiddleware,
+    authController.passwordRecovery.bind(authController))
+
+authRouter.post('/new-password',
+    rateLimitsMiddleware,
+    newPasswordValidation,
+    errorsValidationMiddleware,
+    authController.newPassword.bind(authController)
 )

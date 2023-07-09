@@ -1,4 +1,4 @@
-import {Router, Request, Response} from "express";
+import {Router, Response} from "express";
 import {
     RequestWithBody,
     RequestWithBodyAndParams,
@@ -7,15 +7,15 @@ import {
     RequestWithQueryAndParams
 } from "../types/types";
 import {URIParamsId} from "../models/URIParamsIdModel";
-import {blogsService} from "../domain/blogs-service";
+import {BlogsService} from "../domain/blogs-service";
 import {CreateAndUpdateBlogInputModel} from "../models/blog-models/CreateAndUpdateBlogInputModel";
 import {BlogViewModel} from "../models/blog-models/BlogViewModel";
 import {blogValidate} from "../middlewares/blog-middlewares";
 import {authorizationValidation} from "../middlewares/auth-middleware";
-import {blogsQueryRepository} from "../repositories/query-blogs-repository";
+import {QueryBlogsRepository} from "../repositories/query-blogs-repository";
 import {PostViewModel} from "../models/post-models/PostViewModel";
 import {CreateModelPostForBlog} from "../models/blog-models/CreateModelPostForBlog";
-import {postsQueryRepository} from "../repositories/query-posts-repository";
+import {PostsQueryRepository} from "../repositories/query-posts-repository";
 import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
 import {postValidateForBlog} from "../middlewares/post-middleware";
 import {QueryInputModel} from "../models/QueryInputModel";
@@ -28,23 +28,35 @@ import {ObjectId} from "mongodb";
 export const blogRouter = Router()
 
 class BlogsController {
+
+    private blogsQueryRepository: QueryBlogsRepository
+    private blogsService: BlogsService
+    private postsQueryRepository: PostsQueryRepository
+
+    constructor() {
+        this.blogsService = new BlogsService()
+        this.blogsQueryRepository = new QueryBlogsRepository()
+        this.postsQueryRepository = new PostsQueryRepository()
+    }
+
+
     async getBlogs(req: RequestWithQuery<QueryInputModel>, res: Response<QueryViewModel<BlogViewModel>>) {
-        const allBlogs = await blogsQueryRepository.allBlogs(req.query)
+        const allBlogs = await this.blogsQueryRepository.allBlogs(req.query)
         res.json(allBlogs)
     }
 
     async getAllPostsForBlog(req: RequestWithQueryAndParams<URIParamsId, QueryInputModel>, res: Response<QueryViewModel<PostViewModel>>) {
 
-        const blogIsExists = blogsQueryRepository.findBlog(new ObjectId(req.params.id))
+        const blogIsExists = this.blogsQueryRepository.findBlog(new ObjectId(req.params.id))
         if (!blogIsExists) return res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
 
-        const allPostsForBlog = await postsQueryRepository.allPosts(req.query, req.params.id)
+        const allPostsForBlog = await this.postsQueryRepository.allPosts(req.query, req.params.id)
         return res.send(allPostsForBlog)
     }
 
     async createBlog(req: RequestWithBody<CreateAndUpdateBlogInputModel>, res: Response<BlogViewModel>) {
-        const idBlog = await blogsService.createBlog(req.body)
-        const newBlog = await blogsQueryRepository.findBlog(idBlog)
+        const idBlog = await this.blogsService.createBlog(req.body)
+        const newBlog = await this.blogsQueryRepository.findBlog(idBlog)
         if (!newBlog) {
             res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
             return
@@ -54,12 +66,12 @@ class BlogsController {
 
     async createPostForBlog(req: RequestWithBodyAndParams<URIParamsId, CreateModelPostForBlog>, res: Response<PostViewModel>) {
 
-        const idPost = await blogsService.createPostForBlog(req.params.id, req.body)
+        const idPost = await this.blogsService.createPostForBlog(req.params.id, req.body)
         if (!idPost) {
             res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
             return
         }
-        const foundNewPost = await postsQueryRepository.findPost(idPost)
+        const foundNewPost = await this.postsQueryRepository.findPost(idPost)
 
         if (!foundNewPost) {
             res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)
@@ -70,7 +82,7 @@ class BlogsController {
     }
 
     async getBlogById(req: RequestWithParams<URIParamsId>, res: Response<BlogViewModel>) {
-        const foundBlog = await blogsQueryRepository.findBlog(formatIdInObjectId(req.params.id))
+        const foundBlog = await this.blogsQueryRepository.findBlog(formatIdInObjectId(req.params.id))
         if (foundBlog) {
             res.send(foundBlog)
         } else {
@@ -79,7 +91,7 @@ class BlogsController {
     }
 
     async updateBlog(req: RequestWithBodyAndParams<URIParamsId, CreateAndUpdateBlogInputModel>, res: Response) {
-        const isUpdate: boolean = await blogsService.updateBlog(req.params.id, req.body)
+        const isUpdate: boolean = await this.blogsService.updateBlog(req.params.id, req.body)
         if (isUpdate) {
             res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         } else {
@@ -88,7 +100,7 @@ class BlogsController {
     }
 
     async deleteBlog(req: RequestWithParams<URIParamsId>, res: Response) {
-        const isDeleted: boolean = await blogsService.deleteBlog(req.params.id)
+        const isDeleted: boolean = await this.blogsService.deleteBlog(req.params.id)
         if (isDeleted) {
             res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         } else {
@@ -101,34 +113,34 @@ class BlogsController {
 const blogsController = new BlogsController()
 
 
-blogRouter.get('/', blogsController.getBlogs)
+blogRouter.get('/', blogsController.getBlogs.bind(blogsController))
 
 blogRouter.get('/:id/posts',
     mongoIdMiddleware,
-    blogsController.getAllPostsForBlog)
+    blogsController.getAllPostsForBlog.bind(blogsController))
 
 blogRouter.post('/',
     blogValidate,
-    blogsController.createBlog)
+    blogsController.createBlog.bind(blogsController))
 
 
 blogRouter.post('/:id/posts',
     postValidateForBlog,
-    blogsController.createPostForBlog)
+    blogsController.createPostForBlog.bind(blogsController))
 
 
 blogRouter.get('/:id',
     mongoIdMiddleware,
-    blogsController.getBlogById)
+    blogsController.getBlogById.bind(blogsController))
 
 blogRouter.put('/:id',
     blogValidate,
     mongoIdMiddleware,
-    blogsController.updateBlog
+    blogsController.updateBlog.bind(blogsController)
 )
 
 blogRouter.delete('/:id',
     authorizationValidation,
     mongoIdMiddleware,
-    blogsController.deleteBlog)
+    blogsController.deleteBlog.bind(blogsController))
 

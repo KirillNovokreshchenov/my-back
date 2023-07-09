@@ -3,7 +3,7 @@ import {emailAdapter} from "../adapters/email-adapter";
 import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-email-type";
 
 
-export const emailManagers = {
+export class EmailManagers {
     async emailRegistration({email, confirmationCode}: EmailConfirmationType) {
         const emailUser = email
 
@@ -18,7 +18,7 @@ export const emailManagers = {
         await emailAdapter.sendEmail(emailUser, subject, htmlMessages)
 
 
-    },
+    }
     async passwordRecovery({email, recoveryCode}: PasswordRecoveryType) {
         const emailUser = email
 
@@ -34,6 +34,5 @@ export const emailManagers = {
 
 
     }
-
 
 }

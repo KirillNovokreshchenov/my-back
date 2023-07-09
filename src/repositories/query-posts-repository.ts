@@ -1,16 +1,16 @@
 import {PostType} from "../db/db-posts-type";
-import {collectionPosts} from "../db/db";
-import {ObjectId, Sort} from "mongodb";
+
+import {ObjectId} from "mongodb";
 import {PostViewModel} from "../models/post-models/PostViewModel";
 import {pageCount} from "../helpers/pageCount";
 import {limitPages} from "../helpers/limitPages";
 import {QueryInputModel} from "../models/QueryInputModel";
 import {QueryViewModel} from "../models/QueryViewModel";
 import {PostModelClass} from "../db/schemas/schema-post";
-import {BlogType} from "../db/db-blogs-type";
 
 
-class PostsQueryRepository {
+
+export class PostsQueryRepository {
     async allPosts(query: QueryInputModel, blogId?: string): Promise<QueryViewModel<PostViewModel>> {
 
         const {sortBy = 'createdAt', sortDirection='desc', pageNumber = 1, pageSize = 10} = query
@@ -55,4 +55,4 @@ class PostsQueryRepository {
     }
 }
 
-export const postsQueryRepository = new PostsQueryRepository()
+

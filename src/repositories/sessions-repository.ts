@@ -1,12 +1,12 @@
 import {DeviceAuthSessionType} from "../db/db-users-type";
-import {collectionDevicesAuthSessions} from "../db/db";
+
 import {ObjectId} from "mongodb";
 import {DeviceSessionModelClass} from "../db/schemas/shema-session";
 
 
 
 
-class SessionsRepository {
+export class SessionsRepository {
 
     async createDeviceSession(authSession: DeviceAuthSessionType) {
         await DeviceSessionModelClass.create(authSession)
@@ -17,7 +17,7 @@ class SessionsRepository {
     }
 
     async logoutSession(deviceId: string) {
-        const result = await DeviceSessionModelClass.deleteOne({deviceId: deviceId})
+        const result: any = await DeviceSessionModelClass.deleteOne({deviceId: deviceId})
         return result.deletedCount === 1
     }
 
@@ -28,9 +28,8 @@ class SessionsRepository {
     }
 
     async deleteSession(deviceId: string){
-        const result = await DeviceSessionModelClass.deleteOne({deviceId: deviceId})
+        const result: any = await DeviceSessionModelClass.deleteOne({deviceId: deviceId})
         return result.deletedCount === 1
     }
 }
 
-export const sessionsRepository = new SessionsRepository()

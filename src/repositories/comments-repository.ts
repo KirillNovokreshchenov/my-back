@@ -1,10 +1,10 @@
 import {CommentType} from "../db/db-comments-type";
-import {collectionComments} from "../db/db";
+
 import {ObjectId} from "mongodb";
 import {CommentModelClass} from "../db/schemas/schema-comment";
 
 
-class CommentsRepository {
+export class CommentsRepository {
     async createComment(newComment: CommentType): Promise<ObjectId> {
         await CommentModelClass.create(newComment)
         return newComment._id
@@ -20,4 +20,3 @@ class CommentsRepository {
     }
 }
 
-export const commentsRepository = new CommentsRepository()

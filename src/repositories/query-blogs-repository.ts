@@ -1,17 +1,17 @@
 import {BlogViewModel} from "../models/blog-models/BlogViewModel";
-import {collectionBlogs, collectionPosts} from "../db/db";
-import {ObjectId, Sort} from "mongodb";
+
+import {ObjectId} from "mongodb";
 import {BlogType} from "../db/db-blogs-type";
-import {PostViewModel} from "../models/post-models/PostViewModel";
+
 import {QueryInputModel} from "../models/QueryInputModel";
 import {limitPages} from "../helpers/limitPages";
 import {pageCount} from "../helpers/pageCount";
 import {QueryViewModel} from "../models/QueryViewModel";
 import {BlogModelClass} from "../db/schemas/schema-blog";
-import {UserType} from "../db/db-users-type";
 
 
-class QueryBlogsRepository {
+
+export class QueryBlogsRepository {
     async allBlogs(query: QueryInputModel): Promise<QueryViewModel<BlogViewModel>> {
         const {
             searchNameTerm = null,
@@ -75,5 +75,5 @@ class QueryBlogsRepository {
     }
 }
 
-export const blogsQueryRepository = new QueryBlogsRepository()
+
 

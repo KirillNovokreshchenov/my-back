@@ -1,19 +1,15 @@
-import {ObjectId, Sort} from "mongodb";
-import {collectionComments, collectionPosts} from "../db/db";
+import {ObjectId} from "mongodb";
+import {collectionPosts} from "../db/db";
 import {CommentType} from "../db/db-comments-type";
 import {CommentViewModel} from "../models/comment-models/CommentViewModel";
-import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 import {CommentsQueryInputModel} from "../models/comment-models/CommentsQueryInputModel";
 import {QueryViewModel} from "../models/QueryViewModel";
 import {pageCount} from "../helpers/pageCount";
 import {limitPages} from "../helpers/limitPages";
 import {CommentModelClass} from "../db/schemas/schema-comment";
-import {PostModelClass} from "../db/schemas/schema-post";
-import {PostType} from "../db/db-posts-type";
-import {FlattenMaps} from "mongoose";
 
 
-class QueryCommentsRepository {
+export class QueryCommentsRepository {
     async findComment(id: ObjectId): Promise<CommentViewModel|null> {
         const comment:CommentType|null= await CommentModelClass.findOne({ _id: id })
        if(!comment) return null
@@ -61,4 +57,3 @@ class QueryCommentsRepository {
     }
 }
 
-export const queryCommentsRepository = new QueryCommentsRepository()

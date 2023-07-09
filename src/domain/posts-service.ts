@@ -1,21 +1,27 @@
 
 import {CreateAndUpdatePostModel} from "../models/post-models/CreateAndUpdatePostModel";
-import {postsRepository} from "../repositories/posts-repository";
+import {PostsRepository} from "../repositories/posts-repository";
 import {ObjectId} from "mongodb";
-import {collectionBlogs} from "../db/db";
-import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 import {PostType} from "../db/db-posts-type";
-import {blogsQueryRepository} from "../repositories/query-blogs-repository";
-import {BlogType} from "../db/db-blogs-type";
+import {QueryBlogsRepository} from "../repositories/query-blogs-repository";
+
 import {BlogViewModel} from "../models/blog-models/BlogViewModel";
 
 
 
 export class PostsService {
 
+    private postsRepository: PostsRepository
+    private blogsQueryRepository: QueryBlogsRepository
+
+    constructor() {
+        this.postsRepository = new PostsRepository()
+        this.blogsQueryRepository = new QueryBlogsRepository()
+    }
+
     async createPost({title, shortDescription, content, blogId}: CreateAndUpdatePostModel): Promise<ObjectId|null>{
 
-        const foundBlogName = await blogsQueryRepository.findBlog(new ObjectId(blogId))
+        const foundBlogName = await this.blogsQueryRepository.findBlog(new ObjectId(blogId))
         if(!foundBlogName){
             return null
         }
@@ -30,22 +36,21 @@ export class PostsService {
             new Date().toISOString(),
         )
 
-        return await postsRepository.createPost(createPost)
+        return await this.postsRepository.createPost(createPost)
 
 
     }
 
     async updatePost(postId: string, {title, shortDescription, content, blogId}: CreateAndUpdatePostModel): Promise<boolean>{
-        const blog:BlogViewModel|null = await blogsQueryRepository.findBlog(new ObjectId(blogId))
+        const blog:BlogViewModel|null = await this.blogsQueryRepository.findBlog(new ObjectId(blogId))
         if(!blog) return false
-        return await postsRepository.updatePost(new ObjectId(postId), title, shortDescription, content, blogId, blog.name)
+        return await this.postsRepository.updatePost(new ObjectId(postId), title, shortDescription, content, blogId, blog.name)
 
     }
 
     async deletePost(id: string): Promise<boolean> {
-        return await postsRepository.deletePost(id)
+        return await this.postsRepository.deletePost(id)
     }
 
 }
 
-export const postsService = new PostsService()

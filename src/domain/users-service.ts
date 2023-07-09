@@ -1,44 +1,52 @@
 import {UserInputModel} from "../models/user-models/UserInputModel";
 import {ObjectId} from "mongodb";
 import bcrypt from 'bcrypt'
-import {usersRepository} from "../repositories/users-repository";
+import {UsersRepository} from "../repositories/users-repository";
 import {LoginModel} from "../models/auth-models/LoginModel";
 import {UserType} from "../db/db-users-type";
 import {uuid} from "uuidv4";
 import {add} from 'date-fns'
-import {emailManagers} from "../managers/email-managers";
-import {usersQueryRepository} from "../repositories/query-users-repository";
-import {UserModelClass} from "../db/schemas/schema-user";
-import {HydratedDocument} from "mongoose";
-import {collectionEmail} from "../db/db";
+import {EmailManagers} from "../managers/email-managers";
+import {UsersQueryRepository} from "../repositories/query-users-repository";
+
 import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-email-type";
 
 
-class UsersService {
+export class UsersService {
+    private usersRepository: UsersRepository
+    private usersQueryRepository: UsersQueryRepository
+    private emailManagers: EmailManagers
+    constructor() {
+        this.usersRepository = new UsersRepository()
+        this.usersQueryRepository = new UsersQueryRepository()
+        this.emailManagers = new EmailManagers()
+    }
+
+
     async createUser(userData: UserInputModel): Promise<ObjectId> {
         const newUser: UserType = await this._newUser(userData)
-        return usersRepository.createUser(newUser)
+        return this.usersRepository.createUser(newUser)
     }
 
     async createUserByRegistration(dataRegistration: UserInputModel): Promise<boolean> {
 
         const newUser: UserType = await this._newUser(dataRegistration)
 
-        const userId = await usersRepository.createUser(newUser)
+        const userId = await this.usersRepository.createUser(newUser)
 
         if (!userId) return false
 
         const newEmailConfirmation: EmailConfirmationType = await this._createEmailConfirmation(userId, newUser.email)
 
-        await usersRepository.emailConfirmation(newEmailConfirmation)
+        await this.usersRepository.emailConfirmation(newEmailConfirmation)
 
         try {
-            await emailManagers.emailRegistration(newEmailConfirmation)
+            await this.emailManagers.emailRegistration(newEmailConfirmation)
             return true
         } catch (e) {
             console.log(e)
-            await usersRepository.deleteUser(userId.toString())
-            await usersRepository.deleteEmailConfirmation(userId)
+            await this.usersRepository.deleteUser(userId.toString())
+            await this.usersRepository.deleteEmailConfirmation(userId)
             return false
         }
 
@@ -46,11 +54,11 @@ class UsersService {
     }
 
     async deleteUser(id: string) {
-        return await usersRepository.deleteUser(id)
+        return await this.usersRepository.deleteUser(id)
     }
 
     async checkCredentials({loginOrEmail, password}: LoginModel): Promise<false | ObjectId> {
-        const user = await usersRepository.findByLoginOrEmail(loginOrEmail)
+        const user = await this.usersRepository.findByLoginOrEmail(loginOrEmail)
         if (!user) return false
         const isValid = await bcrypt.compare(password, user.password)
         if (!isValid) return false
@@ -59,15 +67,15 @@ class UsersService {
     }
 
     async confirmEmail(code: string): Promise<boolean> {
-        const codeIsExisting = await usersQueryRepository.getEmailConfirmation(code)
+        const codeIsExisting = await this.usersQueryRepository.getEmailConfirmation(code)
         if (!codeIsExisting) return false
         if (codeIsExisting.expirationDate < new Date()) return false
         if (codeIsExisting.isConfirmed) return false
-        return usersRepository.updateConfirm(code)
+        return this.usersRepository.updateConfirm(code)
     }
 
     async emailResending(email: string): Promise<boolean> {
-        const emailConfirmation = await usersQueryRepository.getEmailConfirmation(email)
+        const emailConfirmation = await this.usersQueryRepository.getEmailConfirmation(email)
         if (!emailConfirmation) return false
         if (emailConfirmation.isConfirmed) return false
 
@@ -77,8 +85,8 @@ class UsersService {
         })
 
         try {
-            await usersRepository.updateEmailConfirmationCode(emailConfirmation.userId, newCode, newDate)
-            await emailManagers.emailRegistration({...emailConfirmation, confirmationCode: newCode})
+            await this.usersRepository.updateEmailConfirmationCode(emailConfirmation.userId, newCode, newDate)
+            await this.emailManagers.emailRegistration({...emailConfirmation, confirmationCode: newCode})
             return true
         } catch (e) {
             console.log(e)
@@ -99,26 +107,24 @@ class UsersService {
         )
 
         try {
-            await emailManagers.passwordRecovery(recoveryPassword)
+            await this.emailManagers.passwordRecovery(recoveryPassword)
         } catch {
             return
         }
-        await usersRepository.emailRecoveryPassword(recoveryPassword)
+        await this.usersRepository.emailRecoveryPassword(recoveryPassword)
 
     }
 
     async newPassword(newPassword: string, recoveryCode: string): Promise<boolean> {
 
-        const recoveryData = await usersQueryRepository.getRecoveryData(recoveryCode)
+        const recoveryData = await this.usersQueryRepository.getRecoveryData(recoveryCode)
 
         if (!recoveryData) return false
         if (recoveryData.expirationDate < new Date()) return false
 
         const newPasswordCreated = await this._generateHash(newPassword)
 
-        const updatePassword = await usersRepository.newPassword(newPasswordCreated, recoveryData.email)
-
-        return updatePassword;
+        return this.usersRepository.newPassword(newPasswordCreated, recoveryData.email);
 
 
     }
@@ -130,15 +136,13 @@ class UsersService {
 
     async _newUser({login, email, password}: UserInputModel) {
         const passwordHash = await this._generateHash(password)
-        const newUser: UserType = new UserType(
+        return new UserType(
             new ObjectId(),
             login,
             email,
             passwordHash,
             new Date().toISOString()
         )
-
-        return newUser
     }
 
     _createEmailConfirmation(userId: ObjectId, email: string): EmailConfirmationType {
@@ -156,4 +160,3 @@ class UsersService {
 
 }
 
-export const usersService = new UsersService()

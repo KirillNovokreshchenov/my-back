@@ -1,6 +1,5 @@
-import {ObjectId, Sort} from "mongodb";
+import {ObjectId} from "mongodb";
 import {UserViewModel} from "../models/user-models/UserViewModel";
-import {collectionDevicesAuthSessions, collectionEmail, collectionUsers} from "../db/db";
 import {DeviceAuthSessionType, UserType} from "../db/db-users-type";
 import {UsersQueryInputModel} from "../models/user-models/UsersQueryInputModel";
 import {pageCount} from "../helpers/pageCount";
@@ -12,7 +11,7 @@ import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-email-type";
 import {EmailConfirmationClass, PasswordRecoveryClass} from "../db/schemas/schemas-email";
 import {DeviceSessionModelClass} from "../db/schemas/shema-session";
 
- class UsersQueryRepository {
+ export class UsersQueryRepository {
 
     async allUsers(userQuery: UsersQueryInputModel): Promise<QueryViewModel<UserViewModel>> {
         const {
@@ -114,4 +113,3 @@ import {DeviceSessionModelClass} from "../db/schemas/shema-session";
 
 }
 
-export const usersQueryRepository = new UsersQueryRepository()

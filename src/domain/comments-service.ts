@@ -1,17 +1,28 @@
 import {ObjectId} from "mongodb";
-import {postsQueryRepository} from "../repositories/query-posts-repository";
+import {PostsQueryRepository} from "../repositories/query-posts-repository";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 import {UserType} from "../db/db-users-type";
 import {CommentType} from "../db/db-comments-type";
-import {commentsRepository} from "../repositories/comments-repository";
-import {queryCommentsRepository} from "../repositories/query-comments-repository";
+import {CommentsRepository} from "../repositories/comments-repository";
+import {QueryCommentsRepository} from "../repositories/query-comments-repository";
 import {RESPONSE_OPTIONS} from "../types/res-status";
 
 
-class CommentsService {
+export class CommentsService {
+
+    commentsRepository: CommentsRepository
+    queryCommentsRepository: QueryCommentsRepository
+    postsQueryRepository: PostsQueryRepository
+
+    constructor() {
+        this.commentsRepository = new CommentsRepository()
+        this.postsQueryRepository = new PostsQueryRepository()
+        this.queryCommentsRepository = new QueryCommentsRepository()
+    }
+
 
     async createComment(postId: string, {_id, login}: UserType, content: string): Promise<ObjectId | null> {
-        const isExistingPost = await postsQueryRepository.findPost(formatIdInObjectId(postId))
+        const isExistingPost = await this.postsQueryRepository.findPost(formatIdInObjectId(postId))
         if (!isExistingPost) return null
         const newComment: CommentType = new CommentType(
             new ObjectId(),
@@ -24,33 +35,32 @@ class CommentsService {
             isExistingPost.id
         )
 
-        return commentsRepository.createComment(newComment)
+        return this.commentsRepository.createComment(newComment)
 
     }
     async updateComment(commentId: string, content: string, userId: ObjectId): Promise<RESPONSE_OPTIONS> {
 
-        const foundComment = await queryCommentsRepository.findComment(new ObjectId(commentId))
+        const foundComment = await this.queryCommentsRepository.findComment(new ObjectId(commentId))
 
         if (!foundComment) return RESPONSE_OPTIONS.NOT_FOUND
 
         if (foundComment.commentatorInfo.userId !== userId.toString()) return RESPONSE_OPTIONS.FORBIDDEN
 
-        await commentsRepository.updateComment(new ObjectId(commentId), content)
+        await this.commentsRepository.updateComment(new ObjectId(commentId), content)
 
         return RESPONSE_OPTIONS.NO_CONTENT
     }
 
     async deleteComment(commentId: string, userId: ObjectId): Promise<RESPONSE_OPTIONS> {
-        const foundComment = await queryCommentsRepository.findComment(formatIdInObjectId(commentId))
+        const foundComment = await this.queryCommentsRepository.findComment(formatIdInObjectId(commentId))
 
         if (!foundComment) return RESPONSE_OPTIONS.NOT_FOUND
 
         if (foundComment.commentatorInfo.userId !== userId.toString()) return RESPONSE_OPTIONS.FORBIDDEN
 
-        await commentsRepository.deleteComment(formatIdInObjectId(commentId))
+        await this.commentsRepository.deleteComment(formatIdInObjectId(commentId))
 
         return RESPONSE_OPTIONS.NO_CONTENT
     }
 }
 
-export const commentsService = new CommentsService()

@@ -1,8 +1,8 @@
 import {Request, Response, Router} from "express";
 import {jwtRefreshMiddleware} from "../middlewares/auth-refresh-middleware";
-import {usersQueryRepository} from "../repositories/query-users-repository";
+import {UsersQueryRepository} from "../repositories/query-users-repository";
 import {DeviceSessionModel} from "../models/user-models/DeviceSessionModel";
-import {jwtService} from "../application/jwt-service";
+import {JwtService} from "../application/jwt-service";
 import {RESPONSE_OPTIONS} from "../types/res-status";
 import {RESPONSE_STATUS} from "../types/res-status";
 
@@ -10,14 +10,20 @@ import {RESPONSE_STATUS} from "../types/res-status";
 export const deviseRouter = Router({})
 
 class DeviceController {
+    private usersQueryRepository = new UsersQueryRepository()
+    private jwtService = new JwtService()
+    constructor() {
+        this.jwtService = new JwtService()
+        this.usersQueryRepository = new UsersQueryRepository()
+    }
 
     async getSessions(req: Request, res: Response<DeviceSessionModel[]>) {
-        const allSessions = await usersQueryRepository.getAllSessions(req.user!._id)
+        const allSessions = await this.usersQueryRepository.getAllSessions(req.user!._id)
         res.status(200).send(allSessions)
     }
 
     async deleteAllSessions(req: Request, res: Response) {
-        const isDeleted = await jwtService.deleteAllSessions(req.user!._id, req.deviceId)
+        const isDeleted = await this.jwtService.deleteAllSessions(req.user!._id, req.deviceId)
         if (!isDeleted) {
             res.sendStatus(401)
         } else {
@@ -26,7 +32,7 @@ class DeviceController {
     }
 
     async deleteSessionById(req: Request, res: Response) {
-        const condition = await jwtService.deleteSession(req.user!._id, req.params.id)
+        const condition = await this.jwtService.deleteSession(req.user!._id, req.params.id)
         switch (condition) {
             case RESPONSE_OPTIONS.NOT_FOUND:
                 res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
@@ -47,12 +53,12 @@ const deviceController = new DeviceController()
 
 deviseRouter.get('/',
     jwtRefreshMiddleware,
-    deviceController.getSessions)
+    deviceController.getSessions.bind(deviceController))
 
 deviseRouter.delete('/',
     jwtRefreshMiddleware,
-    deviceController.deleteAllSessions)
+    deviceController.deleteAllSessions.bind(deviceController))
 
 deviseRouter.delete('/:id',
     jwtRefreshMiddleware,
-    deviceController.deleteSessionById)
+    deviceController.deleteSessionById.bind(deviceController))

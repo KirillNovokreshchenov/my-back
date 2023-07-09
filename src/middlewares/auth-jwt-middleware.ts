@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response} from "express";
-import {jwtService} from "../application/jwt-service";
-import {collectionUsers} from "../db/db";
+import {JwtService} from "../application/jwt-service";
 import {RESPONSE_STATUS} from "../types/res-status";
+import {UserModelClass} from "../db/schemas/schema-user";
 
 
 export const jwtMiddleware = async(req: Request, res: Response, next: NextFunction)=>{
@@ -11,9 +11,9 @@ export const jwtMiddleware = async(req: Request, res: Response, next: NextFuncti
     }
     const token = req.headers.authorization.split(' ')[1]
 
-    const userId = await jwtService.getUserIdByToken(token)
+    const userId = await new JwtService().getUserIdByToken(token)
     if(userId){
-        const user =  await collectionUsers.findOne(userId)
+        const user =  await UserModelClass.findOne(userId)
         if(!user) {
             res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
             return
