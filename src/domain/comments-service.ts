@@ -10,19 +10,15 @@ import {RESPONSE_OPTIONS} from "../types/res-status";
 
 export class CommentsService {
 
-    commentsRepository: CommentsRepository
-    queryCommentsRepository: QueryCommentsRepository
-    postsQueryRepository: PostsQueryRepository
+    constructor(protected commentsRepository: CommentsRepository,
+                protected queryCommentsRepository: QueryCommentsRepository,
+                protected postsQueryRepository: PostsQueryRepository) {
 
-    constructor() {
-        this.commentsRepository = new CommentsRepository()
-        this.postsQueryRepository = new PostsQueryRepository()
-        this.queryCommentsRepository = new QueryCommentsRepository()
     }
 
 
     async createComment(postId: string, {_id, login}: UserType, content: string): Promise<ObjectId | null> {
-        const isExistingPost = await this.postsQueryRepository.findPost(formatIdInObjectId(postId))
+        const isExistingPost = await this.postsQueryRepository.findPost(new ObjectId(postId))
         if (!isExistingPost) return null
         const newComment: CommentType = new CommentType(
             new ObjectId(),
@@ -38,6 +34,7 @@ export class CommentsService {
         return this.commentsRepository.createComment(newComment)
 
     }
+
     async updateComment(commentId: string, content: string, userId: ObjectId): Promise<RESPONSE_OPTIONS> {
 
         const foundComment = await this.queryCommentsRepository.findComment(new ObjectId(commentId))

@@ -13,13 +13,11 @@ import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-email-type";
 
 
 export class UsersService {
-    private usersRepository: UsersRepository
-    private usersQueryRepository: UsersQueryRepository
-    private emailManagers: EmailManagers
-    constructor() {
-        this.usersRepository = new UsersRepository()
-        this.usersQueryRepository = new UsersQueryRepository()
-        this.emailManagers = new EmailManagers()
+
+    constructor(
+        protected usersRepository: UsersRepository,
+        protected usersQueryRepository: UsersQueryRepository,
+        protected emailManagers: EmailManagers) {
     }
 
 

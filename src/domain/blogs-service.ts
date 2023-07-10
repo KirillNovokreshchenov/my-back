@@ -8,12 +8,8 @@ import {PostType} from "../db/db-posts-type";
 
 export class BlogsService {
 
-    private blogsQueryRepository: QueryBlogsRepository
-    private blogsRepository: BlogsRepository
-
-    constructor() {
-        this.blogsRepository= new BlogsRepository()
-        this.blogsQueryRepository = new QueryBlogsRepository()
+    constructor(protected blogsQueryRepository: QueryBlogsRepository,
+                protected blogsRepository: BlogsRepository) {
     }
 
     async createBlog({name, description, websiteUrl}: CreateAndUpdateBlogInputModel): Promise<ObjectId> {

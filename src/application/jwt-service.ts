@@ -11,15 +11,11 @@ import {DeviceAuthSessionType} from "../db/db-users-type";
 
 
 export class JwtService {
-    private sessionsRepository: SessionsRepository
-    private usersQueryRepository: UsersQueryRepository
-    private usersRepository: UsersRepository
 
-    constructor() {
-        this.sessionsRepository = new SessionsRepository()
-        this.usersQueryRepository = new UsersQueryRepository()
-        this.usersRepository = new UsersRepository()
-    }
+
+    constructor(protected sessionsRepository: SessionsRepository,
+                protected usersQueryRepository: UsersQueryRepository,
+                protected usersRepository: UsersRepository) { }
 
 
     async createJWT(userId: ObjectId, ip: string, deviceName = "Chrome") {
@@ -36,8 +32,8 @@ export class JwtService {
             deviceName,
             dateForSessions,
             add(dateForSessions, {
-            minutes: 20
-        }),
+                minutes: 20
+            }),
             deviceId,
         )
 
@@ -55,6 +51,7 @@ export class JwtService {
         }
 
     }
+
     async verifyRefreshToken(refreshToken: string) {
         try {
             const result: any = jwt.verify(refreshToken, settings.SECRET_REFRESH)
@@ -94,18 +91,19 @@ export class JwtService {
         }
     }
 
-    async logout(deviceId: string){
+    async logout(deviceId: string) {
         return await this.sessionsRepository.logoutSession(deviceId)
     }
 
     async deleteAllSessions(userId: ObjectId, deviceId: string) {
         return await this.sessionsRepository.deleteAllSessions(userId, deviceId)
     }
-    async deleteSession(userId: ObjectId, deviceId: string): Promise<RESPONSE_OPTIONS>{
-        const session: DeviceAuthSessionType|null = await this.usersQueryRepository.findDeviceSession(deviceId)
-        if(!session) return RESPONSE_OPTIONS.NOT_FOUND
 
-        if(userId.toString() !== session.userId.toString() ) {
+    async deleteSession(userId: ObjectId, deviceId: string): Promise<RESPONSE_OPTIONS> {
+        const session: DeviceAuthSessionType | null = await this.usersQueryRepository.findDeviceSession(deviceId)
+        if (!session) return RESPONSE_OPTIONS.NOT_FOUND
+
+        if (userId.toString() !== session.userId.toString()) {
             return RESPONSE_OPTIONS.FORBIDDEN
         }
 

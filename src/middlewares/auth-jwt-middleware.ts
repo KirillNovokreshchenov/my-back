@@ -2,6 +2,7 @@ import {NextFunction, Request, Response} from "express";
 import {JwtService} from "../application/jwt-service";
 import {RESPONSE_STATUS} from "../types/res-status";
 import {UserModelClass} from "../db/schemas/schema-user";
+import {jwtService} from "../composition-root";
 
 
 export const jwtMiddleware = async(req: Request, res: Response, next: NextFunction)=>{
@@ -11,7 +12,7 @@ export const jwtMiddleware = async(req: Request, res: Response, next: NextFuncti
     }
     const token = req.headers.authorization.split(' ')[1]
 
-    const userId = await new JwtService().getUserIdByToken(token)
+    const userId = await jwtService.getUserIdByToken(token)
     if(userId){
         const user =  await UserModelClass.findOne(userId)
         if(!user) {
