@@ -7,6 +7,7 @@ import {CommentViewModel} from "../models/comment-models/CommentViewModel";
 import {ObjectId} from "mongodb";
 import {RESPONSE_OPTIONS, RESPONSE_STATUS} from "../types/res-status";
 import {CommentCreateAndUpdateModel} from "../models/comment-models/CommentCreateAndUpdateModel";
+import {LikeStatusInputModel} from "../models/comment-models/LikeStatusInputModel";
 
 
 export class CommentsController {
@@ -18,7 +19,7 @@ export class CommentsController {
 
 
     async getComment(req: RequestWithParams<URIParamsId>, res: Response<CommentViewModel>) {
-        const comment = await this.queryCommentsRepository.findComment(new ObjectId(req.params.id))
+        const comment = await this.queryCommentsRepository.findComment(new ObjectId(req.params.id), req.user?._id)
         if (!comment) {
             res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         } else {
@@ -35,6 +36,14 @@ export class CommentsController {
 
         const isDeleted = await this.commentsService.deleteComment(req.params.id, req.user!._id)
         this._switchResponseComment(isDeleted, res)
+    }
+
+    async likeStatus(req: RequestWithBodyAndParams<URIParamsId, LikeStatusInputModel>, res: Response){
+        const likeStatus = await this.commentsService.updateLikeStatus(req.params.id, req.body.likeStatus, req.user!._id)
+        if(!likeStatus){
+            return res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
+        }
+        return res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
     }
 
 

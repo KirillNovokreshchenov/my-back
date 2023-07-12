@@ -5,7 +5,7 @@ import {UserModelClass} from "../db/schemas/schema-user";
 import {jwtService} from "../composition-root";
 
 
-export const jwtMiddleware = async(req: Request, res: Response, next: NextFunction)=>{
+const jwtAuthMiddleware = async(req: Request, res: Response, next: NextFunction)=>{
     if(!req.headers.authorization){
         res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
         return
@@ -24,6 +24,19 @@ export const jwtMiddleware = async(req: Request, res: Response, next: NextFuncti
     } else {
         res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
         return
+    }
+
+}
+
+export const jwtMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    await jwtAuthMiddleware(req, res, next)
+}
+
+export const likeStatusMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    if (req.headers.authorization) {
+        await jwtAuthMiddleware(req, res, next)
+    } else{
+        next()
     }
 
 }

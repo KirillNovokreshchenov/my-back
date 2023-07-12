@@ -1,7 +1,8 @@
-import {CommentType} from "../db/db-comments-type";
+import {CommentType, LikeStatus} from "../db/db-comments-type";
 
 import {ObjectId} from "mongodb";
-import {CommentModelClass} from "../db/schemas/schema-comment";
+import {CommentModelClass, LikeStatusClass} from "../db/schemas/schema-comment";
+import {LIKE_STATUS} from "../models/comment-models/EnumLikeStatusModel";
 
 
 export class CommentsRepository {
@@ -17,6 +18,37 @@ export class CommentsRepository {
 
     async deleteComment(id: ObjectId): Promise<void> {
         await CommentModelClass.deleteOne({_id: id})
+    }
+
+    async getLikeStatus(commentId: ObjectId, userId: ObjectId): Promise<LikeStatus|null> {
+        return LikeStatusClass.findOne({$and:[{commentId: commentId},{ userId: userId}]})
+    }
+
+    async createLikeStatus(newLikeStatus: LikeStatus, inputLikeStatus: LIKE_STATUS, commentId: ObjectId){
+        await LikeStatusClass.create(newLikeStatus)
+        if(inputLikeStatus===LIKE_STATUS.LIKE){
+            await CommentModelClass.updateOne({_id: commentId}, {$inc: {"likesInfo.likes": 1}})
+        } else {
+            await CommentModelClass.updateOne({_id: commentId}, {$inc: {"likesInfo.dislikes": 1}})
+        }
+    }
+
+    async deleteLikeStatus(commentId: ObjectId, userId: ObjectId, existingLikeStatus: LIKE_STATUS){
+        await LikeStatusClass.deleteOne({$and:[{commentId: commentId},{ userId: userId}]})
+        if(existingLikeStatus===LIKE_STATUS.LIKE){
+            await CommentModelClass.updateOne({_id: commentId}, {$inc: {"likesInfo.likes": -1}})
+        } else {
+            await CommentModelClass.updateOne({_id: commentId}, {$inc: {"likesInfo.dislikes": -1}})
+        }
+    }
+    async updateLikeStatus(commentId: ObjectId, userId: ObjectId, likeStatus: LIKE_STATUS){
+        await LikeStatusClass.updateOne({$and:[{commentId: commentId},{ userId: userId}]}, {$set:{likeStatus: likeStatus}})
+        if(likeStatus === LIKE_STATUS.LIKE){
+            await CommentModelClass.updateOne({_id: commentId}, {$inc: {"likesInfo.likes": 1, "likesInfo.dislikes": -1}})
+        } else {
+            await CommentModelClass.updateOne({_id: commentId}, {$inc: {"likesInfo.likes": -1, "likesInfo.dislikes": 1}})
+        }
+
     }
 }
 

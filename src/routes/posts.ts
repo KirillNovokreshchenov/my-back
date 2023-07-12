@@ -2,7 +2,7 @@ import {Router} from "express";
 import {postValidate} from "../middlewares/post-middleware";
 import {authorizationValidation} from "../middlewares/auth-middleware";
 import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
-import {jwtMiddleware} from "../middlewares/auth-jwt-middleware";
+import {jwtMiddleware, likeStatusMiddleware} from "../middlewares/auth-jwt-middleware";
 import {contentValidation} from "../middlewares/comment-middleware";
 import {errorsValidationMiddleware} from "../middlewares/err-middleware";
 import {postsController} from "../composition-root";
@@ -41,5 +41,6 @@ postRouter.post('/:id/comments',
     postsController.createCommentForPost.bind(postsController))
 
 postRouter.get('/:id/comments',
+    likeStatusMiddleware,
     postsController.getCommentsForPost.bind(postsController))
 

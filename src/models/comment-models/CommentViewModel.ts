@@ -1,4 +1,5 @@
 import {ObjectId} from "mongodb";
+import {LIKE_STATUS} from "./EnumLikeStatusModel";
 
 export type CommentViewModel = {
     id: string
@@ -7,5 +8,10 @@ export type CommentViewModel = {
         userId: string
         userLogin: string
     },
-    createdAt: string
+    createdAt: string,
+    likesInfo: {
+        likesCount: number,
+        dislikesCount: number
+        myStatus: LIKE_STATUS
+    }
 }

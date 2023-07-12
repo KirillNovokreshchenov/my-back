@@ -78,7 +78,6 @@ export class PostsController {
     }
 
     async createCommentForPost(req: RequestWithBodyAndParams<URIParamsId, CommentCreateAndUpdateModel>, res: Response<CommentViewModel>) {
-
         const commentId = await this.commentsService.createComment(req.params.id, req.user!, req.body.content)
         if (!commentId) {
             res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
@@ -89,7 +88,7 @@ export class PostsController {
     }
 
     async getCommentsForPost(req: RequestWithQueryAndParams<URIParamsId, CommentsQueryInputModel>, res: Response<QueryViewModel<CommentViewModel>>) {
-        const comments = await this.queryCommentsRepository.getComments(req.params.id, req.query)
+        const comments = await this.queryCommentsRepository.getComments(req.params.id, req.query, req.user?._id)
         if (!comments) {
             res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
         } else {
