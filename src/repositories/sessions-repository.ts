@@ -8,6 +8,14 @@ import {DeviceSessionModelClass} from "../db/schemas/shema-session";
 
 export class SessionsRepository {
 
+    async findDeviceSession(deviceId: string, date?: Date) : Promise<DeviceAuthSessionType|null> {
+        if(date){
+            return DeviceSessionModelClass.findOne({$and: [{lastActiveDate: new Date(date)}, {deviceId: deviceId}]})
+        } else{
+            return DeviceSessionModelClass.findOne({deviceId: deviceId})
+        }
+    }
+
     async createDeviceSession(authSession: DeviceAuthSessionType) {
         await DeviceSessionModelClass.create(authSession)
     }

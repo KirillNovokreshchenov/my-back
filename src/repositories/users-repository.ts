@@ -9,6 +9,10 @@ import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-email-type";
 import {EmailConfirmationClass, PasswordRecoveryClass} from "../db/schemas/schemas-email";
 
 export class UsersRepository {
+    // async findUser(id: ObjectId): Promise<UserType|null> {
+    //     const foundUser = await UserModelClass.findOne(id).lean()
+    //     return foundUser
+    // }
     async createUser(newUser: UserType): Promise<ObjectId> {
         await UserModelClass.create(newUser)
         return newUser._id
@@ -55,6 +59,14 @@ export class UsersRepository {
        const result: any = await UserModelClass.updateOne({email: email},{$set: {password: newPassword}})
         return result.modifiedCount === 1
 
+    }
+
+    async getEmailConfirmation(emailOrCode: string): Promise<EmailConfirmationType | null> {
+        return EmailConfirmationClass.findOne({$or: [{email: emailOrCode}, {confirmationCode: emailOrCode}]})
+    }
+
+    async getRecoveryData(recoveryCode: string): Promise<PasswordRecoveryType|null>{
+        return PasswordRecoveryClass.findOne({recoveryCode})
     }
 
 }

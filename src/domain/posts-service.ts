@@ -2,21 +2,22 @@ import {CreateAndUpdatePostModel} from "../models/post-models/CreateAndUpdatePos
 import {PostsRepository} from "../repositories/posts-repository";
 import {ObjectId} from "mongodb";
 import {PostType} from "../db/db-posts-type";
-import {QueryBlogsRepository} from "../repositories/query-blogs-repository";
-
 import {BlogViewModel} from "../models/blog-models/BlogViewModel";
+import {BlogsRepository} from "../repositories/blogs-repository";
+import {BlogType} from "../db/db-blogs-type";
 
 
 export class PostsService {
 
-    constructor(private postsRepository: PostsRepository,
-                private blogsQueryRepository: QueryBlogsRepository) {
+    constructor(protected postsRepository: PostsRepository,
+                protected blogsRepository: BlogsRepository
+    ) {
 
     }
 
     async createPost({title, shortDescription, content, blogId}: CreateAndUpdatePostModel): Promise<ObjectId | null> {
 
-        const foundBlogName = await this.blogsQueryRepository.findBlog(new ObjectId(blogId))
+        const foundBlogName = await this.blogsRepository.findBlog(new ObjectId(blogId))
         if (!foundBlogName) {
             return null
         }
@@ -42,7 +43,7 @@ export class PostsService {
         content,
         blogId
     }: CreateAndUpdatePostModel): Promise<boolean> {
-        const blog: BlogViewModel | null = await this.blogsQueryRepository.findBlog(new ObjectId(blogId))
+        const blog: BlogType | null = await this.blogsRepository.findBlog(new ObjectId(blogId))
         if (!blog) return false
         return await this.postsRepository.updatePost(new ObjectId(postId), title, shortDescription, content, blogId, blog.name)
 

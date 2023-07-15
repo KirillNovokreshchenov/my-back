@@ -1,9 +1,11 @@
 
-import {emailAdapter} from "../adapters/email-adapter";
+import {EmailAdapter} from "../adapters/email-adapter";
 import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-email-type";
 
 
 export class EmailManagers {
+    constructor(protected emailAdapter: EmailAdapter) {
+    }
     async emailRegistration({email, confirmationCode}: EmailConfirmationType) {
         const emailUser = email
 
@@ -15,7 +17,7 @@ export class EmailManagers {
         <a href='https://somesite.com/confirm-email?code=${confirmationCode}'>complete registration</a>
        </p>`
 
-        await emailAdapter.sendEmail(emailUser, subject, htmlMessages)
+        await this.emailAdapter.sendEmail(emailUser, subject, htmlMessages)
 
 
     }
@@ -30,7 +32,7 @@ export class EmailManagers {
           <a href='https://somesite.com/password-recovery?recoveryCode=${recoveryCode}'>recovery password</a>
       </p>`
 
-        await emailAdapter.sendEmail(emailUser, subject, htmlMessages)
+        await this.emailAdapter.sendEmail(emailUser, subject, htmlMessages)
 
 
     }

@@ -59,7 +59,6 @@ export class QueryBlogsRepository {
             return null
         }
         return this._mapBlog(foundBlog)
-
     }
 
     _mapBlog(blog: BlogType) {

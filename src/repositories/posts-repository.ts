@@ -3,10 +3,15 @@ import {PostType} from "../db/db-posts-type";
 import {ObjectId} from "mongodb";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 import {PostModelClass} from "../db/schemas/schema-post";
+import {PostViewModel} from "../models/post-models/PostViewModel";
 
 
 export class PostsRepository {
 
+    async findPost(id: ObjectId): Promise<PostViewModel | null> {
+        return PostModelClass.findOne(id)
+
+    }
     async createPost(createPost: PostType): Promise<ObjectId>{
         await PostModelClass.create(createPost)
         return createPost._id

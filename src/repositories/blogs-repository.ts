@@ -1,4 +1,3 @@
-
 import {ObjectId} from "mongodb";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 import {BlogType} from "../db/db-blogs-type";
@@ -7,6 +6,11 @@ import {PostModelClass} from "../db/schemas/schema-post";
 
 
 export class BlogsRepository {
+
+    async findBlog(id: ObjectId): Promise<BlogType| null> {
+        return BlogModelClass.findOne(id)
+    }
+
     async createBlog(newBlog: BlogType): Promise<ObjectId> {
         await BlogModelClass.create(newBlog)
         return newBlog._id
@@ -18,7 +22,7 @@ export class BlogsRepository {
     }
 
     async updateBlog(id: string, name: string, description: string, websiteUrl: string): Promise<boolean> {
-        const result: any  = await BlogModelClass.updateOne({_id: formatIdInObjectId(id)}, {
+        const result: any = await BlogModelClass.updateOne({_id: formatIdInObjectId(id)}, {
             $set: {
                 name,
                 description,
@@ -32,7 +36,7 @@ export class BlogsRepository {
     }
 
     async deleteBlog(id: string): Promise<boolean> {
-        const result: any  = await BlogModelClass.deleteOne({_id: formatIdInObjectId(id)})
+        const result: any = await BlogModelClass.deleteOne({_id: formatIdInObjectId(id)})
         return result.deletedCount === 1
     }
 

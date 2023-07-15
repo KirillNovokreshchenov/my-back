@@ -1,27 +1,25 @@
-import jwt from 'jsonwebtoken'
 import {ObjectId} from "mongodb";
-import {settings} from "../settings";
 import {UsersRepository} from "../repositories/users-repository";
-import {uuid} from "uuidv4";
-import {add} from "date-fns";
-import {UsersQueryRepository} from "../repositories/query-users-repository";
 import {RESPONSE_OPTIONS} from "../types/res-status";
 import {SessionsRepository} from "../repositories/sessions-repository";
 import {DeviceAuthSessionType} from "../db/db-users-type";
+import {JwtAdapter} from "../adapters/jwt-adapter";
 
 
 export class JwtService {
 
 
     constructor(protected sessionsRepository: SessionsRepository,
-                protected usersQueryRepository: UsersQueryRepository,
-                protected usersRepository: UsersRepository) { }
+                protected usersRepository: UsersRepository,
+                protected jwtAdapter: JwtAdapter) {
+    }
 
 
     async createJWT(userId: ObjectId, ip: string, deviceName = "Chrome") {
 
         const dateForSessions = new Date()
-        const deviceId = uuid()
+        const expDate = await this.jwtAdapter.createExpDate(dateForSessions)
+        const deviceId = await this.jwtAdapter.createId()
 
         const bothTokens = await this._createTokens(userId, deviceId, dateForSessions)
 
@@ -31,9 +29,7 @@ export class JwtService {
             ip,
             deviceName,
             dateForSessions,
-            add(dateForSessions, {
-                minutes: 20
-            }),
+            expDate,
             deviceId,
         )
 
@@ -44,7 +40,7 @@ export class JwtService {
 
     async getUserIdByToken(token: string) {
         try {
-            const result: any = jwt.verify(token, settings.SECRET_JWT)
+            const result: any = await this.jwtAdapter.verifyAccessToken(token)
             return new ObjectId(result.userId)
         } catch (error) {
             return null
@@ -54,12 +50,12 @@ export class JwtService {
 
     async verifyRefreshToken(refreshToken: string) {
         try {
-            const result: any = jwt.verify(refreshToken, settings.SECRET_REFRESH)
-            const deviceSession = await this.usersQueryRepository.findDeviceSession(result.deviceId, result.lastActiveDate)
+            const tokenIsVerified: any = await this.jwtAdapter.verifyRefreshToken(refreshToken)
+            const deviceSession = await this.sessionsRepository.findDeviceSession(tokenIsVerified.deviceId, tokenIsVerified.lastActiveDate)
             if (!deviceSession) {
                 return null
             }
-            return result
+            return tokenIsVerified
         } catch (error) {
             return null
         }
@@ -75,13 +71,9 @@ export class JwtService {
 
     async _createTokens(userId: ObjectId, deviceId: string, date: Date) {
 
-        const token = jwt.sign({userId: userId}, settings.SECRET_JWT, {expiresIn: '10m'})
+        const token = await this.jwtAdapter.signAccessToken(userId)
 
-        const refreshToken = jwt.sign({
-            userId: userId,
-            deviceId: deviceId,
-            lastActiveDate: date
-        }, settings.SECRET_REFRESH, {expiresIn: '20m'})
+        const refreshToken = await this.jwtAdapter.signRefreshToken(userId, deviceId, date)
 
         return {
             accessToken: {
@@ -100,7 +92,7 @@ export class JwtService {
     }
 
     async deleteSession(userId: ObjectId, deviceId: string): Promise<RESPONSE_OPTIONS> {
-        const session: DeviceAuthSessionType | null = await this.usersQueryRepository.findDeviceSession(deviceId)
+        const session: DeviceAuthSessionType | null = await this.sessionsRepository.findDeviceSession(deviceId)
         if (!session) return RESPONSE_OPTIONS.NOT_FOUND
 
         if (userId.toString() !== session.userId.toString()) {

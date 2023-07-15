@@ -19,34 +19,32 @@ import {QueryCommentsRepository} from "./repositories/query-comments-repository"
 import {CommentsRepository} from "./repositories/comments-repository";
 import {CommentsService} from "./domain/comments-service";
 import {CommentsController} from "./controllers/comment-controller";
+import {EmailAdapter} from "./adapters/email-adapter";
+import {JwtAdapter} from "./adapters/jwt-adapter";
 
 
 
 
 const usersRepository = new UsersRepository()
 const usersQueryRepository = new UsersQueryRepository()
-
-const emailManagers = new EmailManagers()
+const emailAdapter = new EmailAdapter()
 const sessionsRepository = new SessionsRepository()
-
 const blogsQueryRepository = new QueryBlogsRepository()
 const blogsRepository = new BlogsRepository()
-
 const postsQueryRepository = new PostsQueryRepository()
 const postsRepository = new PostsRepository()
-
 const queryCommentsRepository = new QueryCommentsRepository()
 const commentsRepository = new CommentsRepository()
+const jwtAdapter = new JwtAdapter()
 
 
+const emailManagers = new EmailManagers(emailAdapter)
 
-
-
-const usersService = new UsersService(usersRepository, usersQueryRepository, emailManagers)
-export const jwtService = new JwtService(sessionsRepository, usersQueryRepository, usersRepository)
-const blogsService = new BlogsService(blogsQueryRepository, blogsRepository)
-const postsService = new PostsService(postsRepository, blogsQueryRepository)
-const commentsService = new CommentsService(commentsRepository, queryCommentsRepository, postsQueryRepository)
+const usersService = new UsersService(usersRepository, emailManagers)
+export const jwtService = new JwtService(sessionsRepository, usersRepository, jwtAdapter)
+const blogsService = new BlogsService( blogsRepository)
+const postsService = new PostsService(postsRepository, blogsRepository)
+const commentsService = new CommentsService(commentsRepository, postsRepository)
 
 
 export const usersController = new UsersController(usersService, usersQueryRepository)
@@ -54,5 +52,4 @@ export const authController = new AuthController(usersService, jwtService, users
 export const deviceController = new DeviceController(usersQueryRepository, jwtService)
 export const blogsController = new BlogsController(blogsQueryRepository, blogsService, postsQueryRepository)
 export const postsController = new PostsController(postsQueryRepository, postsService, commentsService, queryCommentsRepository)
-
 export const commentsController = new CommentsController( queryCommentsRepository, commentsService)

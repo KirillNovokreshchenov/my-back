@@ -1,25 +1,23 @@
 import {ObjectId} from "mongodb";
-import {PostsQueryRepository} from "../repositories/query-posts-repository";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 import {UserType} from "../db/db-users-type";
 import {CommentType, LikeStatus} from "../db/db-comments-type";
 import {CommentsRepository} from "../repositories/comments-repository";
-import {QueryCommentsRepository} from "../repositories/query-comments-repository";
 import {RESPONSE_OPTIONS} from "../types/res-status";
 import {LIKE_STATUS} from "../models/comment-models/EnumLikeStatusModel";
+import {PostsRepository} from "../repositories/posts-repository";
 
 
 export class CommentsService {
 
     constructor(protected commentsRepository: CommentsRepository,
-                protected queryCommentsRepository: QueryCommentsRepository,
-                protected postsQueryRepository: PostsQueryRepository) {
+                protected postsRepository: PostsRepository ) {
 
     }
 
 
     async createComment(postId: string, {_id, login}: UserType, content: string): Promise<ObjectId | null> {
-        const isExistingPost = await this.postsQueryRepository.findPost(new ObjectId(postId))
+        const isExistingPost = await this.postsRepository.findPost(new ObjectId(postId))
         if (!isExistingPost) return null
         const newComment: CommentType = new CommentType(
             new ObjectId(),
@@ -38,7 +36,7 @@ export class CommentsService {
 
     async updateComment(commentId: string, content: string, userId: ObjectId): Promise<RESPONSE_OPTIONS> {
 
-        const foundComment = await this.queryCommentsRepository.findComment(new ObjectId(commentId))
+        const foundComment = await this.commentsRepository.findComment(new ObjectId(commentId))
 
         if (!foundComment) return RESPONSE_OPTIONS.NOT_FOUND
 
@@ -50,7 +48,7 @@ export class CommentsService {
     }
 
     async deleteComment(commentId: string, userId: ObjectId): Promise<RESPONSE_OPTIONS> {
-        const foundComment = await this.queryCommentsRepository.findComment(formatIdInObjectId(commentId))
+        const foundComment = await this.commentsRepository.findComment(formatIdInObjectId(commentId))
 
         if (!foundComment) return RESPONSE_OPTIONS.NOT_FOUND
 
@@ -61,13 +59,13 @@ export class CommentsService {
         return RESPONSE_OPTIONS.NO_CONTENT
     }
 
-   async updateLikeStatus(commentId: string, likeStatus: LIKE_STATUS, userId: ObjectId): Promise<boolean>{
+   async updateLikeStatus(commentId: string, likeStatus: LIKE_STATUS, userId: ObjectId): Promise<boolean> {
 
-       const commentIsExist =  await this.queryCommentsRepository.findComment(new ObjectId(commentId))
+       const commentIsExist =  await this.commentsRepository.findComment(new ObjectId(commentId))
        if(!commentIsExist) return false
 
        const likeStatusIsExist = await this.commentsRepository.getLikeStatus(new ObjectId(commentId), userId)
-       if(!likeStatusIsExist){
+       if(!likeStatusIsExist) {
            const newLikeStatus = new LikeStatus(new ObjectId(), new ObjectId(commentId), userId, likeStatus)
            await this.commentsRepository.createLikeStatus(newLikeStatus, likeStatus, new ObjectId(commentId))
            return true

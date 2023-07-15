@@ -49,8 +49,6 @@ import {DeviceSessionModelClass} from "../db/schemas/shema-session";
         const foundUser = await UserModelClass.findOne(id).lean()
         if(!foundUser) return null
         return this._mapUser(foundUser)
-
-
     }
     async findUserWithToken(id: ObjectId): Promise<DataViewByToken | null> {
         const foundUser:UserType|null = await UserModelClass.findOne(id)
@@ -62,21 +60,7 @@ import {DeviceSessionModelClass} from "../db/schemas/shema-session";
         }
     }
 
-    async getEmailConfirmation(emailOrCode: string): Promise<EmailConfirmationType | null> {
-        return EmailConfirmationClass.findOne({$or: [{email: emailOrCode}, {confirmationCode: emailOrCode}]})
-    }
 
-    async getRecoveryData(recoveryCode: string): Promise<PasswordRecoveryType|null>{
-        return PasswordRecoveryClass.findOne({recoveryCode})
-    }
-
-    async findDeviceSession(deviceId: string, date?: Date) {
-        if(date){
-        return DeviceSessionModelClass.findOne({$and: [{lastActiveDate: new Date(date)}, {deviceId: deviceId}]}).lean()
-        } else{
-            return DeviceSessionModelClass.findOne({deviceId: deviceId}).lean()
-        }
-    }
 
     async getAllSessions(userId: ObjectId) {
         const allSessionsUser: DeviceAuthSessionType[] = await DeviceSessionModelClass.find({userId: userId}).lean()

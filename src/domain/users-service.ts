@@ -7,7 +7,7 @@ import {UserType} from "../db/db-users-type";
 import {uuid} from "uuidv4";
 import {add} from 'date-fns'
 import {EmailManagers} from "../managers/email-managers";
-import {UsersQueryRepository} from "../repositories/query-users-repository";
+
 
 import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-email-type";
 
@@ -16,7 +16,6 @@ export class UsersService {
 
     constructor(
         protected usersRepository: UsersRepository,
-        protected usersQueryRepository: UsersQueryRepository,
         protected emailManagers: EmailManagers) {
     }
 
@@ -65,7 +64,7 @@ export class UsersService {
     }
 
     async confirmEmail(code: string): Promise<boolean> {
-        const codeIsExisting = await this.usersQueryRepository.getEmailConfirmation(code)
+        const codeIsExisting = await this.usersRepository.getEmailConfirmation(code)
         if (!codeIsExisting) return false
         if (codeIsExisting.expirationDate < new Date()) return false
         if (codeIsExisting.isConfirmed) return false
@@ -73,7 +72,7 @@ export class UsersService {
     }
 
     async emailResending(email: string): Promise<boolean> {
-        const emailConfirmation = await this.usersQueryRepository.getEmailConfirmation(email)
+        const emailConfirmation = await this.usersRepository.getEmailConfirmation(email)
         if (!emailConfirmation) return false
         if (emailConfirmation.isConfirmed) return false
 
@@ -115,7 +114,7 @@ export class UsersService {
 
     async newPassword(newPassword: string, recoveryCode: string): Promise<boolean> {
 
-        const recoveryData = await this.usersQueryRepository.getRecoveryData(recoveryCode)
+        const recoveryData = await this.usersRepository.getRecoveryData(recoveryCode)
 
         if (!recoveryData) return false
         if (recoveryData.expirationDate < new Date()) return false

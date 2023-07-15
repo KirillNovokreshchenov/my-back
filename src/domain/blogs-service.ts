@@ -8,8 +8,8 @@ import {PostType} from "../db/db-posts-type";
 
 export class BlogsService {
 
-    constructor(protected blogsQueryRepository: QueryBlogsRepository,
-                protected blogsRepository: BlogsRepository) {
+    constructor(
+        protected blogsRepository: BlogsRepository) {
     }
 
     async createBlog({name, description, websiteUrl}: CreateAndUpdateBlogInputModel): Promise<ObjectId> {
@@ -32,7 +32,7 @@ export class BlogsService {
         content
     }: CreateModelPostForBlog): Promise<ObjectId | null> {
 
-        const foundBlogName = await this.blogsQueryRepository.findBlog(new ObjectId(BlogId))
+        const foundBlogName = await this.blogsRepository.findBlog(new ObjectId(BlogId))
         if (!foundBlogName) {
             return null
         }
