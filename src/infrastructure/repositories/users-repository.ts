@@ -1,31 +1,32 @@
 import {ObjectId} from "mongodb";
 import {formatIdInObjectId} from "../../helpers/format-id-ObjectId";
 import {EmailConfirmationType, UserType} from "../../db/db-users-type";
-import {UserModelClass} from "../../domain/schema-user";
+import {UserMethods, UserModelClass} from "../../domain/schema-user";
 import {PasswordRecoveryType} from "../../db/db-email-type";
 import {PasswordRecoveryClass} from "../../domain/schemas-email";
 import {injectable} from "inversify";
+import {HydratedDocument} from "mongoose";
 
 @injectable()
 export class UsersRepository {
-    async findUser(codeOrEmail: string): Promise<UserType | null> {
-        return UserModelClass.findOne({$or: [{email: codeOrEmail}, {"emailConfirmation.confirmationCode": codeOrEmail}]})
+    // async findUser(codeOrEmail: string): Promise<UserType | null> {
+    //     return UserModelClass.findOne({$or: [{email: codeOrEmail}, {"emailConfirmation.confirmationCode": codeOrEmail}]})
+    //
+    // }
 
-    }
-
-    async createUser(newUserDTO: UserType): Promise<ObjectId> {
-        const user = new UserModelClass(newUserDTO)
-        await user.save()
-        return user._id
-    }
+    // async createUser(newUserDTO: UserType): Promise<ObjectId> {
+    //     const user = new UserModelClass(newUserDTO)
+    //     await user.save()
+    //     return user._id
+    // }
 
     async deleteUser(id: string) {
         const result: any = await UserModelClass.deleteOne({_id: formatIdInObjectId(id)})
         return result.deletedCount === 1
     }
 
-    async findByLoginOrEmail(loginOrEmail: string): Promise<UserType | null> {
-        return UserModelClass.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
+    async findUser(loginOrEmailOrCode: string): Promise<HydratedDocument<UserType, UserMethods> | null> {
+        return UserModelClass.findOne({$or: [{login: loginOrEmailOrCode}, {email: loginOrEmailOrCode}, {"emailConfirmation.confirmationCode": loginOrEmailOrCode}]})
     }
 
 

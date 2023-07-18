@@ -15,8 +15,6 @@ export const EmailConfirmationSchema = new mongoose.Schema<EmailConfirmationType
 
 
 
-// export const EmailConfirmationClass = mongoose.model('EmailConfirmation', EmailConfirmationSchema, 'EmailCollection')
-
 const PasswordRecoverySchema = new mongoose.Schema<PasswordRecoveryType>({
     email: String,
     recoveryCode: String,

@@ -48,7 +48,8 @@ import {HydratedDocument} from "mongoose";
     }
 
     async findUser(id: ObjectId): Promise<UserViewModel|null> {
-        const foundUser= await UserModelClass.findOne(id).lean().exec()
+        const foundUser: UserType|null= await UserModelClass.findOne(id).lean().exec()
+
         if(!foundUser) return null
         return this._mapUser(foundUser)
     }

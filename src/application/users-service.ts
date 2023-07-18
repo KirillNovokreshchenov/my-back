@@ -9,8 +9,8 @@ import {add} from 'date-fns'
 import {EmailManagers} from "./managers/email-managers";
 import {PasswordRecoveryType} from "../db/db-email-type";
 import {inject, injectable} from "inversify";
-import {UserModelClass} from "../domain/schema-user";
-import mongoose from "mongoose";
+import {UserMethods, UserModelClass} from "../domain/schema-user";
+import mongoose, {HydratedDocument} from "mongoose";
 
 
 @injectable()
@@ -23,25 +23,23 @@ export class UsersService {
 
 
     async createUserByAdmin(userData: UserInputModel): Promise<ObjectId> {
-        const newUser: UserType = await this._newUser(userData)
-        const userModel = new UserModelClass(newUser)
-        newUser.emailConfirmation.isConfirmed = true
-        await this.usersRepository.saveUser(userModel)
+
+        const newUser: HydratedDocument<UserType, UserMethods> = await UserModelClass.constructUser(userData.login, userData.email, userData.password)
+        newUser.confirm()
+        await this.usersRepository.saveUser(newUser)
         return newUser._id
     }
 
     async createUserByRegistration(dataRegistration: UserInputModel): Promise<boolean> {
 
-        const newUser = await this._newUser(dataRegistration)
-
-        const userModel = new UserModelClass(newUser)
+        const newUser = await UserModelClass.constructUser(dataRegistration.login, dataRegistration.email, dataRegistration.password)
 
         try {
             await this.emailManagers.emailRegistration(newUser)
         } catch {
             return false
         }
-        await this.usersRepository.saveUser(userModel)
+        await this.usersRepository.saveUser(newUser)
         return true
     }
 
@@ -49,22 +47,26 @@ export class UsersService {
         return await this.usersRepository.deleteUser(id)
     }
 
-    async checkCredentials({loginOrEmail, password}: LoginModel): Promise<false | ObjectId> {
-        const user = await this.usersRepository.findByLoginOrEmail(loginOrEmail)
+    async checkCredentials({loginOrEmail, password}: LoginModel): Promise<ObjectId | false> {
+        const user: HydratedDocument<UserType, UserMethods>|null = await this.usersRepository.findUser(loginOrEmail)
+
         if (!user) return false
-        const isValid = await bcrypt.compare(password, user.password)
+
+        const isValid = await user.compareHash(password, user.password)
+
         if (!isValid) return false
+
         return user._id
 
     }
 
     async confirmEmail(code: string): Promise<boolean> {
-        const userModel = await this.usersRepository.findUser(code)
-        if (!userModel) return false
-        if (userModel.emailConfirmation.expirationDate < new Date()) return false
-        if (userModel.emailConfirmation.isConfirmed) return false
-        userModel.emailConfirmation.isConfirmed = true
-        await this.usersRepository.saveUser(userModel)
+        const user = await this.usersRepository.findUser(code)
+        if (!user) return false
+        if (user.emailConfirmation.expirationDate < new Date()) return false
+        if (user.emailConfirmation.isConfirmed) return false
+        user.emailConfirmation.isConfirmed = true
+        await this.usersRepository.saveUser(user)
         return true
     }
 

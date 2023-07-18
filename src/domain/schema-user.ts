@@ -3,27 +3,18 @@ import {UserType} from "../db/db-users-type";
 import {EmailConfirmationSchema} from "./schemas-email";
 import {uuid} from "uuidv4";
 import {add} from "date-fns";
-
-
+import bcrypt from "bcrypt";
 
 
 export type UserMethods = {
     confirm(): void
+    compareHash(password: string, hash: string): Promise<boolean>
 }
 
-// type UserMethodsType = Model<UserType, {}, UserMethods>
-//
-//
-// type UserStaticType = Model<UserType> & {
-//     constructUser(login: string,email: string,passwordHash: string): HydratedDocument<UserType, UserMethods>
-// }
-//
-// type FullUserModelType = UserMethodsType&UserStaticType
-//
-// // export type HydratedUser = HydratedDocument<UserType, UserMethods>
 
-type UserModel =  Model<UserType, {}, UserMethods> &{
-    createWithFullName(name: string): Promise<HydratedDocument<UserType, UserMethods>>;
+type UserModel = Model<UserType, {}, UserMethods> & {
+    constructUser(login: string, email: string, password: string): Promise<HydratedDocument<UserType, UserMethods>>
+    createHash(password: string): Promise<string>
 }
 
 const UserSchema = new mongoose.Schema<UserType, UserModel, UserMethods>({
@@ -44,12 +35,23 @@ UserSchema.method('confirm', function confirm() {
     that.emailConfirmation.isConfirmed = true
 })
 
-UserSchema.static('constructUser', function constructUser(login: string,email: string,passwordHash: string) {
+UserSchema.method('compareHash', async function compareHash(password: string, hash: string) {
+    const isTrue = await bcrypt.compare(password, hash)
+    return isTrue
+})
+
+UserSchema.static('createHash', function createHash(password: string) {
+    const hash = bcrypt.hash(password, 10)
+    return hash
+})
+
+UserSchema.static('constructUser', async function constructUser(login: string, email: string, password: string) {
+    const hash = await this.createHash(password)
     const newUser = new UserType(
         new mongoose.Types.ObjectId(),
         login,
         email,
-        passwordHash,
+        hash,
         new Date().toISOString(),
         {
             confirmationCode: uuid(),
@@ -57,10 +59,11 @@ UserSchema.static('constructUser', function constructUser(login: string,email: s
                 hours: 1
             }),
             isConfirmed: false
-        }
-    )
-    return newUser as UserType
+        })
+    return new UserModelClass(newUser)
+
 })
+
 
 export const UserModelClass = mongoose.model<UserType, UserModel>('User', UserSchema)
 

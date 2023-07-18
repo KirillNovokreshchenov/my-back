@@ -23,7 +23,7 @@ export type EmailConfirmationType = {
 
 export class UserType{
     constructor(
-        public _id:  Types.ObjectId,
+        public _id: ObjectId,
         public login: string,
         public email: string,
         public password: string,
