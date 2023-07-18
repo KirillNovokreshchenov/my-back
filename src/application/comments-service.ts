@@ -2,16 +2,17 @@ import {ObjectId} from "mongodb";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
 import {UserType} from "../db/db-users-type";
 import {CommentType, LikeStatus} from "../db/db-comments-type";
-import {CommentsRepository} from "../repositories/comments-repository";
+import {CommentsRepository} from "../infrastructure/repositories/comments-repository";
 import {RESPONSE_OPTIONS} from "../types/res-status";
 import {LIKE_STATUS} from "../models/comment-models/EnumLikeStatusModel";
-import {PostsRepository} from "../repositories/posts-repository";
+import {PostsRepository} from "../infrastructure/repositories/posts-repository";
+import {inject, injectable} from "inversify";
 
-
+@injectable()
 export class CommentsService {
 
-    constructor(protected commentsRepository: CommentsRepository,
-                protected postsRepository: PostsRepository ) {
+    constructor( @inject(CommentsRepository)protected commentsRepository: CommentsRepository,
+                 @inject(PostsRepository)protected postsRepository: PostsRepository ) {
 
     }
 

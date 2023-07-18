@@ -1,10 +1,11 @@
 import {ObjectId} from "mongodb";
 import jwt from "jsonwebtoken";
-import {settings} from "../settings";
+import {settings} from "../../settings";
 import {uuid} from "uuidv4";
 import {add} from "date-fns";
+import {injectable} from "inversify";
 
-
+@injectable()
 export class JwtAdapter {
     async signAccessToken(userId: ObjectId) {
         return jwt.sign({userId: userId}, settings.SECRET_JWT, {expiresIn: '10m'})

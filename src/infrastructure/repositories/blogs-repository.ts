@@ -1,10 +1,11 @@
 import {ObjectId} from "mongodb";
-import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
-import {BlogType} from "../db/db-blogs-type";
-import {BlogModelClass} from "../db/schemas/schema-blog";
-import {PostModelClass} from "../db/schemas/schema-post";
+import {formatIdInObjectId} from "../../helpers/format-id-ObjectId";
+import {BlogType} from "../../db/db-blogs-type";
+import {BlogModelClass} from "../../domain/schema-blog";
+import {PostModelClass} from "../../domain/schema-post";
+import {injectable} from "inversify";
 
-
+@injectable()
 export class BlogsRepository {
 
     async findBlog(id: ObjectId): Promise<BlogType| null> {

@@ -3,9 +3,10 @@ import {blogValidate} from "../middlewares/blog-middlewares";
 import {authorizationValidation} from "../middlewares/auth-middleware";
 import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
 import {postValidateForBlog} from "../middlewares/post-middleware";
-import {blogsController} from "../composition-root";
+import {iocContainer} from "../composition-root";
+import {BlogsController} from "../controllers/blog-controller";
 
-
+const blogsController = iocContainer.resolve(BlogsController)
 
 export const blogRouter = Router()
 

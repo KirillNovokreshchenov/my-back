@@ -1,16 +1,16 @@
 import {CreateAndUpdatePostModel} from "../models/post-models/CreateAndUpdatePostModel";
-import {PostsRepository} from "../repositories/posts-repository";
+import {PostsRepository} from "../infrastructure/repositories/posts-repository";
 import {ObjectId} from "mongodb";
 import {PostType} from "../db/db-posts-type";
-import {BlogViewModel} from "../models/blog-models/BlogViewModel";
-import {BlogsRepository} from "../repositories/blogs-repository";
+import {BlogsRepository} from "../infrastructure/repositories/blogs-repository";
 import {BlogType} from "../db/db-blogs-type";
+import {inject, injectable} from "inversify";
 
-
+@injectable()
 export class PostsService {
 
-    constructor(protected postsRepository: PostsRepository,
-                protected blogsRepository: BlogsRepository
+    constructor(@inject(PostsRepository)protected postsRepository: PostsRepository,
+                @inject(BlogsRepository)protected blogsRepository: BlogsRepository
     ) {
 
     }

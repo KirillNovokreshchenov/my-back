@@ -3,8 +3,11 @@ import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
 import {jwtMiddleware, likeStatusMiddleware} from "../middlewares/auth-jwt-middleware";
 import {contentValidation, likeStatusValidation} from "../middlewares/comment-middleware";
 import {errorsValidationMiddleware} from "../middlewares/err-middleware";
-import {commentsController} from "../composition-root";
+import {iocContainer} from "../composition-root";
 
+import {CommentsController} from "../controllers/comment-controller";
+
+const commentsController = iocContainer.resolve(CommentsController)
 
 export const commentRouter = Router()
 

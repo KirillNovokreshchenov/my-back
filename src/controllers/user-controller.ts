@@ -1,5 +1,5 @@
-import {UsersService} from "../domain/users-service";
-import {UsersQueryRepository} from "../repositories/query-users-repository";
+import {UsersService} from "../application/users-service";
+import {UsersQueryRepository} from "../infrastructure/repositories/query-repositories/query-users-repository";
 import {RequestWithBody, RequestWithParams, RequestWithQuery} from "../types/types";
 import {UsersQueryInputModel} from "../models/user-models/UsersQueryInputModel";
 import {Response} from "express";
@@ -8,13 +8,14 @@ import {UserViewModel} from "../models/user-models/UserViewModel";
 import {UserInputModel} from "../models/user-models/UserInputModel";
 import {RESPONSE_STATUS} from "../types/res-status";
 import {URIParamsId} from "../models/URIParamsIdModel";
+import {inject, injectable} from "inversify";
 
-
+@injectable()
 export class UsersController {
 
     constructor(
-        protected usersService: UsersService,
-        protected usersQueryRepository: UsersQueryRepository) {
+        @inject(UsersService)protected usersService: UsersService,
+        @inject(UsersQueryRepository)protected usersQueryRepository: UsersQueryRepository) {
 
     }
 
@@ -25,7 +26,7 @@ export class UsersController {
     }
 
     async createUser(req: RequestWithBody<UserInputModel>, res: Response<UserViewModel>) {
-        const userObjectId = await this.usersService.createUser(req.body)
+        const userObjectId = await this.usersService.createUserByAdmin(req.body)
         const newUser = await this.usersQueryRepository.findUser(userObjectId)
         if (!newUser) {
             return res.sendStatus(RESPONSE_STATUS.SERVER_ERROR_500)

@@ -1,7 +1,7 @@
-import {PostsQueryRepository} from "../repositories/query-posts-repository";
-import {PostsService} from "../domain/posts-service";
-import {CommentsService} from "../domain/comments-service";
-import {QueryCommentsRepository} from "../repositories/query-comments-repository";
+import {PostsQueryRepository} from "../infrastructure/repositories/query-repositories/query-posts-repository";
+import {PostsService} from "../application/posts-service";
+import {CommentsService} from "../application/comments-service";
+import {QueryCommentsRepository} from "../infrastructure/repositories/query-repositories/query-comments-repository";
 import {
     RequestWithBody,
     RequestWithBodyAndParams,
@@ -20,14 +20,15 @@ import {CreateAndUpdatePostModel} from "../models/post-models/CreateAndUpdatePos
 import {CommentCreateAndUpdateModel} from "../models/comment-models/CommentCreateAndUpdateModel";
 import {CommentViewModel} from "../models/comment-models/CommentViewModel";
 import {CommentsQueryInputModel} from "../models/comment-models/CommentsQueryInputModel";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class PostsController {
 
-
-    constructor(protected postsQueryRepository: PostsQueryRepository,
-                protected postsService: PostsService,
-                protected commentsService: CommentsService,
-                protected queryCommentsRepository: QueryCommentsRepository) {
+    constructor(@inject(PostsQueryRepository)protected postsQueryRepository: PostsQueryRepository,
+                @inject(PostsService)protected postsService: PostsService,
+                @inject(CommentsService)protected commentsService: CommentsService,
+                @inject(QueryCommentsRepository)protected queryCommentsRepository: QueryCommentsRepository) {
 
     }
 

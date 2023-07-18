@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import {RateLimitType} from "../db-users-type";
+import {RateLimitType} from "../db/db-users-type";
 
 
 const RateLimitSchema = new mongoose.Schema<RateLimitType>({

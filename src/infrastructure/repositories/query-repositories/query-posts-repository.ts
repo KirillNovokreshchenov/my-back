@@ -1,15 +1,16 @@
-import {PostType} from "../db/db-posts-type";
+import {PostType} from "../../../db/db-posts-type";
 
 import {ObjectId} from "mongodb";
-import {PostViewModel} from "../models/post-models/PostViewModel";
-import {pageCount} from "../helpers/pageCount";
-import {limitPages} from "../helpers/limitPages";
-import {QueryInputModel} from "../models/QueryInputModel";
-import {QueryViewModel} from "../models/QueryViewModel";
-import {PostModelClass} from "../db/schemas/schema-post";
+import {PostViewModel} from "../../../models/post-models/PostViewModel";
+import {pageCount} from "../../../helpers/pageCount";
+import {limitPages} from "../../../helpers/limitPages";
+import {QueryInputModel} from "../../../models/QueryInputModel";
+import {QueryViewModel} from "../../../models/QueryViewModel";
+import {PostModelClass} from "../../../domain/schema-post";
+import {injectable} from "inversify";
 
 
-
+@injectable()
 export class PostsQueryRepository {
     async allPosts(query: QueryInputModel, blogId?: string): Promise<QueryViewModel<PostViewModel>> {
 

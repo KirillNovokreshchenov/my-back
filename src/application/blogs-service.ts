@@ -1,15 +1,16 @@
-import {BlogsRepository} from "../repositories/blogs-repository";
+import {BlogsRepository} from "../infrastructure/repositories/blogs-repository";
 import {CreateAndUpdateBlogInputModel} from "../models/blog-models/CreateAndUpdateBlogInputModel";
 import {ObjectId} from "mongodb";
 import {CreateModelPostForBlog} from "../models/blog-models/CreateModelPostForBlog";
 import {BlogType} from "../db/db-blogs-type";
-import {QueryBlogsRepository} from "../repositories/query-blogs-repository";
 import {PostType} from "../db/db-posts-type";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class BlogsService {
 
     constructor(
-        protected blogsRepository: BlogsRepository) {
+        @inject(BlogsRepository)protected blogsRepository: BlogsRepository) {
     }
 
     async createBlog({name, description, websiteUrl}: CreateAndUpdateBlogInputModel): Promise<ObjectId> {
@@ -26,13 +27,13 @@ export class BlogsService {
 
     }
 
-    async createPostForBlog(BlogId: string, {
+    async createPostForBlog(blogId: string, {
         title,
         shortDescription,
         content
     }: CreateModelPostForBlog): Promise<ObjectId | null> {
 
-        const foundBlogName = await this.blogsRepository.findBlog(new ObjectId(BlogId))
+        const foundBlogName = await this.blogsRepository.findBlog(new ObjectId(blogId))
         if (!foundBlogName) {
             return null
         }
@@ -41,7 +42,7 @@ export class BlogsService {
             title,
             shortDescription,
             content,
-            BlogId,
+            blogId,
             foundBlogName.name,
             new Date().toISOString(),
         )

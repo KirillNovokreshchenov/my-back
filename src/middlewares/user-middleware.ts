@@ -1,10 +1,8 @@
 import {body} from "express-validator";
 import {authorizationValidation} from "./auth-middleware";
 import {errorsValidationMiddleware} from "./err-middleware";
-import {collectionEmail, collectionUsers} from "../db/db";
 import {rateLimitsMiddleware} from "./rateLimits-middleware";
-import {EmailConfirmationClass} from "../db/schemas/schemas-email";
-
+import {UserModelClass} from "../domain/schema-user";
 
 
 const loginValidation = body('login')
@@ -14,7 +12,7 @@ const loginValidation = body('login')
     .isLength({min: 3, max: 10})
     .matches(/^[a-zA-Z0-9_-]*$/)
     .custom(async value =>{
-        const foundUser = await collectionUsers.findOne({login: value});
+        const foundUser = await UserModelClass.findOne({login: value});
         if(foundUser) {
             throw new Error('incorrect login')
         }
@@ -38,9 +36,9 @@ const emailValidation = body('email')
     .notEmpty()
     .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
     .custom(async value =>{
-        const foundUser = await collectionUsers.findOne({email: value});
+        const foundUser = await UserModelClass.findOne({email: value});
         if(foundUser) {
-            throw new Error('incorrect email')
+            throw new Error('incorrect emaill')
         }
     })
 
@@ -55,7 +53,7 @@ export const codeConfirmationValidation = body('code')
     .trim()
     .notEmpty()
     .custom(async value =>{
-        const foundCode = await EmailConfirmationClass.findOne({confirmationCode: value});
+        const foundCode = await UserModelClass.findOne({"emailConfirmation.confirmationCode": value});
         if(!foundCode) {
             throw new Error('incorrect code')
         }

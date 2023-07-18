@@ -1,5 +1,6 @@
 import {app} from "./app";
 import {runDB} from "./db/db";
+import mongoose from "mongoose";
 
 
 const port = 3000

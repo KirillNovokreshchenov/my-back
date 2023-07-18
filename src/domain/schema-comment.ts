@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
 
-import {CommentType, LikeStatus} from "../db-comments-type";
-import {PostModelClass} from "./schema-post";
-import {LIKE_STATUS} from "../../models/comment-models/EnumLikeStatusModel";
+import {CommentType, LikeStatus} from "../db/db-comments-type";
 
 
 const CommentSchema = new mongoose.Schema<CommentType>({

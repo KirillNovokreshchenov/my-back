@@ -1,4 +1,4 @@
-import {BlogType} from "../db-blogs-type";
+import {BlogType} from "../db/db-blogs-type";
 import mongoose from "mongoose";
 
 

@@ -1,11 +1,12 @@
-import {PostType} from "../db/db-posts-type";
+import {PostType} from "../../db/db-posts-type";
 
 import {ObjectId} from "mongodb";
-import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
-import {PostModelClass} from "../db/schemas/schema-post";
-import {PostViewModel} from "../models/post-models/PostViewModel";
+import {formatIdInObjectId} from "../../helpers/format-id-ObjectId";
+import {PostModelClass} from "../../domain/schema-post";
+import {PostViewModel} from "../../models/post-models/PostViewModel";
+import {injectable} from "inversify";
 
-
+@injectable()
 export class PostsRepository {
 
     async findPost(id: ObjectId): Promise<PostViewModel | null> {

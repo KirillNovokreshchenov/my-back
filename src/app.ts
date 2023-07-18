@@ -1,5 +1,4 @@
 import express from "express";
-import bodyParser from "body-parser";
 import {videoRouter} from "./routes/videos";
 import {testingRouter} from "./routes/testing";
 import {blogRouter} from "./routes/blogs";

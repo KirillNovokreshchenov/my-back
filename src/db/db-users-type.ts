@@ -1,16 +1,45 @@
-import {ObjectId, WithId} from "mongodb";
+import {ObjectId} from "mongodb";
+import {Types} from "mongoose";
 
-export class UserType {
+
+
+// export class EmailConfirmationType {
+//     constructor(
+//         public _id: ObjectId,
+//         public userId: ObjectId,
+//         public email: string,
+//         public confirmationCode: string,
+//         public expirationDate: Date,
+//         public isConfirmed: boolean
+//     ) {
+//     }
+//
+// }
+export type EmailConfirmationType = {
+    confirmationCode: string
+    expirationDate: Date
+    isConfirmed: boolean
+}
+
+export class UserType{
     constructor(
-        public _id: ObjectId,
+        public _id:  Types.ObjectId,
         public login: string,
         public email: string,
         public password: string,
-        public createdAt: string
+        public createdAt: string,
+        public emailConfirmation: EmailConfirmationType
     ) {
     }
 }
-
+// export interface UserDoc extends Document {
+//     _id:  Types.ObjectId,
+//     login: string,
+//     email: string,
+//     password: string,
+//     createdAt: string,
+//     emailConfirmation: EmailConfirmationType
+// }
 
 // export type UserType = WithId<{
 //     login: string

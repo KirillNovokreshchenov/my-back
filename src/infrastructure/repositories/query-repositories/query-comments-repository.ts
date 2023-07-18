@@ -1,15 +1,16 @@
 import {ObjectId} from "mongodb";
-import {collectionPosts} from "../db/db";
-import {CommentType, LikeStatus} from "../db/db-comments-type";
-import {CommentViewModel} from "../models/comment-models/CommentViewModel";
-import {CommentsQueryInputModel} from "../models/comment-models/CommentsQueryInputModel";
-import {QueryViewModel} from "../models/QueryViewModel";
-import {pageCount} from "../helpers/pageCount";
-import {limitPages} from "../helpers/limitPages";
-import {CommentModelClass, LikeStatusClass} from "../db/schemas/schema-comment";
-import {LIKE_STATUS} from "../models/comment-models/EnumLikeStatusModel";
+import {CommentType, LikeStatus} from "../../../db/db-comments-type";
+import {CommentViewModel} from "../../../models/comment-models/CommentViewModel";
+import {CommentsQueryInputModel} from "../../../models/comment-models/CommentsQueryInputModel";
+import {QueryViewModel} from "../../../models/QueryViewModel";
+import {pageCount} from "../../../helpers/pageCount";
+import {limitPages} from "../../../helpers/limitPages";
+import {CommentModelClass, LikeStatusClass} from "../../../domain/schema-comment";
+import {LIKE_STATUS} from "../../../models/comment-models/EnumLikeStatusModel";
+import {injectable} from "inversify";
+import {PostModelClass} from "../../../domain/schema-post";
 
-
+@injectable()
 export class QueryCommentsRepository {
     async findComment(commentId: ObjectId, userId?: ObjectId): Promise<CommentViewModel | null> {
         const comment: CommentType | null = await CommentModelClass.findOne({_id: commentId})
@@ -20,7 +21,7 @@ export class QueryCommentsRepository {
     async getComments(postId: string, query: CommentsQueryInputModel, userId?: ObjectId): Promise<QueryViewModel<CommentViewModel> | null> {
         const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10} = query
 
-        const post = await collectionPosts.findOne(new ObjectId(postId))
+        const post = await PostModelClass.findOne(new ObjectId(postId))
 
         if (!post) return null
 

@@ -1,5 +1,3 @@
-import {ObjectId, WithId} from "mongodb";
-
 export type UserViewModel = {
     id: string
     login: string

@@ -1,17 +1,11 @@
-import {Request, Response, Router} from "express";
+import {Router} from "express";
 import {jwtRefreshMiddleware} from "../middlewares/auth-refresh-middleware";
-import {UsersQueryRepository} from "../repositories/query-users-repository";
-import {DeviceSessionModel} from "../models/user-models/DeviceSessionModel";
-import {JwtService} from "../application/jwt-service";
-import {RESPONSE_OPTIONS} from "../types/res-status";
-import {RESPONSE_STATUS} from "../types/res-status";
-import {deviceController} from "../composition-root";
+import {iocContainer} from "../composition-root";
+import {DeviceController} from "../controllers/security-device-controller";
 
+const deviceController = iocContainer.resolve(DeviceController)
 
 export const deviseRouter = Router({})
-
-
-
 
 deviseRouter.get('/',
     jwtRefreshMiddleware,

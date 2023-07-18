@@ -1,4 +1,3 @@
-import {ObjectId} from "mongodb";
 import {LIKE_STATUS} from "./EnumLikeStatusModel";
 
 export type CommentViewModel = {

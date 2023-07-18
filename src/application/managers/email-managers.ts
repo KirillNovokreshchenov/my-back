@@ -1,20 +1,22 @@
+import {EmailAdapter} from "../../infrastructure/adapters/email-adapter";
+import {PasswordRecoveryType} from "../../db/db-email-type";
+import {inject, injectable} from "inversify";
+import {EmailConfirmationType, UserType} from "../../db/db-users-type";
 
-import {EmailAdapter} from "../adapters/email-adapter";
-import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-email-type";
-
-
+@injectable()
 export class EmailManagers {
-    constructor(protected emailAdapter: EmailAdapter) {
+    constructor(@inject(EmailAdapter)protected emailAdapter: EmailAdapter) {
     }
-    async emailRegistration({email, confirmationCode}: EmailConfirmationType) {
-        const emailUser = email
+    async emailRegistration(user: UserType) {
+
+        const emailUser = user.email
 
         const subject = 'Complete registration'
 
         const htmlMessages =
             `<h1>Thank for your registration</h1>
        <p>To finish registration please follow the link below:
-        <a href='https://somesite.com/confirm-email?code=${confirmationCode}'>complete registration</a>
+        <a href='https://somesite.com/confirm-email?code=${user.emailConfirmation.confirmationCode}'>complete registration</a>
        </p>`
 
         await this.emailAdapter.sendEmail(emailUser, subject, htmlMessages)

@@ -5,9 +5,10 @@ import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
 import {jwtMiddleware, likeStatusMiddleware} from "../middlewares/auth-jwt-middleware";
 import {contentValidation} from "../middlewares/comment-middleware";
 import {errorsValidationMiddleware} from "../middlewares/err-middleware";
-import {postsController} from "../composition-root";
+import {iocContainer} from "../composition-root";
+import {PostsController} from "../controllers/post-controller";
 
-
+const postsController = iocContainer.resolve(PostsController)
 
 export const postRouter = Router()
 

@@ -1,4 +1,3 @@
-import {collectionUsers} from "../db/db";
 import {errorsValidationMiddleware} from "./err-middleware";
 import {body} from "express-validator";
 import {rateLimitsMiddleware} from "./rateLimits-middleware";

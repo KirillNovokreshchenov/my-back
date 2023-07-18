@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import {PostType} from "../db-posts-type";
+import {PostType} from "../db/db-posts-type";
 
 
 const PostSchema = new mongoose.Schema<PostType>({

@@ -1,6 +1,6 @@
-import {QueryBlogsRepository} from "../repositories/query-blogs-repository";
-import {BlogsService} from "../domain/blogs-service";
-import {PostsQueryRepository} from "../repositories/query-posts-repository";
+import {QueryBlogsRepository} from "../infrastructure/repositories/query-repositories/query-blogs-repository";
+import {BlogsService} from "../application/blogs-service";
+import {PostsQueryRepository} from "../infrastructure/repositories/query-repositories/query-posts-repository";
 import {
     RequestWithBody,
     RequestWithBodyAndParams,
@@ -19,14 +19,14 @@ import {RESPONSE_STATUS} from "../types/res-status";
 import {CreateAndUpdateBlogInputModel} from "../models/blog-models/CreateAndUpdateBlogInputModel";
 import {CreateModelPostForBlog} from "../models/blog-models/CreateModelPostForBlog";
 import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
+import {inject, injectable} from "inversify";
 
-
+@injectable()
 export class BlogsController {
 
-
-    constructor(protected blogsQueryRepository: QueryBlogsRepository,
-                protected blogsService: BlogsService,
-                protected postsQueryRepository: PostsQueryRepository) {
+    constructor(@inject(QueryBlogsRepository)protected blogsQueryRepository: QueryBlogsRepository,
+                @inject(BlogsService)protected blogsService: BlogsService,
+                @inject(PostsQueryRepository)protected postsQueryRepository: PostsQueryRepository) {
 
     }
 

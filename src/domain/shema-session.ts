@@ -1,6 +1,5 @@
-
 import mongoose from "mongoose";
-import {DeviceAuthSessionType} from "../db-users-type";
+import {DeviceAuthSessionType} from "../db/db-users-type";
 import {ObjectId} from "mongodb";
 
 

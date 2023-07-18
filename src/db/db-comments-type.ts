@@ -1,4 +1,4 @@
-import {ObjectId, WithId} from "mongodb";
+import {ObjectId} from "mongodb";
 import {LIKE_STATUS} from "../models/comment-models/EnumLikeStatusModel";
 
 // export type CommentType = WithId<{

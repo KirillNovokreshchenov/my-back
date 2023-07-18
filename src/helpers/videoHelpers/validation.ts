@@ -4,10 +4,6 @@ import {correctAge} from "./minAgeRestriction";
 import {errorsMessages} from "../../models/ErrorModel";
 
 
-
-
-
-
 export function validation(video: VideoCreateAndUpdateModel) {
     const errors: errorsMessages= {
         "errorsMessages": []

@@ -1,4 +1,4 @@
-import {ObjectId, WithId} from "mongodb";
+import {ObjectId} from "mongodb";
 
 // export type EmailConfirmationType = WithId<{
 //     userId: ObjectId
@@ -8,18 +8,7 @@ import {ObjectId, WithId} from "mongodb";
 //     isConfirmed: boolean
 // }>
 
-export class EmailConfirmationType {
-    constructor(
-        public _id: ObjectId,
-        public userId: ObjectId,
-        public email: string,
-        public confirmationCode: string,
-        public expirationDate: Date,
-        public isConfirmed: boolean
-    ) {
-    }
 
-}
 
 export class PasswordRecoveryType {
     constructor(

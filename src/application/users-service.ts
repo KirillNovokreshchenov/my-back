@@ -1,53 +1,48 @@
 import {UserInputModel} from "../models/user-models/UserInputModel";
 import {ObjectId} from "mongodb";
 import bcrypt from 'bcrypt'
-import {UsersRepository} from "../repositories/users-repository";
+import {UsersRepository} from "../infrastructure/repositories/users-repository";
 import {LoginModel} from "../models/auth-models/LoginModel";
-import {UserType} from "../db/db-users-type";
+import {EmailConfirmationType, UserType} from "../db/db-users-type";
 import {uuid} from "uuidv4";
 import {add} from 'date-fns'
-import {EmailManagers} from "../managers/email-managers";
+import {EmailManagers} from "./managers/email-managers";
+import {PasswordRecoveryType} from "../db/db-email-type";
+import {inject, injectable} from "inversify";
+import {UserModelClass} from "../domain/schema-user";
+import mongoose from "mongoose";
 
 
-import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-email-type";
-
-
+@injectable()
 export class UsersService {
 
     constructor(
-        protected usersRepository: UsersRepository,
-        protected emailManagers: EmailManagers) {
+        @inject(UsersRepository) protected usersRepository: UsersRepository,
+        @inject(EmailManagers) protected emailManagers: EmailManagers) {
     }
 
 
-    async createUser(userData: UserInputModel): Promise<ObjectId> {
+    async createUserByAdmin(userData: UserInputModel): Promise<ObjectId> {
         const newUser: UserType = await this._newUser(userData)
-        return this.usersRepository.createUser(newUser)
+        const userModel = new UserModelClass(newUser)
+        newUser.emailConfirmation.isConfirmed = true
+        await this.usersRepository.saveUser(userModel)
+        return newUser._id
     }
 
     async createUserByRegistration(dataRegistration: UserInputModel): Promise<boolean> {
 
-        const newUser: UserType = await this._newUser(dataRegistration)
+        const newUser = await this._newUser(dataRegistration)
 
-        const userId = await this.usersRepository.createUser(newUser)
-
-        if (!userId) return false
-
-        const newEmailConfirmation: EmailConfirmationType = await this._createEmailConfirmation(userId, newUser.email)
-
-        await this.usersRepository.emailConfirmation(newEmailConfirmation)
+        const userModel = new UserModelClass(newUser)
 
         try {
-            await this.emailManagers.emailRegistration(newEmailConfirmation)
-            return true
-        } catch (e) {
-            console.log(e)
-            await this.usersRepository.deleteUser(userId.toString())
-            await this.usersRepository.deleteEmailConfirmation(userId)
+            await this.emailManagers.emailRegistration(newUser)
+        } catch {
             return false
         }
-
-
+        await this.usersRepository.saveUser(userModel)
+        return true
     }
 
     async deleteUser(id: string) {
@@ -64,31 +59,33 @@ export class UsersService {
     }
 
     async confirmEmail(code: string): Promise<boolean> {
-        const codeIsExisting = await this.usersRepository.getEmailConfirmation(code)
-        if (!codeIsExisting) return false
-        if (codeIsExisting.expirationDate < new Date()) return false
-        if (codeIsExisting.isConfirmed) return false
-        return this.usersRepository.updateConfirm(code)
+        const userModel = await this.usersRepository.findUser(code)
+        if (!userModel) return false
+        if (userModel.emailConfirmation.expirationDate < new Date()) return false
+        if (userModel.emailConfirmation.isConfirmed) return false
+        userModel.emailConfirmation.isConfirmed = true
+        await this.usersRepository.saveUser(userModel)
+        return true
     }
 
     async emailResending(email: string): Promise<boolean> {
-        const emailConfirmation = await this.usersRepository.getEmailConfirmation(email)
-        if (!emailConfirmation) return false
-        if (emailConfirmation.isConfirmed) return false
+        const userModel = await this.usersRepository.findUser(email)
+        if (!userModel) return false
+        if (userModel.emailConfirmation.isConfirmed) return false
 
-        const newCode = uuid()
-        const newDate = add(new Date(), {
+        userModel.emailConfirmation.confirmationCode = uuid()
+        userModel.emailConfirmation.expirationDate = add(new Date(), {
             hours: 1
         })
 
         try {
-            await this.usersRepository.updateEmailConfirmationCode(emailConfirmation.userId, newCode, newDate)
-            await this.emailManagers.emailRegistration({...emailConfirmation, confirmationCode: newCode})
-            return true
-        } catch (e) {
-            console.log(e)
+            // await this.usersRepository.upda teEmailConfirmationCode(emailConfirmation.userId, newCode, newDate)
+            await this.emailManagers.emailRegistration(userModel)
+        } catch {
             return false
         }
+        await this.usersRepository.saveUser(userModel)
+        return true
     }
 
     async recoveryPassword(email: string) {
@@ -133,27 +130,21 @@ export class UsersService {
 
     async _newUser({login, email, password}: UserInputModel) {
         const passwordHash = await this._generateHash(password)
-        return new UserType(
-            new ObjectId(),
+        const newUser = new UserType(
+            new mongoose.Types.ObjectId(),
             login,
             email,
             passwordHash,
-            new Date().toISOString()
+            new Date().toISOString(),
+            {
+                confirmationCode: uuid(),
+                expirationDate: add(new Date(), {
+                    hours: 1
+                }),
+                isConfirmed: false
+            }
         )
+        return newUser
     }
-
-    _createEmailConfirmation(userId: ObjectId, email: string): EmailConfirmationType {
-        return new EmailConfirmationType(
-            new ObjectId(),
-            userId,
-            email,
-            uuid(),
-            add(new Date(), {
-                hours: 1
-            }),
-            false)
-    }
-
-
 }
 

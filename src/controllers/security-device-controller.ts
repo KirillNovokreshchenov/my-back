@@ -1,14 +1,15 @@
-import {UsersQueryRepository} from "../repositories/query-users-repository";
+import {UsersQueryRepository} from "../infrastructure/repositories/query-repositories/query-users-repository";
 import {JwtService} from "../application/jwt-service";
 import {Request, Response} from "express";
 import {DeviceSessionModel} from "../models/user-models/DeviceSessionModel";
 import {RESPONSE_OPTIONS, RESPONSE_STATUS} from "../types/res-status";
+import {inject, injectable} from "inversify";
 
-
+@injectable()
 export class DeviceController {
 
-    constructor(protected usersQueryRepository: UsersQueryRepository,
-                protected jwtService: JwtService) {
+    constructor(@inject(UsersQueryRepository)protected usersQueryRepository: UsersQueryRepository,
+                @inject(JwtService)protected jwtService: JwtService) {
     }
 
     async getSessions(req: Request, res: Response<DeviceSessionModel[]>) {

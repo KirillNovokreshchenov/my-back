@@ -1,11 +1,6 @@
 import {body} from "express-validator";
 import {errorsValidationMiddleware} from "./err-middleware";
 import {authorizationValidation} from "./auth-middleware";
-import {NextFunction, Request, Response} from "express";
-import {BSON} from "mongodb";
-import {collectionBlogs} from "../db/db";
-import {formatIdInObjectId} from "../helpers/format-id-ObjectId";
-
 
 
 const nameValidation = body('name')

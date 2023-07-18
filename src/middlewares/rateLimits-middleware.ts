@@ -2,7 +2,7 @@ import {NextFunction, Request, Response} from "express";
 
 import {RateLimitType} from "../db/db-users-type";
 import {addSeconds} from "date-fns";
-import {RateLimitModelClass} from "../db/schemas/schema-rate-limits";
+import {RateLimitModelClass} from "../domain/schema-rate-limits";
 
 
 export const rateLimitsMiddleware = async (req: Request, res: Response, next: NextFunction) => {

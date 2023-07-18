@@ -3,14 +3,17 @@ import {loginValidation} from "../middlewares/login-middleware";
 import {jwtMiddleware} from "../middlewares/auth-jwt-middleware";
 import {
     codeConfirmationValidation,
-    emailValidationResending, newPasswordValidation,
+    emailValidationResending,
+    newPasswordValidation,
     userValidationByRegistration
 } from "../middlewares/user-middleware";
 import {errorsValidationMiddleware} from "../middlewares/err-middleware";
 import {jwtRefreshMiddleware} from "../middlewares/auth-refresh-middleware";
 import {rateLimitsMiddleware} from "../middlewares/rateLimits-middleware";
-import {authController} from "../composition-root";
+import {iocContainer} from "../composition-root";
+import {AuthController} from "../controllers/auth-controller";
 
+const authController = iocContainer.resolve(AuthController)
 
 export const authRouter = Router()
 

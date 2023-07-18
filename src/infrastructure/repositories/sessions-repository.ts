@@ -1,11 +1,11 @@
-import {DeviceAuthSessionType} from "../db/db-users-type";
+import {DeviceAuthSessionType} from "../../db/db-users-type";
 
 import {ObjectId} from "mongodb";
-import {DeviceSessionModelClass} from "../db/schemas/shema-session";
+import {DeviceSessionModelClass} from "../../domain/shema-session";
+import {injectable} from "inversify";
 
 
-
-
+@injectable()
 export class SessionsRepository {
 
     async findDeviceSession(deviceId: string, date?: Date) : Promise<DeviceAuthSessionType|null> {

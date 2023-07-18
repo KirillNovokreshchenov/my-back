@@ -1,16 +1,17 @@
 import {ObjectId} from "mongodb";
-import {UserViewModel} from "../models/user-models/UserViewModel";
-import {DeviceAuthSessionType, UserType} from "../db/db-users-type";
-import {UsersQueryInputModel} from "../models/user-models/UsersQueryInputModel";
-import {pageCount} from "../helpers/pageCount";
-import {limitPages} from "../helpers/limitPages";
-import {QueryViewModel} from "../models/QueryViewModel";
-import {DataViewByToken} from "../models/auth-models/DataViewByToken";
-import {UserModelClass} from "../db/schemas/schema-user";
-import {EmailConfirmationType, PasswordRecoveryType} from "../db/db-email-type";
-import {EmailConfirmationClass, PasswordRecoveryClass} from "../db/schemas/schemas-email";
-import {DeviceSessionModelClass} from "../db/schemas/shema-session";
+import {UserViewModel} from "../../../models/user-models/UserViewModel";
+import {DeviceAuthSessionType, UserType} from "../../../db/db-users-type";
+import {UsersQueryInputModel} from "../../../models/user-models/UsersQueryInputModel";
+import {pageCount} from "../../../helpers/pageCount";
+import {limitPages} from "../../../helpers/limitPages";
+import {QueryViewModel} from "../../../models/QueryViewModel";
+import {DataViewByToken} from "../../../models/auth-models/DataViewByToken";
+import {UserMethods, UserModelClass} from "../../../domain/schema-user";
+import {DeviceSessionModelClass} from "../../../domain/shema-session";
+import {injectable} from "inversify";
+import {HydratedDocument} from "mongoose";
 
+@injectable()
  export class UsersQueryRepository {
 
     async allUsers(userQuery: UsersQueryInputModel): Promise<QueryViewModel<UserViewModel>> {
@@ -25,10 +26,8 @@ import {DeviceSessionModelClass} from "../db/schemas/shema-session";
 
 
 
-        const totalCount = await UserModelClass.countDocuments(this._sortedLoginEmail(searchLoginTerm, searchEmailTerm))
-
-
-        return {
+        const totalCount = await UserModelClass.countDocuments(this._sortedLoginEmail(searchLoginTerm, searchEmailTerm)).exec()
+        const users = {
             pagesCount: pageCount(totalCount, +pageSize),
             page: +pageNumber,
             pageSize: +pageSize,
@@ -43,15 +42,20 @@ import {DeviceSessionModelClass} from "../db/schemas/shema-session";
                     return Array.from(users).map((user: UserType) => this._mapUser(user))
                 })
         }
+
+
+        return users
     }
 
     async findUser(id: ObjectId): Promise<UserViewModel|null> {
-        const foundUser = await UserModelClass.findOne(id).lean()
+        const foundUser= await UserModelClass.findOne(id).lean().exec()
         if(!foundUser) return null
         return this._mapUser(foundUser)
     }
+
     async findUserWithToken(id: ObjectId): Promise<DataViewByToken | null> {
-        const foundUser:UserType|null = await UserModelClass.findOne(id)
+        const foundUser = await UserModelClass.findOne(id).lean().exec()
+
         if (!foundUser) return null
         return {
             email: foundUser.email,

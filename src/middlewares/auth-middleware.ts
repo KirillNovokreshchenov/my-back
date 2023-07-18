@@ -1,5 +1,4 @@
 import {NextFunction, Request, Response} from "express";
-import {userValidation} from "./user-middleware";
 import {RESPONSE_STATUS} from "../types/res-status";
 
 export const authorizationValidation = (req: Request, res: Response, next: NextFunction)=>{

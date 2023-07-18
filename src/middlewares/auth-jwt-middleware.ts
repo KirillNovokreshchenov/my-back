@@ -1,10 +1,13 @@
 import {NextFunction, Request, Response} from "express";
 import {JwtService} from "../application/jwt-service";
 import {RESPONSE_STATUS} from "../types/res-status";
-import {UserModelClass} from "../db/schemas/schema-user";
-import {jwtService} from "../composition-root";
+import {UserMethods, UserModelClass} from "../domain/schema-user";
+import {iocContainer} from "../composition-root";
+import {HydratedDocument} from "mongoose";
+import {UserType} from "../db/db-users-type";
 
 
+const jwtService = iocContainer.resolve(JwtService)
 const jwtAuthMiddleware = async(req: Request, res: Response, next: NextFunction)=>{
     if(!req.headers.authorization){
         res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
@@ -14,11 +17,11 @@ const jwtAuthMiddleware = async(req: Request, res: Response, next: NextFunction)
 
     const userId = await jwtService.getUserIdByToken(token)
     if(userId){
-        const user =  await UserModelClass.findOne(userId)
+        const user: UserType|null =  await UserModelClass.findOne(userId).exec()
         if(!user) {
             res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
             return
-        }
+        } 
         req.user = user
         next()
     } else {

@@ -1,11 +1,11 @@
-import {CommentType, LikeStatus} from "../db/db-comments-type";
+import {CommentType, LikeStatus} from "../../db/db-comments-type";
 
 import {ObjectId} from "mongodb";
-import {CommentModelClass, LikeStatusClass} from "../db/schemas/schema-comment";
-import {LIKE_STATUS} from "../models/comment-models/EnumLikeStatusModel";
-import {CommentViewModel} from "../models/comment-models/CommentViewModel";
+import {CommentModelClass, LikeStatusClass} from "../../domain/schema-comment";
+import {LIKE_STATUS} from "../../models/comment-models/EnumLikeStatusModel";
+import {injectable} from "inversify";
 
-
+@injectable()
 export class CommentsRepository {
 
     async findComment(commentId: ObjectId, userId?: ObjectId): Promise<CommentType | null> {

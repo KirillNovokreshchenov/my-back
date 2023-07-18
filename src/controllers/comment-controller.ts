@@ -1,5 +1,5 @@
-import {QueryCommentsRepository} from "../repositories/query-comments-repository";
-import {CommentsService} from "../domain/comments-service";
+import {QueryCommentsRepository} from "../infrastructure/repositories/query-repositories/query-comments-repository";
+import {CommentsService} from "../application/comments-service";
 import {RequestWithBodyAndParams, RequestWithParams} from "../types/types";
 import {URIParamsId} from "../models/URIParamsIdModel";
 import {Response} from "express";
@@ -8,12 +8,13 @@ import {ObjectId} from "mongodb";
 import {RESPONSE_OPTIONS, RESPONSE_STATUS} from "../types/res-status";
 import {CommentCreateAndUpdateModel} from "../models/comment-models/CommentCreateAndUpdateModel";
 import {LikeStatusInputModel} from "../models/comment-models/LikeStatusInputModel";
+import {inject, injectable} from "inversify";
 
-
+@injectable()
 export class CommentsController {
 
-    constructor(protected queryCommentsRepository: QueryCommentsRepository,
-                protected commentsService: CommentsService) {
+    constructor(@inject(QueryCommentsRepository)protected queryCommentsRepository: QueryCommentsRepository,
+                @inject(CommentsService) protected commentsService: CommentsService) {
 
     }
 

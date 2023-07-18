@@ -1,19 +1,18 @@
 import {ObjectId} from "mongodb";
-import {UsersRepository} from "../repositories/users-repository";
+import {UsersRepository} from "../infrastructure/repositories/users-repository";
 import {RESPONSE_OPTIONS} from "../types/res-status";
-import {SessionsRepository} from "../repositories/sessions-repository";
+import {SessionsRepository} from "../infrastructure/repositories/sessions-repository";
 import {DeviceAuthSessionType} from "../db/db-users-type";
-import {JwtAdapter} from "../adapters/jwt-adapter";
+import {JwtAdapter} from "../infrastructure/adapters/jwt-adapter";
+import {inject, injectable} from "inversify";
 
-
+@injectable()
 export class JwtService {
 
-
-    constructor(protected sessionsRepository: SessionsRepository,
-                protected usersRepository: UsersRepository,
-                protected jwtAdapter: JwtAdapter) {
+    constructor(@inject(SessionsRepository) protected sessionsRepository: SessionsRepository,
+                @inject(UsersRepository)protected usersRepository: UsersRepository,
+                @inject(JwtAdapter) protected jwtAdapter: JwtAdapter) {
     }
-
 
     async createJWT(userId: ObjectId, ip: string, deviceName = "Chrome") {
 
