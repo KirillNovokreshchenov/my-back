@@ -9,7 +9,7 @@ import {QueryViewModel} from "../../../models/QueryViewModel";
 import {HydratedPost, PostModelClass} from "../../../domain/schema-post";
 import {injectable} from "inversify";
 import {LIKE_STATUS} from "../../../models/comment-models/EnumLikeStatusModel";
-import {CommentViewModel} from "../../../models/comment-models/CommentViewModel";
+
 
 
 @injectable()
@@ -54,14 +54,13 @@ export class PostsQueryRepository {
             const userLike = post.likesInfo.usersLikes.find(userLike => userLike.userId.toString() === userId.toString())
             if (userLike) likeStatus = userLike.likeStatus
         }
-       const newestLikes: NewestLikes[] = post.likesInfo.usersLikes.filter(likes=>likes.likeStatus===LIKE_STATUS.LIKE).slice(-3).map(like=>{
-           return {
-               addedAt: like.addedAt,
-               login: like.userLogin,
-               userId: like.userId.toString()
-
-           }
-       })
+        const newestLikes: NewestLikes[] = post.likesInfo.usersLikes.filter(likes => likes.likeStatus === LIKE_STATUS.LIKE).slice(-3).sort((a, b) => b.addedAt - a.addedAt).map(like => {
+            return {
+                addedAt: like.addedAt,
+                login: like.userLogin,
+                userId: like.userId.toString()
+            }
+        })
 
         return {
             id: post._id.toString(),

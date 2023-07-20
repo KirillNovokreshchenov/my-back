@@ -5,6 +5,7 @@ import {mongoIdMiddleware} from "../middlewares/mongoIdMiddleware";
 import {postValidateForBlog} from "../middlewares/post-middleware";
 import {iocContainer} from "../composition-root";
 import {BlogsController} from "../controllers/blog-controller";
+import {likeStatusMiddleware} from "../middlewares/auth-jwt-middleware";
 
 const blogsController = iocContainer.resolve(BlogsController)
 
@@ -14,6 +15,7 @@ export const blogRouter = Router()
 blogRouter.get('/', blogsController.getBlogs.bind(blogsController))
 
 blogRouter.get('/:id/posts',
+    likeStatusMiddleware,
     mongoIdMiddleware,
     blogsController.getAllPostsForBlog.bind(blogsController))
 

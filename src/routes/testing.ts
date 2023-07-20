@@ -1,23 +1,27 @@
-import {Router} from "express";
+import {Request,Response, Router} from "express";
+import {RESPONSE_STATUS} from "../types/res-status";
+import {BlogModelClass} from "../domain/schema-blog";
+import {CommentModelClass, LikeStatusClass} from "../domain/schema-comment";
+import {PostModelClass} from "../domain/schema-post";
+import {RateLimitModelClass} from "../domain/schema-rate-limits";
+import {UserModelClass} from "../domain/schema-user";
+import {PasswordRecoveryClass} from "../domain/schemas-email";
+import {DeviceSessionModelClass} from "../domain/shema-session";
 
 
 export const testingRouter = Router()
 
 
 
-// testingRouter.delete('/all-data', async (req: Request, res: Response)=>{
-//     dbVideos.videos = []
-//     const promiseBlogs = collectionBlogs.deleteMany({});
-//     const promisePosts = collectionPosts.deleteMany({});
-//     const promiseUsers = collectionUsers.deleteMany({})
-//     const promiseComments = collectionComments.deleteMany({})
-//     const promiseEmailConfirmations = collectionEmail.deleteMany({})
-//     const promiseDeviceAuth = collectionDevicesAuthSessions.deleteMany({})
-//     const promiseRiteLimit = collectionRateLimits.deleteMany({})
-//
-//     await Promise.all([promiseBlogs, promisePosts, promiseUsers, promiseComments, promiseEmailConfirmations, promiseDeviceAuth,promiseRiteLimit])
-//         .catch((err) => {
-//             console.error(err);
-//         });
-//     res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
-// })
+testingRouter.delete('/all-data', async (req: Request, res: Response)=>{
+    const deleteBlog = BlogModelClass.deleteMany({})
+    const deleteComment = CommentModelClass.deleteMany({})
+    const deleteLikeStatus = LikeStatusClass.deleteMany({})
+    const deletePost= PostModelClass.deleteMany({})
+    const deleteRateLimit = RateLimitModelClass.deleteMany({})
+    const deleteUser = UserModelClass.deleteMany({})
+    const deletePassword = PasswordRecoveryClass.deleteMany({})
+    const deleteDevice = DeviceSessionModelClass.deleteMany({})
+    await Promise.all([deleteBlog, deleteComment, deleteLikeStatus, deletePost, deleteRateLimit,deleteUser,deletePassword,deleteDevice])
+    res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
+})
