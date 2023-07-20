@@ -14,14 +14,7 @@ if(!uri){
 const client = new MongoClient(uri);
 
 const db = client.db('')
-// export const collectionBlogs = db.collection<BlogType>('blogs')
-// export const collectionPosts = db.collection<PostType>('posts')
-// export const collectionUsers = db.collection<UserType>('users')
-// export const collectionComments = db.collection<CommentType>('comments')
-// export const collectionEmail= db.collection<EmailConfirmationType|PasswordRecoveryType>('email')
-// export const collectionRefreshTokens = db.collection('blackListRefreshToken')
-// export const collectionDevicesAuthSessions = db.collection<DeviceAuthSessionType>('DevicesAuthSessions')
-// export const collectionRateLimits = db.collection<RateLimitType>('RateLimits')
+
 
 
 export async function runDB() {
