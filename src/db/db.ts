@@ -5,8 +5,7 @@ import * as mongoose from "mongoose";
 dotenv.config()
 
 const dbName = 'MyDB'
-const uri = process.env.MONGO_URI
-//`mongodb://0.0.0.0:27017/${dbName}`
+const uri = process.env.MONGO_URI||`mongodb://0.0.0.0:27017/${dbName}`
 
 if(!uri){
     throw new Error('incorrect mongo URL')
@@ -21,7 +20,7 @@ const db = client.db('')
 export async function runDB() {
     try {
         await mongoose.connect(uri)
-        // await client.connect();
+        await client.connect();
         console.log("You successfully connected to MongoDB!");
     } catch {
         console.log('No connect')

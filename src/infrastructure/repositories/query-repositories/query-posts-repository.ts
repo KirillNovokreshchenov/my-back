@@ -1,4 +1,4 @@
-import {PostType} from "../../../db/db-posts-type";
+import {PostType, UsersLikes} from "../../../db/db-posts-type";
 
 import {ObjectId} from "mongodb";
 import {NewestLikes, PostViewModel} from "../../../models/post-models/PostViewModel";
@@ -54,7 +54,7 @@ export class PostsQueryRepository {
             const userLike = post.likesInfo.usersLikes.find(userLike => userLike.userId.toString() === userId.toString())
             if (userLike) likeStatus = userLike.likeStatus
         }
-        const newestLikes: NewestLikes[] = post.likesInfo.usersLikes.filter(likes => likes.likeStatus === LIKE_STATUS.LIKE).slice(-3).sort((a, b) => b.addedAt - a.addedAt).map(like => {
+        const newestLikes: NewestLikes[] = post.likesInfo.usersLikes.filter(likes => likes.likeStatus === LIKE_STATUS.LIKE).slice(-3).sort((a:any, b: any) => b.addedAt - a.addedAt).map(like => {
             return {
                 addedAt: like.addedAt,
                 login: like.userLogin,
