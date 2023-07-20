@@ -2,14 +2,14 @@ import {PostType} from "../../db/db-posts-type";
 
 import {ObjectId} from "mongodb";
 import {formatIdInObjectId} from "../../helpers/format-id-ObjectId";
-import {PostModelClass} from "../../domain/schema-post";
+import {HydratedPost, PostModelClass} from "../../domain/schema-post";
 import {PostViewModel} from "../../models/post-models/PostViewModel";
 import {injectable} from "inversify";
 
 @injectable()
 export class PostsRepository {
 
-    async findPost(id: ObjectId): Promise<PostViewModel | null> {
+    async findPost(id: ObjectId): Promise<HydratedPost | null> {
         return PostModelClass.findOne(id)
 
     }
@@ -27,6 +27,10 @@ export class PostsRepository {
     async deletePost(id: string): Promise<boolean> {
         const result: any  = await PostModelClass.deleteOne({_id: formatIdInObjectId(id)})
         return result.deletedCount === 1
+    }
+
+    async savePost(model: HydratedPost){
+       await model.save()
     }
 
 }

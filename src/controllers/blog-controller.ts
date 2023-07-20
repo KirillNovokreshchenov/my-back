@@ -41,7 +41,7 @@ export class BlogsController {
         const blogIsExists = this.blogsQueryRepository.findBlog(new ObjectId(req.params.id))
         if (!blogIsExists) return res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
 
-        const allPostsForBlog = await this.postsQueryRepository.allPosts(req.query, req.params.id)
+        const allPostsForBlog = await this.postsQueryRepository.allPosts(req.query, req.user?._id, req.params.id)
         return res.send(allPostsForBlog)
     }
 

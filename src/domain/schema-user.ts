@@ -9,6 +9,7 @@ import bcrypt from "bcrypt";
 export type UserMethods = {
     confirm(): void
     compareHash(password: string, hash: string): Promise<boolean>
+    canBeConfirmed(): boolean
 }
 
 
@@ -39,6 +40,12 @@ UserSchema.method('compareHash', async function compareHash(password: string, ha
     const isTrue = await bcrypt.compare(password, hash)
     return isTrue
 })
+
+UserSchema.method('canBeConfirmed', function canBeConfirmed() {
+    return this.emailConfirmation.expirationDate > new Date()&&this.emailConfirmation.isConfirmed!==true
+
+})
+
 
 UserSchema.static('createHash', function createHash(password: string) {
     const hash = bcrypt.hash(password, 10)

@@ -1,20 +1,9 @@
 import {ObjectId} from "mongodb";
-import {Types} from "mongoose";
 
 
 
-// export class EmailConfirmationType {
-//     constructor(
-//         public _id: ObjectId,
-//         public userId: ObjectId,
-//         public email: string,
-//         public confirmationCode: string,
-//         public expirationDate: Date,
-//         public isConfirmed: boolean
-//     ) {
-//     }
-//
-// }
+
+
 export type EmailConfirmationType = {
     confirmationCode: string
     expirationDate: Date
@@ -32,21 +21,6 @@ export class UserType{
     ) {
     }
 }
-// export interface UserDoc extends Document {
-//     _id:  Types.ObjectId,
-//     login: string,
-//     email: string,
-//     password: string,
-//     createdAt: string,
-//     emailConfirmation: EmailConfirmationType
-// }
-
-// export type UserType = WithId<{
-//     login: string
-//     email: string
-//     password: string
-//     createdAt: string
-// }>
 
 export class DeviceAuthSessionType {
     constructor(
@@ -61,14 +35,7 @@ export class DeviceAuthSessionType {
     }
 }
 
-// export type DeviceAuthSessionType = {
-//     userId: ObjectId
-//     ip: string
-//     title: string
-//     lastActiveDate: Date
-//     expDate: Date
-//     deviceId: string
-// }
+
 export class RateLimitType {
     constructor(
         public ip: string,
@@ -78,8 +45,3 @@ export class RateLimitType {
     }
 }
 
-// export type RateLimitType = {
-//     ip: string
-//     url: string
-//     date: Date
-// }

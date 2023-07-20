@@ -39,6 +39,7 @@ export class UsersService {
         } catch {
             return false
         }
+
         await this.usersRepository.saveUser(newUser)
         return true
     }
@@ -48,7 +49,7 @@ export class UsersService {
     }
 
     async checkCredentials({loginOrEmail, password}: LoginModel): Promise<ObjectId | false> {
-        const user: HydratedDocument<UserType, UserMethods>|null = await this.usersRepository.findUser(loginOrEmail)
+        const user: HydratedDocument<UserType, UserMethods> | null = await this.usersRepository.findUser(loginOrEmail)
 
         if (!user) return false
 
@@ -61,13 +62,19 @@ export class UsersService {
     }
 
     async confirmEmail(code: string): Promise<boolean> {
+
         const user = await this.usersRepository.findUser(code)
         if (!user) return false
-        if (user.emailConfirmation.expirationDate < new Date()) return false
-        if (user.emailConfirmation.isConfirmed) return false
-        user.emailConfirmation.isConfirmed = true
-        await this.usersRepository.saveUser(user)
-        return true
+
+        if (user.canBeConfirmed()){
+
+            user.emailConfirmation.isConfirmed = true
+            await this.usersRepository.saveUser(user)
+            return true
+
+        } else{
+            return false
+        }
     }
 
     async emailResending(email: string): Promise<boolean> {
@@ -81,7 +88,6 @@ export class UsersService {
         })
 
         try {
-            // await this.usersRepository.upda teEmailConfirmationCode(emailConfirmation.userId, newCode, newDate)
             await this.emailManagers.emailRegistration(userModel)
         } catch {
             return false

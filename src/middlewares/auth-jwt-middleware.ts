@@ -17,7 +17,7 @@ const jwtAuthMiddleware = async(req: Request, res: Response, next: NextFunction)
 
     const userId = await jwtService.getUserIdByToken(token)
     if(userId){
-        const user =  await UserModelClass.findOne(userId).exec()
+        const user =  await UserModelClass.findOne(userId).lean().exec()
         if(!user) {
             res.sendStatus(RESPONSE_STATUS.UNAUTHORIZED_401)
             return

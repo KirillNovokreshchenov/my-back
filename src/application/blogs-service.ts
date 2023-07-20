@@ -42,7 +42,7 @@ export class BlogsService {
             title,
             shortDescription,
             content,
-            blogId,
+            new ObjectId(blogId),
             foundBlogName.name,
             new Date().toISOString(),
         )

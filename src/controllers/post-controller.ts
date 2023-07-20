@@ -21,6 +21,8 @@ import {CommentCreateAndUpdateModel} from "../models/comment-models/CommentCreat
 import {CommentViewModel} from "../models/comment-models/CommentViewModel";
 import {CommentsQueryInputModel} from "../models/comment-models/CommentsQueryInputModel";
 import {inject, injectable} from "inversify";
+import {LikeStatusInputModel} from "../models/comment-models/LikeStatusInputModel";
+import {ObjectId} from "mongodb";
 
 @injectable()
 export class PostsController {
@@ -33,12 +35,12 @@ export class PostsController {
     }
 
     async getPosts(req: RequestWithQuery<QueryInputModel>, res: Response<QueryViewModel<PostViewModel>>) {
-        const allPosts = await this.postsQueryRepository.allPosts(req.query)
+        const allPosts = await this.postsQueryRepository.allPosts(req.query, req.user?._id)
         res.send(allPosts)
     }
 
     async getPost(req: RequestWithParams<URIParamsId>, res: Response<PostViewModel>) {
-        const foundPost = await this.postsQueryRepository.findPost(formatIdInObjectId(req.params.id))
+        const foundPost = await this.postsQueryRepository.findPost(new ObjectId(req.params.id), req.user?._id)
         if (foundPost) {
             res.send(foundPost)
         } else {
@@ -75,6 +77,15 @@ export class PostsController {
             res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         } else {
             res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
+        }
+    }
+
+    async updateLikeStatus(req: RequestWithBodyAndParams<URIParamsId, LikeStatusInputModel>, res: Response){
+        const likeStatus = await this.postsService.updateLike(new ObjectId(req.params.id), req.user!._id, req.user!.login, req.body.likeStatus)
+        if(!likeStatus){
+            res.sendStatus(RESPONSE_STATUS.NOT_FOUND_404)
+        } else {
+            res.sendStatus(RESPONSE_STATUS.NO_CONTENT_204)
         }
     }
 
